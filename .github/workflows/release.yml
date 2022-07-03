@@ -29,15 +29,15 @@ jobs:
           run_install: |
             - cwd: frontend
 
-      - name: Build frontend
-        working-directory: frontend
-        run: pnpm run build
-
       - name: Build wasm
         run: go build -ldflags="-s -w" -v -o frontend/static/calculator.wasm ./wasm
         env:
           GOOS: js
           GOARCH: wasm
+
+      - name: Build frontend
+        working-directory: frontend
+        run: pnpm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
