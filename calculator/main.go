@@ -1,8 +1,6 @@
-package main
+package calculator
 
-import (
-	"timeless-jewels/data"
-)
+import "timeless-jewels/data"
 
 func Calculate(passiveID uint32, seed uint32, timelessJewelType data.JewelType, conqueror data.Conqueror) *data.AlternatePassiveSkillInformation {
 	var passiveSkill *data.PassiveSkill

@@ -6,6 +6,7 @@ import (
 
 	"github.com/MarvinJWendt/testza"
 
+	"timeless-jewels/calculator"
 	"timeless-jewels/data"
 )
 
@@ -109,7 +110,7 @@ func TestGloriousVanity(t *testing.T) {
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
 			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, Calculate(test.passive, seed, test.jewel, test.conqueror))
+				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -217,7 +218,7 @@ func TestLethalPride(t *testing.T) {
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
 			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, Calculate(test.passive, seed, test.jewel, test.conqueror))
+				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -325,7 +326,7 @@ func TestBrutalRestraint(t *testing.T) {
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
 			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, Calculate(test.passive, seed, test.jewel, test.conqueror))
+				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -429,7 +430,7 @@ func TestMilitantFaith(t *testing.T) {
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
 			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, Calculate(test.passive, seed, test.jewel, test.conqueror))
+				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -521,7 +522,7 @@ func TestElegantHubris(t *testing.T) {
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
 			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, Calculate(test.passive, seed, test.jewel, test.conqueror))
+				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
 			})
 		})
 	}

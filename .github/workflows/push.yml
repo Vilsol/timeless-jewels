@@ -17,9 +17,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Tidy
-        run: go mod tidy -compat=1.17
-
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
