@@ -1,0 +1,36 @@
+linters-settings:
+  wrapcheck:
+    ignorePackageGlobs:
+      - github.com/vilsol/timeless-jewels/*
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - bidichk
+    - contextcheck
+    - durationcheck
+    - errorlint
+    - goconst
+    - goimports
+    - revive
+    - ifshort
+    - misspell
+    - prealloc
+    - whitespace
+    - wrapcheck
+
+issues:
+  exclude:
+    - "undeclared name: `gosseract`"
+    - "\"github.com/otiai10/gosseract/v2\" imported but not used"
+    - "pattern all:frontend/dist: no matching files found"
