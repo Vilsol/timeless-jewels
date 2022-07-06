@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import { Canvas, Layer, t } from 'svelte-canvas';
   import type { SkillTreeData, RenderFunc, Node, Group, Sprite, Translation, TranslationData } from '../types';
   import { browser } from '$app/env';
@@ -23,9 +23,9 @@
   if (browser) {
     skillTree = JSON.parse(window['SkillTree']);
 
-    Object.keys(skillTree.groups).forEach(groupId => {
+    Object.keys(skillTree.groups).forEach((groupId) => {
       const group = skillTree.groups[groupId];
-      group.nodes.forEach(nodeId => {
+      group.nodes.forEach((nodeId) => {
         const node = skillTree.nodes[nodeId];
 
         // Do not care about proxy passives
@@ -60,34 +60,40 @@
       });
     });
 
-    skillTree.skillSprites.keystoneInactive.forEach(k => Object.keys(k.coords).forEach(c => inverseSprites[c] = k));
-    skillTree.skillSprites.notableInactive.forEach(k => Object.keys(k.coords).forEach(c => inverseSprites[c] = k));
-    skillTree.skillSprites.normalInactive.forEach(k => Object.keys(k.coords).forEach(c => inverseSprites[c] = k));
-    skillTree.skillSprites.masteryInactive.forEach(k => Object.keys(k.coords).forEach(c => inverseSprites[c] = k));
+    skillTree.skillSprites.keystoneInactive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k))
+    );
+    skillTree.skillSprites.notableInactive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k))
+    );
+    skillTree.skillSprites.normalInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
+    skillTree.skillSprites.masteryInactive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k))
+    );
 
-    skillTree.skillSprites.keystoneActive.forEach(k => Object.keys(k.coords).forEach(c => inverseSpritesActive[c] = k));
-    skillTree.skillSprites.notableActive.forEach(k => Object.keys(k.coords).forEach(c => inverseSpritesActive[c] = k));
-    skillTree.skillSprites.normalActive.forEach(k => Object.keys(k.coords).forEach(c => inverseSpritesActive[c] = k));
-    skillTree.skillSprites.masteryInactive.forEach(k => Object.keys(k.coords).forEach(c => inverseSpritesActive[c] = k));
+    skillTree.skillSprites.keystoneActive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+    );
+    skillTree.skillSprites.notableActive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+    );
+    skillTree.skillSprites.normalActive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+    );
+    skillTree.skillSprites.masteryInactive.forEach((k) =>
+      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+    );
 
     const translations: Translation[] = JSON.parse(PassiveTranslations);
 
-    translations.forEach(t => {
-      t.ids.forEach(id => {
+    translations.forEach((t) => {
+      t.ids.forEach((id) => {
         inverseTranslations[id] = t;
       });
     });
   }
 
-  const startGroups = [
-    427,
-    320,
-    226,
-    227,
-    323,
-    422,
-    329
-  ];
+  const startGroups = [427, 320, 226, 227, 323, 422, 329];
 
   const titleFont = '25px Roboto Mono';
   const statsFont = '17px Roboto Mono';
@@ -104,7 +110,7 @@
   type Point = {
     x: number;
     y: number;
-  }
+  };
 
   const toCanvasCoords = (x: number, y: number): Point => {
     return {
@@ -117,8 +123,8 @@
     const radians = (Math.PI / 180) * angle;
     const cos = Math.cos(radians);
     const sin = Math.sin(radians);
-    const nx = (cos * (target.x - center.x)) + (sin * (target.y - center.y)) + center.x;
-    const ny = (cos * (target.y - center.y)) - (sin * (target.x - center.x)) + center.y;
+    const nx = cos * (target.x - center.x) + sin * (target.y - center.y) + center.x;
+    const ny = cos * (target.y - center.y) - sin * (target.x - center.x) + center.y;
     return {
       x: nx,
       y: ny
@@ -129,7 +135,10 @@
   // treeImg.src = assets + '/poe_tree.png';
 
   const orbit16Angles = [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330];
-  const orbit40Angles = [0, 10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 100, 110, 120, 130, 135, 140, 150, 160, 170, 180, 190, 200, 210, 220, 225, 230, 240, 250, 260, 270, 280, 290, 300, 310, 315, 320, 330, 340, 350];
+  const orbit40Angles = [
+    0, 10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 100, 110, 120, 130, 135, 140, 150, 160, 170, 180, 190, 200, 210, 220,
+    225, 230, 240, 250, 260, 270, 280, 290, 300, 310, 315, 320, 330, 340, 350
+  ];
 
   const orbitAngleAt = (orbit: number, index: number): number => {
     const nodesInOrbit = skillTree.constants.skillsPerOrbit[orbit];
@@ -138,7 +147,7 @@
     } else if (nodesInOrbit == 40) {
       return orbit40Angles[orbit40Angles.length - index] || 0;
     } else {
-      return 360 - ((360 / nodesInOrbit) * index);
+      return 360 - (360 / nodesInOrbit) * index;
     }
   };
 
@@ -147,7 +156,7 @@
     const targetAngle = orbitAngleAt(node.orbit, node.orbitIndex);
 
     const targetGroupPos = toCanvasCoords(targetGroup.x, targetGroup.y);
-    const targetNodePos = toCanvasCoords(targetGroup.x, targetGroup.y - (skillTree.constants.orbitRadii[node.orbit]));
+    const targetNodePos = toCanvasCoords(targetGroup.x, targetGroup.y - skillTree.constants.orbitRadii[node.orbit]);
     return rotateAroundPoint(targetGroupPos, targetNodePos, targetAngle);
   };
 
@@ -169,7 +178,7 @@
 
   $: {
     if (browser && included.size == 0) {
-      skillTree.jewelSlots.forEach(jewelId => {
+      skillTree.jewelSlots.forEach((jewelId) => {
         if (jewelId != 31683) {
           return;
         }
@@ -185,7 +194,7 @@
 
         const jRotatedPos = calculateNodePos(jewel);
 
-        Object.keys(skillTree.nodes).forEach(nodeId => {
+        Object.keys(skillTree.nodes).forEach((nodeId) => {
           const node = skillTree.nodes[nodeId];
           const group = skillTree.groups[node.group];
           if (!group) {
@@ -203,23 +212,23 @@
 
   const drawScaling = 2.6;
   const drawScaledCenter = (context: CanvasRenderingContext2D, asset: HTMLImageElement, pos: Point) => {
-    const newWidth = asset.width / scaling * drawScaling;
-    const newHeight = asset.height / scaling * drawScaling;
+    const newWidth = (asset.width / scaling) * drawScaling;
+    const newHeight = (asset.height / scaling) * drawScaling;
 
-    const topLeftX = pos.x - (newWidth / 2);
-    const topLeftY = pos.y - (newHeight / 2);
+    const topLeftX = pos.x - newWidth / 2;
+    const topLeftY = pos.y - newHeight / 2;
 
     context.drawImage(asset, topLeftX, topLeftY, newWidth, newHeight);
   };
 
   const drawMirror = (context: CanvasRenderingContext2D, asset: HTMLImageElement, pos: Point) => {
-    const newWidth = asset.width / scaling * drawScaling;
-    const newHeight = asset.height / scaling * drawScaling;
+    const newWidth = (asset.width / scaling) * drawScaling;
+    const newHeight = (asset.height / scaling) * drawScaling;
 
-    const topLeftX = pos.x - (newWidth / 2);
-    const topLeftY = pos.y - (newHeight / 2);
+    const topLeftX = pos.x - newWidth / 2;
+    const topLeftY = pos.y - newHeight / 2;
 
-    const finalY = topLeftY - (newHeight / 2);
+    const finalY = topLeftY - newHeight / 2;
 
     context.drawImage(asset, topLeftX, finalY, newWidth, newHeight);
     context.save();
@@ -250,20 +259,30 @@
 
     const self = sprite.coords[path];
 
-    const newWidth = self.w / scaling * drawScaling;
-    const newHeight = self.h / scaling * drawScaling;
+    const newWidth = (self.w / scaling) * drawScaling;
+    const newHeight = (self.h / scaling) * drawScaling;
 
-    const topLeftX = pos.x - (newWidth / 2);
-    const topLeftY = pos.y - (newHeight / 2);
+    const topLeftX = pos.x - newWidth / 2;
+    const topLeftY = pos.y - newHeight / 2;
 
-    context.drawImage((active ? spriteCacheActive : spriteCache)[spriteSheetUrl], self.x, self.y, self.w, self.h, topLeftX, topLeftY, newWidth, newHeight);
+    context.drawImage(
+      (active ? spriteCacheActive : spriteCache)[spriteSheetUrl],
+      self.x,
+      self.y,
+      self.w,
+      self.h,
+      topLeftX,
+      topLeftY,
+      newWidth,
+      newHeight
+    );
   };
 
   const wrapText = (text: string, context: CanvasRenderingContext2D, width: number): string[] => {
     const result = [];
 
     let currentWord = '';
-    text.split(' ').forEach(word => {
+    text.split(' ').forEach((word) => {
       if (context.measureText(currentWord + word).width < width) {
         currentWord += ' ' + word;
       } else {
@@ -306,7 +325,7 @@
     // }
 
     const connected = {};
-    Object.keys(drawnGroups).forEach(groupId => {
+    Object.keys(drawnGroups).forEach((groupId) => {
       context.strokeStyle = `hsl(${$t / 20}, 100%, 50%)`;
 
       if (groupId != 329) {
@@ -328,13 +347,13 @@
       }
     });
 
-    Object.keys(drawnNodes).forEach(nodeId => {
+    Object.keys(drawnNodes).forEach((nodeId) => {
       const node = skillTree.nodes[nodeId];
       const angle = orbitAngleAt(node.orbit, node.orbitIndex);
       const rotatedPos = calculateNodePos(node);
 
-      node.out?.forEach(o => {
-        if (!(drawnNodes[parseInt(o)])) {
+      node.out?.forEach((o) => {
+        if (!drawnNodes[parseInt(o)]) {
           return;
         }
 
@@ -363,8 +382,8 @@
           context.moveTo(rotatedPos.x, rotatedPos.y);
           context.lineTo(targetRotatedPos.x, targetRotatedPos.y);
         } else {
-          let a = (Math.PI / 180) - ((Math.PI / 180) * angle);
-          let b = (Math.PI / 180) - ((Math.PI / 180) * targetAngle);
+          let a = Math.PI / 180 - (Math.PI / 180) * angle;
+          let b = Math.PI / 180 - (Math.PI / 180) * targetAngle;
 
           a -= Math.PI / 2;
           b -= Math.PI / 2;
@@ -393,7 +412,7 @@
 
     let hoveredNodeActive = false;
     let newHoverNode: Node | undefined;
-    Object.keys(drawnNodes).forEach(nodeId => {
+    Object.keys(drawnNodes).forEach((nodeId) => {
       const node = skillTree.nodes[nodeId];
       const rotatedPos = calculateNodePos(node);
       let touchDistance = 0;
@@ -448,7 +467,7 @@
         }
       }
 
-      if (distance(rotatedPos, mousePos) < (touchDistance / scaling)) {
+      if (distance(rotatedPos, mousePos) < touchDistance / scaling) {
         newHoverNode = node;
         hoveredNodeActive = active;
       }
@@ -478,7 +497,7 @@
 
     if (hoveredNode) {
       let nodeName = hoveredNode.name;
-      let nodeStats: { text: string, special: boolean }[] = (hoveredNode.stats || []).map(s => ({
+      let nodeStats: { text: string; special: boolean }[] = (hoveredNode.stats || []).map((s) => ({
         text: s,
         special: false
       }));
@@ -508,8 +527,11 @@
               }
             }
 
-            if ('alternatePassiveAdditionInformations' in result && result['alternatePassiveAdditionInformations'].length > 0) {
-              result['alternatePassiveAdditionInformations'].forEach(info => {
+            if (
+              'alternatePassiveAdditionInformations' in result &&
+              result['alternatePassiveAdditionInformations'].length > 0
+            ) {
+              result['alternatePassiveAdditionInformations'].forEach((info) => {
                 const addition = GetAlternatePassiveAdditionByIndex(info.alternatePassiveSkillAddition);
 
                 if ('statsKeys' in addition) {
@@ -548,18 +570,18 @@
       let offset = 85;
 
       if (nodeStats && nodeStats.length > 0) {
-        nodeStats.forEach(stat => {
+        nodeStats.forEach((stat) => {
           if (allLines.length > 0) {
             offset += 5;
           }
 
-          stat.text.split('\n').forEach(line => {
+          stat.text.split('\n').forEach((line) => {
             if (allLines.length > 0) {
               offset += 10;
             }
 
             const lines = wrapText(line, context, width - padding);
-            lines.forEach(l => {
+            lines.forEach((l) => {
               allLines.push({
                 text: l,
                 offset,
@@ -587,21 +609,21 @@
       context.fillStyle = '#ffffff';
       context.font = titleFont;
       context.textAlign = 'center';
-      context.fillText(nodeName, mousePos.x + (width / 2), mousePos.y + 35);
+      context.fillText(nodeName, mousePos.x + width / 2, mousePos.y + 35);
 
       context.fillStyle = 'rgba(0,0,0,0.8)';
       context.fillRect(mousePos.x, mousePos.y + titleHeight, width, offset - titleHeight);
 
       context.font = statsFont;
       context.textAlign = 'left';
-      allLines.forEach(l => {
+      allLines.forEach((l) => {
         if (l.special) {
           context.fillStyle = '#8cf34c';
         } else {
           context.fillStyle = '#ffffff';
         }
 
-        context.fillText(l.text, mousePos.x + (padding / 2), mousePos.y + l.offset);
+        context.fillText(l.text, mousePos.x + padding / 2, mousePos.y + l.offset);
       });
     }
 
@@ -668,7 +690,7 @@
   };
 
   const onScroll = (event: WheelEvent) => {
-    scaling = Math.min(30, Math.max(3, scaling + (event.deltaY / 100)));
+    scaling = Math.min(30, Math.max(3, scaling + event.deltaY / 100));
 
     if (scaling > 3 && scaling < 30) {
       if (event.deltaY > 0) {
@@ -705,13 +727,13 @@
   }
 </script>
 
-<svelte:window on:pointerup={mouseUp} on:pointermove={mouseMove} on:resize={resize}></svelte:window>
+<svelte:window on:pointerup={mouseUp} on:pointermove={mouseMove} on:resize={resize} />
 
 {#if browser && width && height}
-  <div on:resize={resize} style='touch-action: none; cursor: {cursor}'>
-    <Canvas width={width} height={height} on:pointerdown={mouseDown} on:wheel={onScroll}>
+  <div on:resize={resize} style="touch-action: none; cursor: {cursor}">
+    <Canvas {width} {height} on:pointerdown={mouseDown} on:wheel={onScroll}>
       <Layer {render} />
     </Canvas>
-    <slot></slot>
+    <slot />
   </div>
 {/if}

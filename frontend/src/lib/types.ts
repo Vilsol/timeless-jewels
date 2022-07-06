@@ -282,7 +282,7 @@ export enum Recipe {
   SilverOil = 'SilverOil',
   TealOil = 'TealOil',
   VerdantOil = 'VerdantOil',
-  VioletOil = 'VioletOil',
+  VioletOil = 'VioletOil'
 }
 
 export interface Points {
@@ -326,74 +326,74 @@ export type RenderFunc = (params: RenderParams) => void;
 
 export interface Translation {
   English: TranslationData[];
-  ids:     string[];
+  ids: string[];
   hidden?: boolean;
 }
 
 export interface TranslationData {
-  condition:      Condition[];
-  format:         Format[];
+  condition: Condition[];
+  format: Format[];
   index_handlers: Array<IndexHandler[]>;
-  string:         string;
+  string: string;
 }
 
 export interface Condition {
-  min?:     number;
-  max?:     number;
+  min?: number;
+  max?: number;
   negated?: boolean;
 }
 
 export enum Format {
-  Empty = "#",
-  Format = "+#",
-  Ignore = "ignore",
+  Empty = '#',
+  Format = '+#',
+  Ignore = 'ignore'
 }
 
 export enum IndexHandler {
-  AfflictionRewardType = "affliction_reward_type",
-  CanonicalStat = "canonical_stat",
-  DecisecondsToSeconds = "deciseconds_to_seconds",
-  DisplayIndexableSupport = "display_indexable_support",
-  DivideByFifteen0DP = "divide_by_fifteen_0dp",
-  DivideByFifty = "divide_by_fifty",
-  DivideByFive = "divide_by_five",
-  DivideByFour = "divide_by_four",
-  DivideByOneHundred = "divide_by_one_hundred",
-  DivideByOneHundred2DP = "divide_by_one_hundred_2dp",
-  DivideByOneHundred2DPIfRequired = "divide_by_one_hundred_2dp_if_required",
-  DivideByOneHundredAndNegate = "divide_by_one_hundred_and_negate",
-  DivideByOneThousand = "divide_by_one_thousand",
-  DivideBySix = "divide_by_six",
-  DivideByTen0DP = "divide_by_ten_0dp",
-  DivideByTen1DP = "divide_by_ten_1dp",
-  DivideByTen1DPIfRequired = "divide_by_ten_1dp_if_required",
-  DivideByThree = "divide_by_three",
-  DivideByTwelve = "divide_by_twelve",
-  DivideByTwentyThenDouble0DP = "divide_by_twenty_then_double_0dp",
-  DivideByTwo0DP = "divide_by_two_0dp",
-  Double = "double",
-  MetamorphosisRewardDescription = "metamorphosis_reward_description",
-  MillisecondsToSeconds = "milliseconds_to_seconds",
-  MillisecondsToSeconds0DP = "milliseconds_to_seconds_0dp",
-  MillisecondsToSeconds1DP = "milliseconds_to_seconds_1dp",
-  MillisecondsToSeconds2DP = "milliseconds_to_seconds_2dp",
-  MillisecondsToSeconds2DPIfRequired = "milliseconds_to_seconds_2dp_if_required",
-  ModValueToItemClass = "mod_value_to_item_class",
-  MultiplicativeDamageModifier = "multiplicative_damage_modifier",
-  MultiplyByFour = "multiply_by_four",
-  Negate = "negate",
-  NegateAndDouble = "negate_and_double",
-  OldLeechPercent = "old_leech_percent",
-  OldLeechPermyriad = "old_leech_permyriad",
-  PassiveHash = "passive_hash",
-  PerMinuteToPerSecond = "per_minute_to_per_second",
-  PerMinuteToPerSecond0DP = "per_minute_to_per_second_0dp",
-  PerMinuteToPerSecond1DP = "per_minute_to_per_second_1dp",
-  PerMinuteToPerSecond2DP = "per_minute_to_per_second_2dp",
-  PerMinuteToPerSecond2DPIfRequired = "per_minute_to_per_second_2dp_if_required",
-  The30_OfValue = "30%_of_value",
-  The60_OfValue = "60%_of_value",
-  TimesOnePointFive = "times_one_point_five",
-  TimesTwenty = "times_twenty",
-  TreeExpansionJewelPassive = "tree_expansion_jewel_passive",
+  AfflictionRewardType = 'affliction_reward_type',
+  CanonicalStat = 'canonical_stat',
+  DecisecondsToSeconds = 'deciseconds_to_seconds',
+  DisplayIndexableSupport = 'display_indexable_support',
+  DivideByFifteen0DP = 'divide_by_fifteen_0dp',
+  DivideByFifty = 'divide_by_fifty',
+  DivideByFive = 'divide_by_five',
+  DivideByFour = 'divide_by_four',
+  DivideByOneHundred = 'divide_by_one_hundred',
+  DivideByOneHundred2DP = 'divide_by_one_hundred_2dp',
+  DivideByOneHundred2DPIfRequired = 'divide_by_one_hundred_2dp_if_required',
+  DivideByOneHundredAndNegate = 'divide_by_one_hundred_and_negate',
+  DivideByOneThousand = 'divide_by_one_thousand',
+  DivideBySix = 'divide_by_six',
+  DivideByTen0DP = 'divide_by_ten_0dp',
+  DivideByTen1DP = 'divide_by_ten_1dp',
+  DivideByTen1DPIfRequired = 'divide_by_ten_1dp_if_required',
+  DivideByThree = 'divide_by_three',
+  DivideByTwelve = 'divide_by_twelve',
+  DivideByTwentyThenDouble0DP = 'divide_by_twenty_then_double_0dp',
+  DivideByTwo0DP = 'divide_by_two_0dp',
+  Double = 'double',
+  MetamorphosisRewardDescription = 'metamorphosis_reward_description',
+  MillisecondsToSeconds = 'milliseconds_to_seconds',
+  MillisecondsToSeconds0DP = 'milliseconds_to_seconds_0dp',
+  MillisecondsToSeconds1DP = 'milliseconds_to_seconds_1dp',
+  MillisecondsToSeconds2DP = 'milliseconds_to_seconds_2dp',
+  MillisecondsToSeconds2DPIfRequired = 'milliseconds_to_seconds_2dp_if_required',
+  ModValueToItemClass = 'mod_value_to_item_class',
+  MultiplicativeDamageModifier = 'multiplicative_damage_modifier',
+  MultiplyByFour = 'multiply_by_four',
+  Negate = 'negate',
+  NegateAndDouble = 'negate_and_double',
+  OldLeechPercent = 'old_leech_percent',
+  OldLeechPermyriad = 'old_leech_permyriad',
+  PassiveHash = 'passive_hash',
+  PerMinuteToPerSecond = 'per_minute_to_per_second',
+  PerMinuteToPerSecond0DP = 'per_minute_to_per_second_0dp',
+  PerMinuteToPerSecond1DP = 'per_minute_to_per_second_1dp',
+  PerMinuteToPerSecond2DP = 'per_minute_to_per_second_2dp',
+  PerMinuteToPerSecond2DPIfRequired = 'per_minute_to_per_second_2dp_if_required',
+  The30_OfValue = '30%_of_value',
+  The60_OfValue = '60%_of_value',
+  TimesOnePointFive = 'times_one_point_five',
+  TimesTwenty = 'times_twenty',
+  TreeExpansionJewelPassive = 'tree_expansion_jewel_passive'
 }

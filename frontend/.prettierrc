@@ -1,11 +1,11 @@
 {
-	"useTabs": false,
-	"singleQuote": true,
-	"trailingComma": "none",
-	"printWidth": 120,
-	"svelteStrictMode": false,
-	"svelteAllowShorthand": true,
-	"svelteBracketNewLine": false,
-	"svelteIndentScriptAndStyle": true,
-	"jsxBracketSameLine": true
+  "useTabs": false,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "printWidth": 120,
+  "svelteStrictMode": false,
+  "svelteAllowShorthand": true,
+  "svelteBracketNewLine": false,
+  "svelteIndentScriptAndStyle": true,
+  "jsxBracketSameLine": true
 }
