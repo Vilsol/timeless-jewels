@@ -26,7 +26,7 @@
     canonical_stat: 1,
     per_minute_to_per_second: 60,
     milliseconds_to_seconds: 1000,
-    display_indexable_support: 1, // TODO
+    display_indexable_support: 1,
     divide_by_one_hundred: 100,
     milliseconds_to_seconds_2dp_if_required: 1000,
     deciseconds_to_seconds: 10,
@@ -385,7 +385,7 @@
 
     if (datum.index_handlers.length > 0) {
       datum.index_handlers[0].forEach((handler) => {
-        finalStat = finalStat / indexHandlers[handler];
+        finalStat = finalStat / (indexHandlers[handler] || 1);
       });
     }
 
