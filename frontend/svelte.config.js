@@ -17,6 +17,10 @@ const config = {
 		}),
 		paths: {
 			base: '/timeless-jewels',
+		},
+		prerender: {
+			default: true,
+			enabled: true
 		}
 	}
 };
