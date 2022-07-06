@@ -17,24 +17,22 @@
   }
 </script>
 
-<div class='flex flex-row justify-center h-screen'>
-  <div class='w-1/3 py-10 flex flex-col justify-between'>
-    <div>
-      <h1 class='text-white mb-10 text-center'>
-        Timeless Calculator
-      </h1>
+{#if wasmLoading}
+  <div class='flex flex-row justify-center h-screen'>
+    <div class='flex flex-col'>
+      <div class='py-10 flex flex-col justify-between'>
+        <div>
+          <h1 class='text-white mb-10 text-center'>
+            Timeless Calculator
+          </h1>
 
-      {#if wasmLoading}
-        <h2 class='text-center'>
-          Loading...
-        </h2>
-      {:else}
-        <slot />
-      {/if}
-    </div>
-
-    <div class='text-right text-orange-500'>
-      <a href='https://github.com/Vilsol/timeless-jewels' target='_blank' rel='noopener'>Source (Github)</a>
+          <h2 class='text-center'>
+            Loading...
+          </h2>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+{:else}
+  <slot />
+{/if}

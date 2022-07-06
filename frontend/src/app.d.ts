@@ -9,3 +9,7 @@ declare namespace App {
   // interface Session {}
   // interface Stuff {}
 }
+
+declare global {
+  function Calculate(passiveID: number, seed: number, jewelType: number, conqueror: string);
+}

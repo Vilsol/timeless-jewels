@@ -91,6 +91,22 @@ func main() {
 		})
 	}))
 
+	js.Global().Set("GetPassiveByIndex", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		stat := data.GetPassiveSkillByIndex(uint32(args[0].Int()))
+
+		statsKeys := make([]interface{}, len(stat.StatIndices))
+		for i, key := range stat.StatIndices {
+			statsKeys[i] = key
+		}
+
+		return js.ValueOf(map[string]interface{}{
+			"index": stat.Index,
+			"id":    stat.ID,
+			"name":  stat.Name,
+			"stats": statsKeys,
+		})
+	}))
+
 	remappedTimelessJewels := map[string]interface{}{
 		strconv.Itoa(int(data.GloriousVanity)):  data.GloriousVanity.String(),
 		strconv.Itoa(int(data.LethalPride)):     data.LethalPride.String(),
@@ -124,12 +140,47 @@ func main() {
 
 	remappedPassives := make(map[string]interface{})
 	for _, skill := range data.PassiveSkills {
-		if skill.Name != "" {
+		if skill.Name == "" {
+			continue
+		}
+
+		if skill.IsJewelSocket {
+			continue
+		}
+
+		if node, ok := data.SkillTreeData.Nodes[strconv.Itoa(int(skill.PassiveSkillGraphID))]; ok {
+			if node.AscendancyName != nil {
+				continue
+			}
+
+			if node.IsProxy != nil && *node.IsProxy {
+				continue
+			}
+
+			if node.IsBlighted != nil && *node.IsBlighted {
+				continue
+			}
+
+			if node.IsMastery != nil && *node.IsMastery {
+				continue
+			}
+
 			remappedPassives[skill.Name+" ("+skill.ID+")"] = skill.Index
 		}
 	}
 
 	js.Global().Set("PassiveSkills", js.ValueOf(remappedPassives))
+
+	js.Global().Set("SkillTree", js.ValueOf(string(data.SkillTreeJSON)))
+
+	treeToPassive := make(map[string]interface{})
+	for _, skill := range data.PassiveSkills {
+		treeToPassive[strconv.Itoa(int(skill.PassiveSkillGraphID))] = skill.Index
+	}
+
+	js.Global().Set("TreeToPassive", js.ValueOf(treeToPassive))
+
+	js.Global().Set("PassiveTranslations", js.ValueOf(string(data.PassiveSkillTranslationsJSON)))
 
 	fmt.Println("Calculator Initialized")
 	select {}

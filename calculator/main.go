@@ -3,28 +3,13 @@ package calculator
 import "timeless-jewels/data"
 
 func Calculate(passiveID uint32, seed uint32, timelessJewelType data.JewelType, conqueror data.Conqueror) *data.AlternatePassiveSkillInformation {
-	var passiveSkill *data.PassiveSkill
-
-	for _, skill := range data.PassiveSkills {
-		if skill.Index == passiveID {
-			passiveSkill = skill
-			break
-		}
-	}
+	passiveSkill := data.GetPassiveSkillByIndex(passiveID)
 
 	if !data.IsPassiveSkillValidForAlteration(passiveSkill) {
 		return nil
 	}
 
-	alternateTreeVersionIndex := uint32(timelessJewelType)
-	var alternateTreeVersion *data.AlternateTreeVersion
-
-	for _, version := range data.AlternateTreeVersions {
-		if version.Index == alternateTreeVersionIndex {
-			alternateTreeVersion = version
-			break
-		}
-	}
+	alternateTreeVersion := data.GetAlternateTreeVersionIndex(uint32(timelessJewelType))
 
 	timelessJewelConqueror := data.TimelessJewelConquerors[timelessJewelType][conqueror]
 

@@ -1,24 +1,8 @@
 package data
 
 func GetApplicableAlternatePassiveAdditions(passiveSkill *PassiveSkill, timelessJewel *TimelessJewel) []*AlternatePassiveAddition {
-	applicableAlternatePassiveAdditions := make([]*AlternatePassiveAddition, 0)
 	skillType := GetPassiveSkillType(passiveSkill)
-	for _, addition := range AlternatePassiveAdditions {
-		isSkillType := false
-		for _, passiveType := range addition.PassiveType {
-			if passiveType == skillType {
-				isSkillType = true
-				break
-			}
-		}
-
-		if addition.AlternateTreeVersionsKey != timelessJewel.AlternateTreeVersion.Index || !isSkillType {
-			continue
-		}
-
-		applicableAlternatePassiveAdditions = append(applicableAlternatePassiveAdditions, addition)
-	}
-	return applicableAlternatePassiveAdditions
+	return reverseAlternatePassiveAdditions[skillType][timelessJewel.AlternateTreeVersion.Index]
 }
 
 func GetPassiveSkillType(passiveSkill *PassiveSkill) PassiveSkillType {
@@ -74,24 +58,8 @@ func GetAlternatePassiveSkillKeyStone(timelessJewel *TimelessJewel) *AlternatePa
 }
 
 func GetApplicableAlternatePassiveSkills(passiveSkill *PassiveSkill, timelessJewel *TimelessJewel) []*AlternatePassiveSkill {
-	applicableAlternatePassiveSkills := make([]*AlternatePassiveSkill, 0)
 	skillType := GetPassiveSkillType(passiveSkill)
-	for _, addition := range AlternatePassiveSkills {
-		isSkillType := false
-		for _, passiveType := range addition.PassiveType {
-			if passiveType == skillType {
-				isSkillType = true
-				break
-			}
-		}
-
-		if addition.AlternateTreeVersionsKey != timelessJewel.AlternateTreeVersion.Index || !isSkillType {
-			continue
-		}
-
-		applicableAlternatePassiveSkills = append(applicableAlternatePassiveSkills, addition)
-	}
-	return applicableAlternatePassiveSkills
+	return reverseAlternatePassiveSkills[skillType][timelessJewel.AlternateTreeVersion.Index]
 }
 
 func IsSmallAttribute(stat uint32) bool {
@@ -107,29 +75,67 @@ func IsPassiveSkillValidForAlteration(passiveSkill *PassiveSkill) bool {
 	return (passiveSkillType != None) && (passiveSkillType != JewelSocket)
 }
 
+func GetPassiveSkillByIndex(index uint32) *PassiveSkill {
+	return idToPassiveSkill[index]
+}
+
 func GetStatByIndex(index uint32) *Stat {
-	for _, stat := range Stats {
-		if stat.Index == index {
-			return stat
-		}
-	}
-	return nil
+	return idToStat[index]
 }
 
 func GetAlternatePassiveSkillByIndex(index uint32) *AlternatePassiveSkill {
-	for _, skill := range AlternatePassiveSkills {
-		if skill.Index == index {
-			return skill
-		}
-	}
-	return nil
+	return idToAlternatePassiveSkill[index]
 }
 
 func GetAlternatePassiveAdditionByIndex(index uint32) *AlternatePassiveAddition {
-	for _, addition := range AlternatePassiveAdditions {
-		if addition.Index == index {
-			return addition
+	return idToAlternatePassiveAddition[index]
+}
+
+func GetAlternateTreeVersionIndex(index uint32) *AlternateTreeVersion {
+	return idToAlternateTreeVersion[index]
+}
+
+func FindSkillsWithStats(stat *Stat) []*AlternatePassiveSkill {
+	skills := make([]*AlternatePassiveSkill, 0)
+	for _, skill := range AlternatePassiveSkills {
+		for _, key := range skill.StatsKeys {
+			if key == stat.Index {
+				skills = append(skills, skill)
+				break
+			}
 		}
 	}
-	return nil
+	return skills
+}
+
+func FindAlternatePassiveAdditionsWithStats(stat *Stat) []*AlternatePassiveAddition {
+	additions := make([]*AlternatePassiveAddition, 0)
+	for _, addition := range AlternatePassiveAdditions {
+		for _, key := range addition.StatsKeys {
+			if key == stat.Index {
+				additions = append(additions, addition)
+				break
+			}
+		}
+	}
+	return additions
+}
+
+func FindSkillsMatchingAdditions(additions []*AlternatePassiveAddition) []*PassiveSkill {
+	additionPassiveTypes := make(map[PassiveSkillType]bool)
+	for _, addition := range additions {
+		for _, skillType := range addition.PassiveType {
+			additionPassiveTypes[skillType] = true
+		}
+	}
+
+	skills := make([]*PassiveSkill, 0)
+	for _, skill := range PassiveSkills {
+		skillType := GetPassiveSkillType(skill)
+		if _, ok := additionPassiveTypes[skillType]; ok {
+			skills = append(skills, skill)
+		}
+	}
+
+	return skills
 }

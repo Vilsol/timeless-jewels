@@ -14,6 +14,7 @@ specifiers:
   prettier-plugin-svelte: ^2.7.0
   sass: ^1.53.0
   svelte: ^3.44.0
+  svelte-canvas: ^0.7.1
   svelte-check: ^2.7.1
   svelte-preprocess: ^4.10.7
   svelte-select: ^4.4.7
@@ -35,6 +36,7 @@ devDependencies:
   prettier-plugin-svelte: 2.7.0_nakrehnrzdf7fdea5k3a4dfy4m
   sass: 1.53.0
   svelte: 3.48.0
+  svelte-canvas: 0.7.1
   svelte-check: 2.8.0_s4vji4hbm6754nioyrbgjz6o3e
   svelte-preprocess: 4.10.7_yzgb7wkzq6wz6qgj3h2t2u7ppa
   svelte-select: 4.4.7
@@ -1610,6 +1612,10 @@ packages:
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+    dev: true
+
+  /svelte-canvas/0.7.1:
+    resolution: {integrity: sha512-MsOSxPyown4BTVTuR9LUFiLD/GrD8pubxcKSFGiiRr6IR5jPkBE7WDedwkE4auZw+gniqGSmuXjhC+VltpcZAQ==}
     dev: true
 
   /svelte-check/2.8.0_s4vji4hbm6754nioyrbgjz6o3e:

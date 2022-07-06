@@ -13,11 +13,13 @@ import (
 //go:generate go run tools.go
 
 func main() {
-	reMarshalZip[data.AlternatePassiveAddition]("alternate_passive_additions.json")
-	reMarshalZip[data.AlternatePassiveSkill]("alternate_passive_skills.json")
-	reMarshalZip[data.AlternateTreeVersion]("alternate_tree_versions.json")
-	reMarshalZip[data.PassiveSkill]("passive_skills.json")
-	reMarshalZip[data.Stat]("stats.json")
+	reMarshalZip[[]*data.AlternatePassiveAddition]("alternate_passive_additions.json")
+	reMarshalZip[[]*data.AlternatePassiveSkill]("alternate_passive_skills.json")
+	reMarshalZip[[]*data.AlternateTreeVersion]("alternate_tree_versions.json")
+	reMarshalZip[[]*data.PassiveSkill]("passive_skills.json")
+	reMarshalZip[[]*data.Stat]("stats.json")
+	reMarshalZip[map[string]interface{}]("SkillTree.json")
+	reMarshalZip[[]interface{}]("passive_skill.min.json")
 }
 
 func reMarshalZip[T any](name string) {
@@ -26,7 +28,7 @@ func reMarshalZip[T any](name string) {
 		panic(err)
 	}
 
-	var blob = make([]*T, 0)
+	var blob = new(T)
 	if err := json.Unmarshal(in, &blob); err != nil {
 		panic(err)
 	}

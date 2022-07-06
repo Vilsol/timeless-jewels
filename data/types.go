@@ -1,9 +1,10 @@
 package data
 
 type Stat struct {
-	Index uint32 `json:"_rid"`
-	ID    string `json:"Id"`
-	Text  string `json:"Text"`
+	Index    uint32  `json:"_rid"`
+	ID       string  `json:"Id"`
+	Text     string  `json:"Text"`
+	Category *uint32 `json:"Category"`
 }
 
 type PassiveSkill struct {
