@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Canvas, Layer, t } from 'svelte-canvas';
-  import type { SkillTreeData, RenderFunc, Node, Group, Sprite, Translation, TranslationData } from '../types';
+  import type { SkillTreeData, RenderFunc, Node, Group, Sprite, Translation } from '../types';
   import { browser } from '$app/env';
 
   export let clickNode: (node: Node) => void;
@@ -19,6 +19,55 @@
   const inverseSpritesActive: Record<string, Sprite> = {};
 
   const inverseTranslations: Record<string, Translation> = {};
+
+  const indexHandlers: Record<string, number> = {
+    negate: -1,
+    times_twenty: 1 / 20,
+    canonical_stat: 1,
+    per_minute_to_per_second: 60,
+    milliseconds_to_seconds: 1000,
+    display_indexable_support: 1, // TODO
+    divide_by_one_hundred: 100,
+    milliseconds_to_seconds_2dp_if_required: 1000,
+    deciseconds_to_seconds: 10,
+    old_leech_percent: 1,
+    old_leech_permyriad: 10000,
+    times_one_point_five: 1 / 1.5,
+    '30%_of_value': 100 / 30,
+    divide_by_one_thousand: 1000,
+    divide_by_twelve: 12,
+    divide_by_six: 6,
+    per_minute_to_per_second_2dp_if_required: 60,
+    '60%_of_value': 100 / 60,
+    double: 1 / 2,
+    negate_and_double: 1 / -2,
+    multiply_by_four: 1 / 4,
+    per_minute_to_per_second_0dp: 60,
+    milliseconds_to_seconds_0dp: 1000,
+    mod_value_to_item_class: 1,
+    milliseconds_to_seconds_2dp: 1000,
+    multiplicative_damage_modifier: 1,
+    divide_by_one_hundred_2dp: 100,
+    per_minute_to_per_second_1dp: 60,
+    divide_by_one_hundred_2dp_if_required: 100,
+    divide_by_ten_1dp_if_required: 10,
+    milliseconds_to_seconds_1dp: 1000,
+    divide_by_fifty: 50,
+    per_minute_to_per_second_2dp: 60,
+    divide_by_ten_0dp: 10,
+    divide_by_one_hundred_and_negate: -100,
+    tree_expansion_jewel_passive: 1,
+    passive_hash: 1,
+    divide_by_ten_1dp: 10,
+    affliction_reward_type: 1,
+    divide_by_five: 5,
+    metamorphosis_reward_description: 1,
+    divide_by_two_0dp: 2,
+    divide_by_fifteen_0dp: 15,
+    divide_by_three: 3,
+    divide_by_twenty_then_double_0dp: 10,
+    divide_by_four: 4
+  };
 
   if (browser) {
     skillTree = JSON.parse(window['SkillTree']);
@@ -99,7 +148,6 @@
   const statsFont = '17px Roboto Mono';
 
   let scaling = 10;
-  const padding = 50;
 
   let offsetX = 0;
   let offsetY = 0;
@@ -114,8 +162,8 @@
 
   const toCanvasCoords = (x: number, y: number): Point => {
     return {
-      x: (Math.abs(skillTree.min_x) + x + offsetX) / scaling + padding,
-      y: (Math.abs(skillTree.min_y) + y + offsetY) / scaling + padding
+      x: (Math.abs(skillTree.min_x) + x + offsetX) / scaling,
+      y: (Math.abs(skillTree.min_y) + y + offsetY) / scaling
     };
   };
 
@@ -299,8 +347,49 @@
     return result;
   };
 
-  const formatStats = (translation: Translation, stat: number) => {
-    return translation.English[0].string.replace(`{0}`, translation.English[0].format[0].replace('#', stat));
+  const formatStats = (translation: Translation, stat: number): string | undefined => {
+    let selectedTranslation = -1;
+
+    for (let i = 0; i < translation.English.length; i++) {
+      const t = translation.English[i];
+
+      let matches = true;
+      if (t.condition.length > 0) {
+        const first = t.condition[0];
+        for (let condition of Object.keys(first)) {
+          if (condition == 'min' && stat < first['min']) {
+            matches = false;
+            break;
+          }
+
+          if (condition == 'max' && stat > first['max']) {
+            matches = false;
+            break;
+          }
+        }
+      }
+
+      if (matches) {
+        selectedTranslation = i;
+        break;
+      }
+    }
+
+    if (selectedTranslation == -1) {
+      return undefined;
+    }
+
+    const datum = translation.English[selectedTranslation];
+
+    let finalStat = stat;
+
+    if (datum.index_handlers.length > 0) {
+      datum.index_handlers[0].forEach((handler) => {
+        finalStat = finalStat / indexHandlers[handler];
+      });
+    }
+
+    return datum.string.replace(`{0}`, datum.format[0].replace('#', finalStat.toString()));
   };
 
   let mousePos: Point = {
@@ -519,7 +608,7 @@
                   const translation = inverseTranslations[stat.id] || '';
                   if (translation) {
                     nodeStats.push({
-                      text: formatStats(translation, result.statRolls[i]),
+                      text: formatStats(translation, result.statRolls[i]) || stat.id,
                       special: true
                     });
                   }
@@ -540,7 +629,7 @@
                     const translation = inverseTranslations[stat.id] || '';
                     if (translation) {
                       nodeStats.push({
-                        text: formatStats(translation, info.statRolls[i]),
+                        text: formatStats(translation, info.statRolls[i]) || stat.id,
                         special: true
                       });
                     }
@@ -690,17 +779,19 @@
   };
 
   const onScroll = (event: WheelEvent) => {
-    scaling = Math.min(30, Math.max(3, scaling + event.deltaY / 100));
-
-    if (scaling > 3 && scaling < 30) {
-      if (event.deltaY > 0) {
+    if (event.deltaY > 0) {
+      if (scaling < 30) {
         offsetX += event.offsetX;
         offsetY += event.offsetY;
-      } else {
+      }
+    } else {
+      if (scaling > 3) {
         offsetX -= event.offsetX;
         offsetY -= event.offsetY;
       }
     }
+
+    scaling = Math.min(30, Math.max(3, scaling + event.deltaY / 100));
 
     event.preventDefault();
     event.stopPropagation();
