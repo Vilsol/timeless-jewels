@@ -484,45 +484,49 @@
       }));
 
       if (!hoveredNode.isJewelSocket && hoveredNodeActive) {
-        const result = Calculate(TreeToPassive[hoveredNode.skill], seed, selectedJewel, selectedConqueror);
+        if (hoveredNode.skill && seed && selectedJewel && selectedConqueror) {
+          const result = Calculate(TreeToPassive[hoveredNode.skill], seed, selectedJewel, selectedConqueror);
 
-        if ('alternatePassiveSkill' in result) {
-          const alt = GetAlternatePassiveSkillByIndex(result['alternatePassiveSkill']);
+          if (result) {
+            if ('alternatePassiveSkill' in result) {
+              const alt = GetAlternatePassiveSkillByIndex(result['alternatePassiveSkill']);
 
-          nodeStats = [];
-          nodeName = alt.name;
+              nodeStats = [];
+              nodeName = alt.name;
 
-          if ('statsKeys' in alt) {
-            alt['statsKeys'].forEach((statId, i) => {
-              const stat = GetStatByIndex(statId);
-              const translation = inverseTranslations[stat.id] || '';
-              if (translation) {
-                nodeStats.push({
-                  text: formatStats(translation, result.statRolls[i]),
-                  special: true
+              if ('statsKeys' in alt) {
+                alt['statsKeys'].forEach((statId, i) => {
+                  const stat = GetStatByIndex(statId);
+                  const translation = inverseTranslations[stat.id] || '';
+                  if (translation) {
+                    nodeStats.push({
+                      text: formatStats(translation, result.statRolls[i]),
+                      special: true
+                    });
+                  }
                 });
               }
-            });
-          }
-        }
+            }
 
-        if ('alternatePassiveAdditionInformations' in result && result['alternatePassiveAdditionInformations'].length > 0) {
-          result['alternatePassiveAdditionInformations'].forEach(info => {
-            const addition = GetAlternatePassiveAdditionByIndex(info.alternatePassiveSkillAddition);
+            if ('alternatePassiveAdditionInformations' in result && result['alternatePassiveAdditionInformations'].length > 0) {
+              result['alternatePassiveAdditionInformations'].forEach(info => {
+                const addition = GetAlternatePassiveAdditionByIndex(info.alternatePassiveSkillAddition);
 
-            if ('statsKeys' in addition) {
-              addition['statsKeys'].forEach((statId, i) => {
-                const stat = GetStatByIndex(statId);
-                const translation = inverseTranslations[stat.id] || '';
-                if (translation) {
-                  nodeStats.push({
-                    text: formatStats(translation, info.statRolls[i]),
-                    special: true
+                if ('statsKeys' in addition) {
+                  addition['statsKeys'].forEach((statId, i) => {
+                    const stat = GetStatByIndex(statId);
+                    const translation = inverseTranslations[stat.id] || '';
+                    if (translation) {
+                      nodeStats.push({
+                        text: formatStats(translation, info.statRolls[i]),
+                        special: true
+                      });
+                    }
                   });
                 }
               });
             }
-          });
+          }
         }
       }
 
