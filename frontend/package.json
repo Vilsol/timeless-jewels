@@ -2,10 +2,10 @@
   "name": "frontend",
   "version": "0.0.1",
   "scripts": {
-    "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
+    "dev": "vite dev",
+    "build": "vite build",
     "package": "svelte-kit package",
-    "preview": "svelte-kit preview",
+    "preview": "vite preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
@@ -18,6 +18,7 @@
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
     "autoprefixer": "^10.4.7",
+    "comlink": "^4.3.1",
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-svelte3": "^4.0.0",
@@ -32,7 +33,8 @@
     "svelte-select": "^4.4.7",
     "tailwindcss": "^3.1.4",
     "tslib": "^2.3.1",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "vite": "^2.9.13"
   },
   "type": "module"
 }

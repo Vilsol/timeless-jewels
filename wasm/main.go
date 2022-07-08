@@ -50,6 +50,46 @@ func main() {
 		return js.ValueOf(out)
 	}))
 
+	js.Global().Set("ReverseSearch", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		passiveIDs := make([]uint32, args[0].Length())
+		for i := 0; i < args[0].Length(); i++ {
+			passiveIDs[i] = uint32(args[0].Index(i).Int())
+		}
+
+		skillIDs := make([]uint32, args[1].Length())
+		for i := 0; i < args[1].Length(); i++ {
+			skillIDs[i] = uint32(args[1].Index(i).Int())
+		}
+
+		jewelType := data.JewelType(args[2].Int())
+		conqueror := data.Conqueror(args[3].String())
+
+		var updates calculator.UpdateFunc
+
+		if len(args) > 3 {
+			updates = func(seed uint32) {
+				args[4].Invoke(seed)
+			}
+		}
+
+		result := calculator.ReverseSearch(passiveIDs, skillIDs, jewelType, conqueror, updates)
+
+		out := make(map[string]interface{})
+		for seed, a := range result {
+			seedData := make(map[string]interface{})
+			for passive, b := range a {
+				passiveData := make(map[string]interface{})
+				for statID, roll := range b {
+					passiveData[strconv.Itoa(int(statID))] = roll
+				}
+				seedData[strconv.Itoa(int(passive))] = passiveData
+			}
+			out[strconv.Itoa(int(seed))] = seedData
+		}
+
+		return out
+	}))
+
 	js.Global().Set("GetStatByIndex", js.FuncOf(func(_ js.Value, args []js.Value) any {
 		stat := data.GetStatByIndex(uint32(args[0].Int()))
 
@@ -139,34 +179,8 @@ func main() {
 	js.Global().Set("TimelessJewelSeedRanges", js.ValueOf(remappedTimelessJewelSeedRanges))
 
 	remappedPassives := make(map[string]interface{})
-	for _, skill := range data.PassiveSkills {
-		if skill.Name == "" {
-			continue
-		}
-
-		if skill.IsJewelSocket {
-			continue
-		}
-
-		if node, ok := data.SkillTreeData.Nodes[strconv.Itoa(int(skill.PassiveSkillGraphID))]; ok {
-			if node.AscendancyName != nil {
-				continue
-			}
-
-			if node.IsProxy != nil && *node.IsProxy {
-				continue
-			}
-
-			if node.IsBlighted != nil && *node.IsBlighted {
-				continue
-			}
-
-			if node.IsMastery != nil && *node.IsMastery {
-				continue
-			}
-
-			remappedPassives[skill.Name+" ("+skill.ID+")"] = skill.Index
-		}
+	for _, skill := range data.GetApplicablePassives() {
+		remappedPassives[skill.Name+" ("+skill.ID+")"] = skill.Index
 	}
 
 	js.Global().Set("PassiveSkills", js.ValueOf(remappedPassives))
@@ -181,6 +195,8 @@ func main() {
 	js.Global().Set("TreeToPassive", js.ValueOf(treeToPassive))
 
 	js.Global().Set("PassiveTranslations", js.ValueOf(string(data.PassiveSkillTranslationsJSON)))
+
+	js.Global().Set("PossibleStats", js.ValueOf(string(data.PossibleStatsJSON)))
 
 	fmt.Println("Calculator Initialized")
 	select {}

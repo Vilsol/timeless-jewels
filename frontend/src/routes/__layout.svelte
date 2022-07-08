@@ -3,6 +3,8 @@
   import '../wasm_exec.js';
   import { assets } from '$app/paths';
   import { browser } from '$app/env';
+  import { loadSkillTree } from '../lib/skill_tree';
+  import { syncWrap } from '../lib/worker';
 
   let wasmLoading = true;
 
@@ -10,10 +12,17 @@
   const go = new Go();
 
   if (browser) {
-    WebAssembly.instantiateStreaming(fetch(assets + '/calculator.wasm'), go.importObject).then((result) => {
-      go.run(result.instance);
-      wasmLoading = false;
-    });
+    fetch(assets + '/calculator.wasm')
+      .then((data) => data.arrayBuffer())
+      .then((data) => {
+        WebAssembly.instantiate(data, go.importObject).then((result) => {
+          go.run(result.instance);
+          wasmLoading = false;
+          loadSkillTree();
+        });
+
+        syncWrap.boot(data);
+      });
   }
 </script>
 

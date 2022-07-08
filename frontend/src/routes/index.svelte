@@ -115,10 +115,19 @@
             {#if selectedPassiveSkill}
               <div class="mt-4">
                 <h3 class="mb-2">Seed</h3>
-                <input type="number" bind:value={seed} class="seed" on:blur={updateUrl} min={TimelessJewelSeedRanges[selectedJewel.value].min} max={TimelessJewelSeedRanges[selectedJewel.value].max} />
+                <input
+                  type="number"
+                  bind:value={seed}
+                  class="seed"
+                  on:blur={updateUrl}
+                  min={TimelessJewelSeedRanges[selectedJewel.value].min}
+                  max={TimelessJewelSeedRanges[selectedJewel.value].max}
+                />
                 {#if seed < TimelessJewelSeedRanges[selectedJewel.value].min || seed > TimelessJewelSeedRanges[selectedJewel.value].max}
-                  <div class='mt-2'>
-                    Seed must be between {TimelessJewelSeedRanges[selectedJewel.value].min} and {TimelessJewelSeedRanges[selectedJewel.value].max}
+                  <div class="mt-2">
+                    Seed must be between {TimelessJewelSeedRanges[selectedJewel.value].min} and {TimelessJewelSeedRanges[
+                      selectedJewel.value
+                    ].max}
                   </div>
                 {/if}
               </div>

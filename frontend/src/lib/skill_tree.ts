@@ -1,9 +1,86 @@
-import type { Translation, Node, SkillTreeData } from './types';
+import type { Translation, Node, SkillTreeData, Group, Sprite } from './types';
 
 export let skillTree: SkillTreeData;
 
+export const drawnGroups: Record<number, Group> = {};
+export const drawnNodes: Record<number, Node> = {};
+
+export const inverseSprites: Record<string, Sprite> = {};
+export const inverseSpritesActive: Record<string, Sprite> = {};
+
+export const inverseTranslations: Record<string, Translation> = {};
+
+export const passiveToTree: Record<number, number> = {};
+
 export const loadSkillTree = () => {
   skillTree = JSON.parse(window['SkillTree']);
+
+  Object.keys(skillTree.groups).forEach((groupId) => {
+    const group = skillTree.groups[groupId];
+    group.nodes.forEach((nodeId) => {
+      const node = skillTree.nodes[nodeId];
+
+      // Do not care about proxy passives
+      if (node.isProxy) {
+        return;
+      }
+
+      // Do not care about class starting nodes
+      if ('classStartIndex' in node) {
+        return;
+      }
+
+      // Do not care about cluster jewels
+      if (node.expansionJewel) {
+        if (node.expansionJewel.parent) {
+          return;
+        }
+      }
+
+      // Do not care about blighted nodes
+      if (node.isBlighted) {
+        return;
+      }
+
+      // Do not care about ascendancies
+      if (node.ascendancyName) {
+        return;
+      }
+
+      drawnGroups[parseInt(groupId)] = group;
+      drawnNodes[parseInt(nodeId)] = node;
+    });
+  });
+
+  skillTree.skillSprites.keystoneInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
+  skillTree.skillSprites.notableInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
+  skillTree.skillSprites.normalInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
+  skillTree.skillSprites.masteryInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
+
+  skillTree.skillSprites.keystoneActive.forEach((k) =>
+    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  );
+  skillTree.skillSprites.notableActive.forEach((k) =>
+    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  );
+  skillTree.skillSprites.normalActive.forEach((k) =>
+    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  );
+  skillTree.skillSprites.masteryInactive.forEach((k) =>
+    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  );
+
+  const translations: Translation[] = JSON.parse(window['PassiveTranslations']);
+
+  translations.forEach((t) => {
+    t.ids.forEach((id) => {
+      inverseTranslations[id] = t;
+    });
+  });
+
+  Object.keys(window['TreeToPassive']).forEach((k) => {
+    passiveToTree[window['TreeToPassive'][k]] = parseInt(k);
+  });
 };
 
 const indexHandlers: Record<string, number> = {
@@ -128,17 +205,22 @@ export const formatStats = (translation: Translation, stat: number): string | un
     let matches = true;
     if (t.condition.length > 0) {
       const first = t.condition[0];
-      for (const condition of Object.keys(first)) {
-        const value: number = first[condition];
-        if (condition == 'min' && stat < value) {
+      if (first.min !== undefined) {
+        if (stat < first.min) {
+          console.log(stat, '<', first.min, first.negated);
           matches = false;
-          break;
         }
+      }
 
-        if (condition == 'max' && stat > value) {
+      if (first.max !== undefined) {
+        if (stat > first.max) {
+          console.log(stat, '>', first.max, first.negated);
           matches = false;
-          break;
         }
+      }
+
+      if (first.negated) {
+        matches = !matches;
       }
     }
 
@@ -163,4 +245,44 @@ export const formatStats = (translation: Translation, stat: number): string | un
   }
 
   return datum.string.replace(`{0}`, datum.format[0].replace('#', finalStat.toString()));
+};
+
+const assetCache: Record<string, HTMLImageElement> = {};
+export const getAsset = (name: string): HTMLImageElement => {
+  if (name in assetCache) {
+    return assetCache[name];
+  }
+
+  assetCache[name] = new Image();
+  assetCache[name].src = skillTree.assets[name]['0.3835'];
+
+  return assetCache[name];
+};
+
+export const baseJewelRadius = 1800;
+
+export const getAffectedNodes = (socket: Node): Node[] => {
+  const result: Node[] = [];
+
+  const socketPos = calculateNodePos(socket, 0, 0, 1);
+  for (const node of Object.values(drawnNodes)) {
+    const nodePos = calculateNodePos(node, 0, 0, 1);
+
+    if (distance(nodePos, socketPos) < baseJewelRadius) {
+      result.push(node);
+    }
+  }
+
+  return result;
+};
+
+type Stat = { index: number; id: string; text: string };
+
+const statCache: Record<number, Stat> = {};
+export const getStat = (id: number | string): Stat => {
+  const nId = typeof id === 'string' ? parseInt(id) : id;
+  if (!(nId in statCache)) {
+    statCache[nId] = window['GetStatByIndex'](nId);
+  }
+  return statCache[nId];
 };

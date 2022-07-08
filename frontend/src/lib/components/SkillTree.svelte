@@ -1,12 +1,18 @@
 <script lang="ts">
   import { Canvas, Layer, t } from 'svelte-canvas';
-  import type { RenderFunc, Node, Group, Sprite, Translation } from '../types';
+  import type { RenderFunc, Node } from '../types';
   import { browser } from '$app/env';
   import {
+    baseJewelRadius,
     calculateNodePos,
     distance,
+    drawnGroups,
+    drawnNodes,
     formatStats,
-    loadSkillTree,
+    getAsset,
+    inverseSprites,
+    inverseSpritesActive,
+    inverseTranslations,
     orbitAngleAt,
     skillTree,
     toCanvasCoords
@@ -19,87 +25,7 @@
   export let selectedJewel: number;
   export let selectedConqueror: string;
   export let seed: number;
-
-  const drawnGroups: Record<number, Group> = {};
-  const drawnNodes: Record<number, Node> = {};
-
-  const inverseSprites: Record<string, Sprite> = {};
-  const inverseSpritesActive: Record<string, Sprite> = {};
-
-  const inverseTranslations: Record<string, Translation> = {};
-
-  if (browser) {
-    loadSkillTree();
-
-    Object.keys(skillTree.groups).forEach((groupId) => {
-      const group = skillTree.groups[groupId];
-      group.nodes.forEach((nodeId) => {
-        const node = skillTree.nodes[nodeId];
-
-        // Do not care about proxy passives
-        if (node.isProxy) {
-          return;
-        }
-
-        // Do not care about class starting nodes
-        if ('classStartIndex' in node) {
-          return;
-        }
-
-        // Do not care about cluster jewels
-        if (node.expansionJewel) {
-          if (node.expansionJewel.parent) {
-            return;
-          }
-        }
-
-        // Do not care about blighted nodes
-        if (node.isBlighted) {
-          return;
-        }
-
-        // Do not care about ascendancies
-        if (node.ascendancyName) {
-          return;
-        }
-
-        drawnGroups[groupId] = group;
-        drawnNodes[nodeId] = node;
-      });
-    });
-
-    skillTree.skillSprites.keystoneInactive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k))
-    );
-    skillTree.skillSprites.notableInactive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k))
-    );
-    skillTree.skillSprites.normalInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
-    skillTree.skillSprites.masteryInactive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k))
-    );
-
-    skillTree.skillSprites.keystoneActive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
-    );
-    skillTree.skillSprites.notableActive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
-    );
-    skillTree.skillSprites.normalActive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
-    );
-    skillTree.skillSprites.masteryInactive.forEach((k) =>
-      Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
-    );
-
-    const translations: Translation[] = JSON.parse(PassiveTranslations);
-
-    translations.forEach((t) => {
-      t.ids.forEach((id) => {
-        inverseTranslations[id] = t;
-      });
-    });
-  }
+  export let highlighted: number[] = [];
 
   const startGroups = [427, 320, 226, 227, 323, 422, 329];
 
@@ -111,22 +37,10 @@
   let offsetX = 0;
   let offsetY = 0;
 
-  $: jewelRadius = 1800 / scaling;
+  $: jewelRadius = baseJewelRadius / scaling;
 
   // const treeImg = new Image();
   // treeImg.src = assets + '/poe_tree.png';
-
-  const assetCache: Record<string, HTMLImageElement> = {};
-  const getAsset = (name: string): HTMLImageElement => {
-    if (name in assetCache) {
-      return assetCache[name];
-    }
-
-    assetCache[name] = new Image();
-    assetCache[name].src = skillTree.assets[name]['0.3835'];
-
-    return assetCache[name];
-  };
 
   const drawScaling = 2.6;
   const drawScaledCenter = (context: CanvasRenderingContext2D, asset: HTMLImageElement, pos: Point) => {
@@ -246,7 +160,7 @@
         // return;
       }
 
-      const group = skillTree.groups[groupId];
+      const group = drawnGroups[groupId];
       const groupPos = toCanvasCoords(group.x, group.y, offsetX, offsetY, scaling);
 
       const maxOrbit = Math.max(...group.orbits);
@@ -262,7 +176,7 @@
     });
 
     Object.keys(drawnNodes).forEach((nodeId) => {
-      const node = skillTree.nodes[nodeId];
+      const node = drawnNodes[nodeId];
       const angle = orbitAngleAt(node.orbit, node.orbitIndex);
       const rotatedPos = calculateNodePos(node, offsetX, offsetY, scaling);
 
@@ -280,7 +194,10 @@
         }
         connected[joined] = true;
 
-        const targetNode = skillTree.nodes[parseInt(o)];
+        const targetNode = drawnNodes[parseInt(o)];
+        if (!targetNode) {
+          return;
+        }
 
         // Do not draw connections to mastery nodes
         if (targetNode.isMastery) {
@@ -307,7 +224,7 @@
           const finalA = diff > Math.PI ? Math.max(a, b) : Math.min(a, b);
           const finalB = diff > Math.PI ? Math.min(a, b) : Math.max(a, b);
 
-          const group = skillTree.groups[node.group];
+          const group = drawnGroups[node.group];
           const groupPos = toCanvasCoords(group.x, group.y, offsetX, offsetY, scaling);
           context.arc(groupPos.x, groupPos.y, skillTree.constants.orbitRadii[node.orbit] / scaling + 1, finalA, finalB);
         }
@@ -320,14 +237,14 @@
 
     let circledNodePos: Point;
     if (circledNode) {
-      circledNodePos = calculateNodePos(skillTree.nodes[circledNode], offsetX, offsetY, scaling);
+      circledNodePos = calculateNodePos(drawnNodes[circledNode], offsetX, offsetY, scaling);
       context.strokeStyle = '#ad2b2b';
     }
 
     let hoveredNodeActive = false;
     let newHoverNode: Node | undefined;
     Object.keys(drawnNodes).forEach((nodeId) => {
-      const node = skillTree.nodes[nodeId];
+      const node = drawnNodes[nodeId];
       const rotatedPos = calculateNodePos(node, offsetX, offsetY, scaling);
       let touchDistance = 0;
 
@@ -381,6 +298,14 @@
         }
       }
 
+      if (highlighted.indexOf(node.skill) >= 0) {
+        context.strokeStyle = `hsl(${$t / 20}, 100%, 50%)`;
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(rotatedPos.x, rotatedPos.y, (touchDistance + 30) / scaling, 0, Math.PI * 2);
+        context.stroke();
+      }
+
       if (distance(rotatedPos, mousePos) < touchDistance / scaling) {
         newHoverNode = node;
         hoveredNodeActive = active;
@@ -389,21 +314,9 @@
 
     hoveredNode = newHoverNode;
 
-    // Object.keys(drawnGroups).forEach(groupId => {
-    //   context.strokeStyle = `hsl(${$t / 20}, 100%, 50%)`;
-    //
-    //   const group = skillTree.groups[groupId];
-    //   const groupPos = toCanvasCoords(group.x, group.y);
-    //
-    //   group.orbits.forEach(o => {
-    //     context.beginPath();
-    //     context.arc(groupPos.x, groupPos.y, skillTree.constants.orbitRadii[o] / scaling, 0, Math.PI * 2);
-    //     context.stroke();
-    //   });
-    // });
-
     if (circledNode) {
       context.strokeStyle = '#ad2b2b';
+      context.lineWidth = 1;
       context.beginPath();
       context.arc(circledNodePos.x, circledNodePos.y, jewelRadius, 0, Math.PI * 2);
       context.stroke();
@@ -633,12 +546,12 @@
   let initialized = false;
   $: {
     if (browser) {
-      if (!initialized) {
+      if (!initialized && skillTree) {
         initialized = true;
         offsetX = skillTree.min_x + (window.innerWidth / 2) * scaling;
         offsetY = skillTree.min_y + (window.innerHeight / 2) * scaling;
-        resize();
       }
+      resize();
     }
   }
 </script>
