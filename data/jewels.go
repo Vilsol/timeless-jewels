@@ -150,8 +150,9 @@ var TimelessJewelConquerors = map[JewelType]map[Conqueror]*TimelessJewelConquero
 }
 
 type Range struct {
-	Min uint32
-	Max uint32
+	Min     uint32
+	Max     uint32
+	Special bool
 }
 
 var TimelessJewelSeedRanges = map[JewelType]Range{
@@ -172,7 +173,8 @@ var TimelessJewelSeedRanges = map[JewelType]Range{
 		Max: 10000,
 	},
 	ElegantHubris: {
-		Min: 2000,
-		Max: 160000,
+		Min:     2000,
+		Max:     160000,
+		Special: true,
 	},
 }

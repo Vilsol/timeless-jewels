@@ -1,4 +1,6 @@
 import type { Translation, Node, SkillTreeData, Group, Sprite } from './types';
+import type { Readable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 export let skillTree: SkillTreeData;
 
@@ -12,8 +14,9 @@ export const inverseTranslations: Record<string, Translation> = {};
 
 export const passiveToTree: Record<number, number> = {};
 
-export const loadSkillTree = () => {
-  skillTree = JSON.parse(window['SkillTree']);
+export const loadSkillTree = (tree?: string, translationData?: string, treeToPassive?: unknown) => {
+  skillTree = JSON.parse(tree || window['SkillTree']);
+  console.log('Loaded skill tree', skillTree);
 
   Object.keys(skillTree.groups).forEach((groupId) => {
     const group = skillTree.groups[groupId];
@@ -70,7 +73,7 @@ export const loadSkillTree = () => {
     Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
   );
 
-  const translations: Translation[] = JSON.parse(window['PassiveTranslations']);
+  const translations: Translation[] = JSON.parse(translationData || window['PassiveTranslations']);
 
   translations.forEach((t) => {
     t.ids.forEach((id) => {
@@ -78,8 +81,8 @@ export const loadSkillTree = () => {
     });
   });
 
-  Object.keys(window['TreeToPassive']).forEach((k) => {
-    passiveToTree[window['TreeToPassive'][k]] = parseInt(k);
+  Object.keys(treeToPassive || window['TreeToPassive']).forEach((k) => {
+    passiveToTree[(treeToPassive || window['TreeToPassive'])[k]] = parseInt(k);
   });
 };
 
@@ -207,14 +210,12 @@ export const formatStats = (translation: Translation, stat: number): string | un
       const first = t.condition[0];
       if (first.min !== undefined) {
         if (stat < first.min) {
-          console.log(stat, '<', first.min, first.negated);
           matches = false;
         }
       }
 
       if (first.max !== undefined) {
         if (stat > first.max) {
-          console.log(stat, '>', first.max, first.negated);
           matches = false;
         }
       }
@@ -247,14 +248,21 @@ export const formatStats = (translation: Translation, stat: number): string | un
   return datum.string.replace(`{0}`, datum.format[0].replace('#', finalStat.toString()));
 };
 
-const assetCache: Record<string, HTMLImageElement> = {};
-export const getAsset = (name: string): HTMLImageElement => {
+const assetCache: Record<string, Readable<HTMLImageElement>> = {};
+export const getAsset = (name: string): Readable<HTMLImageElement> => {
   if (name in assetCache) {
     return assetCache[name];
   }
 
-  assetCache[name] = new Image();
-  assetCache[name].src = skillTree.assets[name]['0.3835'];
+  const img = new Image();
+  const imageStore = writable(img);
+
+  img.src = skillTree.assets[name]['0.3835'];
+  img.onload = () => {
+    imageStore.set(img);
+  };
+
+  assetCache[name] = imageStore;
 
   return assetCache[name];
 };
@@ -285,4 +293,44 @@ export const getStat = (id: number | string): Stat => {
     statCache[nId] = window['GetStatByIndex'](nId);
   }
   return statCache[nId];
+};
+
+export interface ReverseSearchConfig {
+  jewel: number;
+  conqueror: string;
+  nodes: number[];
+  stats: StatConfig[];
+}
+
+export interface StatConfig {
+  min: number;
+  id: number;
+  weight: number;
+}
+
+export interface SearchWithSeed {
+  seed: number;
+  weight: number;
+  statCounts: Record<number, number>;
+  skills: {
+    passive: number;
+    stats: { [key: string]: number };
+  }[];
+}
+
+export const translateStat = (id: number, roll?: number | undefined): string => {
+  const stat = getStat(id);
+  const translation = inverseTranslations[stat.id];
+  if (roll) {
+    return formatStats(translation, roll) || stat.id;
+  }
+
+  let translationText = stat.text || stat.id;
+  if (translation && translation.English && translation.English.length) {
+    translationText = translation.English[0].string;
+    translation.English[0].format.forEach((f, i) => {
+      translationText = translationText.replace(`{${i}}`, f);
+    });
+  }
+  return translationText;
 };

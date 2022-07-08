@@ -4,6 +4,8 @@ import "timeless-jewels/data"
 
 type UpdateFunc func(seed uint32)
 
+var calculationCache = make(map[data.Conqueror]map[data.JewelType]map[uint32]map[uint32]*data.AlternatePassiveSkillInformation)
+
 func Calculate(passiveID uint32, seed uint32, timelessJewelType data.JewelType, conqueror data.Conqueror) *data.AlternatePassiveSkillInformation {
 	passiveSkill := data.GetPassiveSkillByIndex(passiveID)
 
@@ -65,52 +67,94 @@ func ReverseSearch(passiveIDs []uint32, statIDs []uint32, timelessJewelType data
 		statMap[id] = true
 	}
 
+	if _, ok := calculationCache[conqueror]; !ok {
+		calculationCache[conqueror] = make(map[data.JewelType]map[uint32]map[uint32]*data.AlternatePassiveSkillInformation)
+	}
+
+	if _, ok := calculationCache[conqueror][timelessJewelType]; !ok {
+		calculationCache[conqueror][timelessJewelType] = make(map[uint32]map[uint32]*data.AlternatePassiveSkillInformation)
+	}
+
 	results := make(map[uint32]map[uint32]map[uint32]uint32)
-	for seed := data.TimelessJewelSeedRanges[timelessJewelType].Min; seed <= data.TimelessJewelSeedRanges[timelessJewelType].Max; seed++ {
-		timelessJewel.Seed = seed
+
+	min := data.TimelessJewelSeedRanges[timelessJewelType].Min
+	max := data.TimelessJewelSeedRanges[timelessJewelType].Max
+
+	if data.TimelessJewelSeedRanges[timelessJewelType].Special {
+		min /= 20
+		max /= 20
+	}
+
+	for seed := min; seed <= max; seed++ {
+		realSeed := seed
+		if data.TimelessJewelSeedRanges[timelessJewelType].Special {
+			realSeed *= 20
+		}
 
 		if seed%10 == 0 && updates != nil {
-			updates(seed)
+			updates(realSeed)
+		}
+
+		timelessJewel.Seed = realSeed
+
+		if _, ok := calculationCache[conqueror][timelessJewelType][realSeed]; !ok {
+			calculationCache[conqueror][timelessJewelType][realSeed] = make(map[uint32]*data.AlternatePassiveSkillInformation)
 		}
 
 		for _, skill := range passiveSkills {
 			alternateTreeManager.PassiveSkill = skill
 
-			if alternateTreeManager.IsPassiveSkillReplaced() {
-				replacement := alternateTreeManager.ReplacePassiveSkill()
-				if replacement.AlternatePassiveSkill != nil {
-					for i, key := range replacement.AlternatePassiveSkill.StatsKeys {
+			var result *data.AlternatePassiveSkillInformation
+			if cacheHit, ok := calculationCache[conqueror][timelessJewelType][realSeed][skill.Index]; ok {
+				result = cacheHit
+			}
+
+			if result == nil {
+				if alternateTreeManager.IsPassiveSkillReplaced() {
+					information := alternateTreeManager.ReplacePassiveSkill()
+					result = &information
+				} else {
+					result = &data.AlternatePassiveSkillInformation{
+						AlternatePassiveAdditionInformations: alternateTreeManager.AugmentPassiveSkill(),
+					}
+				}
+
+				calculationCache[conqueror][timelessJewelType][realSeed][skill.Index] = result
+			}
+
+			if result != nil {
+				if result.AlternatePassiveSkill != nil {
+					for i, key := range result.AlternatePassiveSkill.StatsKeys {
 						if _, ok := statMap[key]; ok {
-							if _, ok := results[seed]; !ok {
-								results[seed] = make(map[uint32]map[uint32]uint32)
+							if _, ok := results[realSeed]; !ok {
+								results[realSeed] = make(map[uint32]map[uint32]uint32)
 							}
 
-							if _, ok := results[seed][skill.Index]; !ok {
-								results[seed][skill.Index] = make(map[uint32]uint32)
+							if _, ok := results[realSeed][skill.Index]; !ok {
+								results[realSeed][skill.Index] = make(map[uint32]uint32)
 							}
 
-							if replacement.StatRolls != nil {
-								results[seed][skill.Index][key] = replacement.StatRolls[uint32(i)]
+							if result.StatRolls != nil {
+								results[realSeed][skill.Index][key] = result.StatRolls[uint32(i)]
 							}
 						}
 					}
 				}
-			} else {
-				augments := alternateTreeManager.AugmentPassiveSkill()
-				for _, augment := range augments {
+
+				for _, augment := range result.AlternatePassiveAdditionInformations {
 					if augment.AlternatePassiveAddition != nil {
 						for i, key := range augment.AlternatePassiveAddition.StatsKeys {
 							if _, ok := statMap[key]; ok {
-								if _, ok := results[seed]; !ok {
-									results[seed] = make(map[uint32]map[uint32]uint32)
+								if _, ok := results[realSeed]; !ok {
+									results[realSeed] = make(map[uint32]map[uint32]uint32)
 								}
 
-								if _, ok := results[seed][skill.Index]; !ok {
-									results[seed][skill.Index] = make(map[uint32]uint32)
+								if _, ok := results[realSeed][skill.Index]; !ok {
+									results[realSeed][skill.Index] = make(map[uint32]uint32)
 								}
 
 								if augment.StatRolls != nil {
-									results[seed][skill.Index][key] = augment.StatRolls[uint32(i)]
+									results[realSeed][skill.Index][key] = augment.StatRolls[uint32(i)]
 								}
 							}
 						}

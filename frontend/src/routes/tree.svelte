@@ -2,13 +2,13 @@
   import SkillTree from '../lib/components/SkillTree.svelte';
   import Select from 'svelte-select';
   import { page } from '$app/stores';
-  import { browser } from '$app/env';
   import { goto } from '$app/navigation';
   import type { Node } from '../lib/types';
-  import { formatStats, getAffectedNodes, inverseTranslations, passiveToTree, skillTree } from '../lib/skill_tree';
+  import { getAffectedNodes, skillTree, translateStat } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
   import { proxy } from 'comlink';
-  import { getStat } from '../lib/skill_tree.js';
+  import type { SearchWithSeed, ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
+  import SearchResults from '../lib/components/SearchResults.svelte';
 
   const searchParams = $page.url.searchParams;
 
@@ -39,28 +39,35 @@
     ? parseInt(searchParams.get('location'))
     : undefined;
 
+  let disabled = new Set();
   const clickNode = (node: Node) => {
     if (node.isJewelSocket) {
       circledNode = node.skill;
       updateUrl();
+    } else if (!node.isMastery) {
+      if (disabled.has(node.skill)) {
+        disabled.delete(node.skill);
+      } else {
+        disabled.add(node.skill);
+      }
+      // Re-assign to update svelte
+      disabled = disabled;
     }
   };
 
   const updateUrl = () => {
-    if (browser) {
-      const url = new URL(window.location.origin + window.location.pathname);
-      selectedJewel && url.searchParams.append('jewel', selectedJewel.value.toString());
-      selectedConqueror && url.searchParams.append('conqueror', selectedConqueror.value);
-      seed && url.searchParams.append('seed', seed.toString());
-      circledNode && url.searchParams.append('location', circledNode.toString());
-      mode && url.searchParams.append('mode', mode);
+    const url = new URL(window.location.origin + window.location.pathname);
+    selectedJewel && url.searchParams.append('jewel', selectedJewel.value.toString());
+    selectedConqueror && url.searchParams.append('conqueror', selectedConqueror.value);
+    seed && url.searchParams.append('seed', seed.toString());
+    circledNode && url.searchParams.append('location', circledNode.toString());
+    mode && url.searchParams.append('mode', mode);
 
-      selectedStats.forEach((s) => {
-        url.searchParams.append('stat', s.toString());
-      });
+    Object.keys(selectedStats).forEach((s) => {
+      url.searchParams.append('stat', s.toString());
+    });
 
-      goto(url.toString());
-    }
+    goto(url.toString());
   };
 
   let mode = searchParams.has('mode') ? searchParams.get('mode') : '';
@@ -69,32 +76,19 @@
     updateUrl();
   };
 
-  let allPossibleStats: { [key: string]: { [key: string]: number } };
-  if (browser) {
-    allPossibleStats = JSON.parse(window['PossibleStats']);
-  }
+  let allPossibleStats: { [key: string]: { [key: string]: number } } = JSON.parse(window['PossibleStats']);
 
-  let selectedStats = new Set<number>();
+  let selectedStats: Record<number, StatConfig> = {};
   if (searchParams.has('stat')) {
-    searchParams.getAll('stat').forEach((s) => selectedStats.add(parseInt(s)));
+    searchParams.getAll('stat').map((s) => {
+      const nStat = parseInt(s);
+      selectedStats[nStat] = {
+        weight: 1,
+        min: 0,
+        id: nStat
+      };
+    });
   }
-
-  const translateStat = (id: number, roll?: number | undefined): string => {
-    const stat = getStat(id);
-    const translation = inverseTranslations[stat.id];
-    if (roll) {
-      return formatStats(translation, roll);
-    }
-
-    let translationText = stat.text || stat.id;
-    if (translation && translation.English && translation.English.length) {
-      translationText = translation.English[0].string;
-      translation.English[0].format.forEach((f, i) => {
-        translationText = translationText.replace(`{${i}}`, f);
-      });
-    }
-    return translationText;
-  };
 
   $: availableStats = !selectedJewel ? [] : Object.keys(allPossibleStats[selectedJewel.value]);
   $: statItems = availableStats
@@ -105,86 +99,67 @@
         value: id
       };
     })
-    .filter((s) => !selectedStats.has(s.value));
+    .filter((s) => !(s.value in selectedStats));
 
   let statSelector: Select;
   const selectStat = (stat: CustomEvent) => {
-    selectedStats = selectedStats.add(stat.detail.value);
+    selectedStats[stat.detail.value] = {
+      weight: 1,
+      min: 0,
+      id: stat.detail.value
+    };
+    selectedStats = selectedStats;
     statSelector['handleClear']();
     updateUrl();
   };
 
   const removeStat = (id: number) => {
-    selectedStats.delete(id);
+    delete selectedStats[id];
     // Re-assign to update svelte
     selectedStats = selectedStats;
     updateUrl();
   };
 
   const changeJewel = () => {
-    selectedStats.clear();
+    selectedStats = {};
     updateUrl();
-  };
-
-  type SearchResults = { [key: string]: { [key: string]: { [key: string]: number } } };
-  type SearchWithSeed = {
-    seed: number;
-    skills: {
-      passive: number;
-      stats: { [key: string]: number };
-    }[];
   };
 
   let searching = false;
   let currentSeed = 0;
-  let searchResult: SearchResults;
   let searchGrouped: { [key: number]: SearchWithSeed[] };
-  let expandedGroup = '';
   const search = () => {
     if (!circledNode) {
       return;
     }
 
     searching = true;
-    searchResult = undefined;
+    searchGrouped = undefined;
 
     const affectedNodes = getAffectedNodes(skillTree.nodes[circledNode])
       .filter((n) => {
         return !n.isJewelSocket && !n.isMastery;
       })
+      .filter((n) => {
+        return !disabled.has(n.skill);
+      })
       .map((n) => window['TreeToPassive'][n.skill]);
 
-    const args = [affectedNodes, [...selectedStats], selectedJewel.value, selectedConqueror.value];
+    const query: ReverseSearchConfig = {
+      jewel: selectedJewel.value,
+      conqueror: selectedConqueror.value,
+      nodes: affectedNodes,
+      stats: Object.keys(selectedStats).map((stat) => selectedStats[stat])
+    };
 
     syncWrap
       .search(
-        args,
+        query,
         proxy((s) => (currentSeed = s))
       )
       .then((result) => {
-        searchResult = result;
+        searchGrouped = result;
         searching = false;
-
-        searchGrouped = {};
-        Object.keys(searchResult).forEach((seed) => {
-          const skills = Object.keys(searchResult[seed]).map((skillID) => {
-            return {
-              passive: passiveToTree[skillID],
-              stats: searchResult[seed][skillID]
-            };
-          });
-
-          const len = Object.keys(searchResult[seed]).length;
-          searchGrouped[len] = [
-            ...(searchGrouped[len] || []),
-            {
-              skills: skills,
-              seed: parseInt(seed)
-            }
-          ];
-        });
-
-        expandedGroup = Object.keys(searchGrouped).sort().reverse()[0];
       });
   };
 
@@ -193,6 +168,22 @@
     seed = newSeed;
     highlighted = passives.map((s) => s.passive);
     updateUrl();
+  };
+
+  const selectAll = () => {
+    disabled.clear();
+    // Re-assign to update svelte
+    disabled = disabled;
+  };
+
+  const deselectAll = () => {
+    getAffectedNodes(skillTree.nodes[circledNode])
+      .filter((n) => {
+        return !n.isJewelSocket && !n.isMastery;
+      })
+      .forEach((n) => disabled.add(n.skill));
+    // Re-assign to update svelte
+    disabled = disabled;
   };
 </script>
 
@@ -203,6 +194,7 @@
   selectedConqueror={selectedConqueror?.value}
   {highlighted}
   {seed}
+  disabled={[...disabled]}
 >
   <div
     class="w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen"
@@ -233,7 +225,6 @@
               <input
                 type="number"
                 bind:value={seed}
-                class="seed"
                 on:blur={updateUrl}
                 min={window['TimelessJewelSeedRanges'][selectedJewel.value].min}
                 max={window['TimelessJewelSeedRanges'][selectedJewel.value].max}
@@ -250,72 +241,62 @@
               <h3 class="mb-2">Add Stat</h3>
               <Select items={statItems} on:select={selectStat} bind:this={statSelector} />
             </div>
-            {#if selectedStats.size > 0}
-              <div class="mt-4 flex flex-col overflow-auto min-h-[50px]">
-                {#each [...selectedStats] as s}
-                  <div class="mb-2 flex flex-row items-center">
-                    <button class="p-2 px-4 bg-red-500/40 rounded mr-2" on:click={() => removeStat(s)}> - </button>
-                    <span>{translateStat(s)}</span>
+            {#if Object.keys(selectedStats).length > 0}
+              <div class="mt-4 flex flex-col overflow-auto min-h-[100px]">
+                {#each Object.keys(selectedStats) as s}
+                  <div class="mb-2 flex flex-row items-start flex-col stat-config">
+                    <div>
+                      <button
+                        class="p-2 px-4 bg-red-500/40 rounded mr-2"
+                        on:click={() => removeStat(selectedStats[s].id)}
+                      >
+                        -
+                      </button>
+                      <span>{translateStat(selectedStats[s].id)}</span>
+                    </div>
+                    <div class="mt-2 flex flex-row">
+                      <div class="mr-4 flex flex-row items-center">
+                        <div class="mr-2">Min:</div>
+                        <input type="number" min="0" bind:value={selectedStats[s].min} />
+                      </div>
+                      <div class="flex flex-row items-center">
+                        <div class="mr-2">Weight:</div>
+                        <input type="number" min="0" bind:value={selectedStats[s].weight} />
+                      </div>
+                    </div>
                   </div>
                 {/each}
               </div>
-              <button
-                class="p-2 px-4 bg-green-500/40 rounded mt-2 disabled:bg-green-700/40"
-                on:click={() => search()}
-                disabled={searching}
-              >
-                {#if searching}
-                  {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                {:else}
-                  Search
-                {/if}
-              </button>
+              <div class="flex flex-row">
+                <button
+                  class="p-2 px-4 bg-yellow-500/40 rounded mt-2 disabled:bg-yellow-700/40 mr-2"
+                  on:click={selectAll}
+                  disabled={searching}
+                >
+                  Select All
+                </button>
+                <button
+                  class="p-2 px-4 bg-yellow-500/40 rounded mt-2 disabled:bg-yellow-700/40 mr-2"
+                  on:click={deselectAll}
+                  disabled={searching}
+                >
+                  Deselect All
+                </button>
+                <button
+                  class="p-2 px-4 bg-green-500/40 rounded mt-2 disabled:bg-green-700/40 flex-grow"
+                  on:click={() => search()}
+                  disabled={searching}
+                >
+                  {#if searching}
+                    {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                  {:else}
+                    Search
+                  {/if}
+                </button>
+              </div>
 
-              {#if searchResult}
-                <div class="mt-4 flex flex-col overflow-auto">
-                  {#each Object.keys(searchGrouped).sort().reverse() as k}
-                    <div class="mb-2">
-                      <button
-                        class="text-lg w-full p-2 px-4 bg-neutral-500/30 rounded flex flex-row justify-between"
-                        on:click={() => (expandedGroup = expandedGroup === k ? '' : k)}
-                      >
-                        <span>
-                          {k} Matches [{searchGrouped[k].length}]
-                        </span>
-                        <span>
-                          {expandedGroup === k ? '^' : 'V'}
-                        </span>
-                      </button>
-
-                      {#if expandedGroup === k}
-                        <div class="flex flex-col">
-                          {#each searchGrouped[k] as set}
-                            <div
-                              class="my-2 border-white/50 border p-2 flex flex-col cursor-pointer"
-                              on:click={() => highlight(set.seed, set.skills)}
-                            >
-                              <div class="font-bold text-orange-500 text-center">
-                                Seed {set.seed}
-                              </div>
-                              {#each set.skills as skill}
-                                <div class="mt-2">
-                                  <span>
-                                    {skillTree.nodes[skill.passive].name} ({skill.passive})
-                                  </span>
-                                  <ul class="list-disc pl-6 font-bold">
-                                    {#each Object.keys(skill.stats) as stat}
-                                      <li>{translateStat(stat, skill.stats[stat])}</li>
-                                    {/each}
-                                  </ul>
-                                </div>
-                              {/each}
-                            </div>
-                          {/each}
-                        </div>
-                      {/if}
-                    </div>
-                  {/each}
-                </div>
+              {#if searchGrouped}
+                <SearchResults {searchGrouped} {highlight} />
               {/if}
             {/if}
           {/if}
@@ -335,14 +316,18 @@
   }
 
   .selection-button:first-child {
-    @apply rounded-l-lg border-r-2 border-black;
+    @apply rounded-l border-r-2 border-black;
   }
 
   .selection-button:last-child {
-    @apply rounded-r-lg;
+    @apply rounded-r;
   }
 
   .selected {
     @apply bg-neutral-100/20;
+  }
+
+  .stat-config:not(:first-child) {
+    @apply border-neutral-100/40 border-t pt-2;
   }
 </style>

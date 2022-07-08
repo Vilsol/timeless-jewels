@@ -7,7 +7,7 @@ type TimelessJewel struct {
 }
 
 func (t TimelessJewel) GetSeed() uint32 {
-	if t.AlternateTreeVersion.Index != 5 {
+	if t.AlternateTreeVersion.Index != uint32(ElegantHubris) {
 		return t.Seed
 	}
 	return t.Seed / 20

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Canvas, Layer, t } from 'svelte-canvas';
   import type { RenderFunc, Node } from '../types';
-  import { browser } from '$app/env';
   import {
     baseJewelRadius,
     calculateNodePos,
@@ -18,6 +17,7 @@
     toCanvasCoords
   } from '../skill_tree';
   import type { Point } from '../skill_tree';
+  import { derived } from 'svelte/store';
 
   export let clickNode: (node: Node) => void;
   export let circledNode: number | undefined;
@@ -26,6 +26,15 @@
   export let selectedConqueror: string;
   export let seed: number;
   export let highlighted: number[] = [];
+  export let disabled: number[] = [];
+
+  const slowTime = derived(t, (values) => {
+    if (!highlighted || !highlighted.length) {
+      return 0;
+    }
+
+    return Math.round(values / 40);
+  });
 
   const startGroups = [427, 320, 226, 227, 323, 422, 329];
 
@@ -38,9 +47,6 @@
   let offsetY = 0;
 
   $: jewelRadius = baseJewelRadius / scaling;
-
-  // const treeImg = new Image();
-  // treeImg.src = assets + '/poe_tree.png';
 
   const drawScaling = 2.6;
   const drawScaledCenter = (context: CanvasRenderingContext2D, asset: HTMLImageElement, pos: Point) => {
@@ -138,6 +144,19 @@
 
   let cursor = 'unset';
 
+  const PSGroupBackground1 = getAsset('PSGroupBackground1');
+  const PSGroupBackground2 = getAsset('PSGroupBackground2');
+  const PSGroupBackground3 = getAsset('PSGroupBackground3');
+  const KeystoneFrameAllocated = getAsset('KeystoneFrameAllocated');
+  const KeystoneFrameUnallocated = getAsset('KeystoneFrameUnallocated');
+  const NotableFrameAllocated = getAsset('NotableFrameAllocated');
+  const NotableFrameUnallocated = getAsset('NotableFrameUnallocated');
+  const JewelSocketAltNormal = getAsset('JewelSocketAltNormal');
+  const JewelFrameAllocated = getAsset('JewelFrameAllocated');
+  const JewelFrameUnallocated = getAsset('JewelFrameUnallocated');
+  const PSSkillFrameActive = getAsset('PSSkillFrameActive');
+  const PSSkillFrame = getAsset('PSSkillFrame');
+
   let hoveredNode: Node | undefined;
   $: render = (({ context, width, height }) => {
     const start = window.performance.now();
@@ -147,19 +166,8 @@
     context.fillStyle = '#080c11';
     context.fillRect(0, 0, width, height);
 
-    // if (!down) {
-    //   const imgScale = 4.74;
-    //   context.drawImage(treeImg, (offsetX - 12825) / scaling, (offsetY - 1625) / scaling, (treeImg.width * imgScale) / scaling, (treeImg.height * imgScale) / scaling);
-    // }
-
     const connected = {};
     Object.keys(drawnGroups).forEach((groupId) => {
-      context.strokeStyle = `hsl(${$t / 20}, 100%, 50%)`;
-
-      if (groupId != 329) {
-        // return;
-      }
-
       const group = drawnGroups[groupId];
       const groupPos = toCanvasCoords(group.x, group.y, offsetX, offsetY, scaling);
 
@@ -167,11 +175,11 @@
       if (startGroups.indexOf(parseInt(groupId)) >= 0) {
         // Do not draw starter nodes
       } else if (maxOrbit == 1) {
-        drawScaledCenter(context, getAsset('PSGroupBackground1'), groupPos);
+        drawScaledCenter(context, $PSGroupBackground1, groupPos);
       } else if (maxOrbit == 2) {
-        drawScaledCenter(context, getAsset('PSGroupBackground2'), groupPos);
+        drawScaledCenter(context, $PSGroupBackground2, groupPos);
       } else if (maxOrbit == 3 || group.orbits.length > 1) {
-        drawMirror(context, getAsset('PSGroupBackground3'), groupPos);
+        drawMirror(context, $PSGroupBackground3, groupPos);
       }
     });
 
@@ -255,35 +263,39 @@
         }
       }
 
+      if (disabled.indexOf(node.skill) >= 0) {
+        active = false;
+      }
+
       if (node.isKeystone) {
         touchDistance = 110;
         drawSprite(context, node.icon, rotatedPos, active);
         if (active) {
-          drawScaledCenter(context, getAsset('KeystoneFrameAllocated'), rotatedPos);
+          drawScaledCenter(context, $KeystoneFrameAllocated, rotatedPos);
         } else {
-          drawScaledCenter(context, getAsset('KeystoneFrameUnallocated'), rotatedPos);
+          drawScaledCenter(context, $KeystoneFrameUnallocated, rotatedPos);
         }
       } else if (node.isNotable) {
         touchDistance = 70;
         drawSprite(context, node.icon, rotatedPos, active);
         if (active) {
-          drawScaledCenter(context, getAsset('NotableFrameAllocated'), rotatedPos);
+          drawScaledCenter(context, $NotableFrameAllocated, rotatedPos);
         } else {
-          drawScaledCenter(context, getAsset('NotableFrameUnallocated'), rotatedPos);
+          drawScaledCenter(context, $NotableFrameUnallocated, rotatedPos);
         }
       } else if (node.isJewelSocket) {
         touchDistance = 70;
         if (node.expansionJewel) {
           if (active) {
-            drawScaledCenter(context, getAsset('JewelSocketAltNormal'), rotatedPos);
+            drawScaledCenter(context, $JewelSocketAltNormal, rotatedPos);
           } else {
-            drawScaledCenter(context, getAsset('JewelSocketAltNormal'), rotatedPos);
+            drawScaledCenter(context, $JewelSocketAltNormal, rotatedPos);
           }
         } else {
           if (active) {
-            drawScaledCenter(context, getAsset('JewelFrameAllocated'), rotatedPos);
+            drawScaledCenter(context, $JewelFrameAllocated, rotatedPos);
           } else {
-            drawScaledCenter(context, getAsset('JewelFrameUnallocated'), rotatedPos);
+            drawScaledCenter(context, $JewelFrameUnallocated, rotatedPos);
           }
         }
       } else if (node.isMastery) {
@@ -292,14 +304,14 @@
         touchDistance = 50;
         drawSprite(context, node.icon, rotatedPos, active);
         if (active) {
-          drawScaledCenter(context, getAsset('PSSkillFrameActive'), rotatedPos);
+          drawScaledCenter(context, $PSSkillFrameActive, rotatedPos);
         } else {
-          drawScaledCenter(context, getAsset('PSSkillFrame'), rotatedPos);
+          drawScaledCenter(context, $PSSkillFrame, rotatedPos);
         }
       }
 
       if (highlighted.indexOf(node.skill) >= 0) {
-        context.strokeStyle = `hsl(${$t / 20}, 100%, 50%)`;
+        context.strokeStyle = `hsl(${$slowTime}, 100%, 50%)`;
         context.lineWidth = 3;
         context.beginPath();
         context.arc(rotatedPos.x, rotatedPos.y, (touchDistance + 30) / scaling, 0, Math.PI * 2);
@@ -545,20 +557,18 @@
 
   let initialized = false;
   $: {
-    if (browser) {
-      if (!initialized && skillTree) {
-        initialized = true;
-        offsetX = skillTree.min_x + (window.innerWidth / 2) * scaling;
-        offsetY = skillTree.min_y + (window.innerHeight / 2) * scaling;
-      }
-      resize();
+    if (!initialized && skillTree) {
+      initialized = true;
+      offsetX = skillTree.min_x + (window.innerWidth / 2) * scaling;
+      offsetY = skillTree.min_y + (window.innerHeight / 2) * scaling;
     }
+    resize();
   }
 </script>
 
 <svelte:window on:pointerup={mouseUp} on:pointermove={mouseMove} on:resize={resize} />
 
-{#if browser && width && height}
+{#if width && height}
   <div on:resize={resize} style="touch-action: none; cursor: {cursor}">
     <Canvas {width} {height} on:pointerdown={mouseDown} on:wheel={onScroll}>
       <Layer {render} />
