@@ -4,7 +4,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import type { Node } from '../lib/types';
-  import { getAffectedNodes, skillTree, translateStat } from '../lib/skill_tree';
+  import { constructQuery, getAffectedNodes, skillTree, translateStat } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
   import { proxy } from 'comlink';
   import type { SearchWithSeed, ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
@@ -185,6 +185,15 @@
     // Re-assign to update svelte
     disabled = disabled;
   };
+
+  const trade = () => {
+    const url = new URL('https://www.pathofexile.com/trade/search/Sentinel');
+    url.searchParams.set(
+      'q',
+      JSON.stringify(constructQuery(selectedJewel.value, selectedConqueror.value, searchGrouped))
+    );
+    window.open(url, '_blank');
+  };
 </script>
 
 <SkillTree
@@ -197,7 +206,7 @@
   disabled={[...disabled]}
 >
   <div
-    class="w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen"
+    class="w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen"
   >
     <div class="p-4 max-h-screen flex flex-col">
       <h3 class="mb-2">Timeless Jewel</h3>
@@ -269,21 +278,28 @@
               </div>
               <div class="flex flex-row">
                 <button
-                  class="p-2 px-4 bg-yellow-500/40 rounded mt-2 disabled:bg-yellow-700/40 mr-2"
+                  class="p-2 px-3 bg-yellow-500/40 rounded mt-2 disabled:bg-yellow-900/40 mr-2"
                   on:click={selectAll}
-                  disabled={searching}
+                  disabled={searching || disabled.size == 0}
                 >
                   Select All
                 </button>
                 <button
-                  class="p-2 px-4 bg-yellow-500/40 rounded mt-2 disabled:bg-yellow-700/40 mr-2"
+                  class="p-2 px-3 bg-yellow-500/40 rounded mt-2 disabled:bg-yellow-900/40 mr-2"
                   on:click={deselectAll}
                   disabled={searching}
                 >
                   Deselect All
                 </button>
                 <button
-                  class="p-2 px-4 bg-green-500/40 rounded mt-2 disabled:bg-green-700/40 flex-grow"
+                  class="p-2 px-3 bg-blue-500/40 rounded mt-2 disabled:bg-blue-900/40 mr-2"
+                  on:click={trade}
+                  disabled={!searchGrouped}
+                >
+                  Trade
+                </button>
+                <button
+                  class="p-2 px-3 bg-green-500/40 rounded mt-2 disabled:bg-green-900/40 flex-grow"
                   on:click={() => search()}
                   disabled={searching}
                 >

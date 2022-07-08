@@ -334,3 +334,91 @@ export const translateStat = (id: number, roll?: number | undefined): string => 
   }
   return translationText;
 };
+
+const tradeStatNames: { [key: number]: { [key: string]: string } } = {
+  1: {
+    Ahuana: 'explicit.pseudo_timeless_jewel_ahuana',
+    Xibaqua: 'explicit.pseudo_timeless_jewel_xibaqua',
+    Doryani: 'explicit.pseudo_timeless_jewel_doryani',
+    Zerphi: 'explicit.pseudo_timeless_jewel_zerphi'
+  },
+  2: {
+    Kaom: 'explicit.pseudo_timeless_jewel_kaom',
+    Rakiata: 'explicit.pseudo_timeless_jewel_rakiata',
+    Kiloava: 'explicit.pseudo_timeless_jewel_kiloava',
+    Akoya: 'explicit.pseudo_timeless_jewel_akoya'
+  },
+  3: {
+    Deshret: 'explicit.pseudo_timeless_jewel_deshret',
+    Balbala: 'explicit.pseudo_timeless_jewel_balbala',
+    Asenath: 'explicit.pseudo_timeless_jewel_asenath',
+    Nasima: 'explicit.pseudo_timeless_jewel_nasima'
+  },
+  4: {
+    Venarius: 'explicit.pseudo_timeless_jewel_venarius',
+    Maxarius: 'explicit.pseudo_timeless_jewel_maxarius',
+    Dominus: 'explicit.pseudo_timeless_jewel_dominus',
+    Avarius: 'explicit.pseudo_timeless_jewel_avarius'
+  },
+  5: {
+    Cadiro: 'explicit.pseudo_timeless_jewel_cadiro',
+    Victario: 'explicit.pseudo_timeless_jewel_victario',
+    Chitus: 'explicit.pseudo_timeless_jewel_chitus',
+    Caspiro: 'explicit.pseudo_timeless_jewel_caspiro'
+  }
+};
+
+// TODO Figure out what the actual limit is
+const maxQueries = 28;
+export const constructQuery = (jewel: number, conqueror: string, result: { [key: number]: SearchWithSeed[] }) => {
+  const seeds: number[] = [];
+
+  const groupOrder = Object.keys(result)
+    .map((x) => parseInt(x))
+    .sort((a, b) => a - b)
+    .reverse();
+
+  for (let i = 0; i < groupOrder.length; i++) {
+    if (seeds.length >= maxQueries) {
+      break;
+    }
+
+    const group = result[groupOrder[i]];
+    for (const r of group) {
+      if (seeds.length >= maxQueries) {
+        break;
+      }
+
+      seeds.push(r.seed);
+    }
+  }
+
+  return {
+    query: {
+      status: {
+        option: 'online'
+      },
+      name: window['TimelessJewels'][jewel],
+      type: 'Timeless Jewel',
+      stats: Object.keys(tradeStatNames[jewel]).map((c) => ({
+        type: 'weight',
+        value: {
+          min: 1
+        },
+        filters: seeds.map((seed, i) => ({
+          id: tradeStatNames[jewel][c],
+          disabled: false,
+          value: {
+            weight: ((window['TimelessJewelSeedRanges'][jewel].max / seeds.length) * (seeds.length - i)) / seed,
+            min: seed,
+            max: seed
+          }
+        })),
+        disabled: c != conqueror
+      }))
+    },
+    sort: {
+      price: 'asc'
+    }
+  };
+};
