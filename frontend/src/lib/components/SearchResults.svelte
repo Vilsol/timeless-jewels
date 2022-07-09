@@ -4,7 +4,7 @@
   import VirtualList from 'svelte-tiny-virtual-list';
 
   export let searchResults: SearchResults;
-  export let highlight: (newSeed: number, passives: SearchWithSeed['skills']) => void;
+  export let highlight: (newSeed: number, passives: number[]) => void;
   export let groupResults = true;
 
   const computeSize = (r: SearchWithSeed) => {

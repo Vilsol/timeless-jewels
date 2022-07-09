@@ -39,6 +39,19 @@
     ? parseInt(searchParams.get('location'))
     : undefined;
 
+  $: affectedNodes = getAffectedNodes(skillTree.nodes[circledNode]).filter((n) => !n.isJewelSocket && !n.isMastery);
+
+  $: seedResults =
+    !seed ||
+    !selectedJewel ||
+    !selectedConqueror ||
+    window['TimelessJewelConquerors'][selectedJewel.value].indexOf(selectedConqueror.value) < 0
+      ? []
+      : affectedNodes.map((n) => ({
+          node: n.skill,
+          result: Calculate(TreeToPassive[n.skill], seed, selectedJewel.value, selectedConqueror.value)
+        }));
+
   let disabled = new Set();
   const clickNode = (node: Node) => {
     if (node.isJewelSocket) {
@@ -137,19 +150,14 @@
     searching = true;
     searchResults = undefined;
 
-    const affectedNodes = getAffectedNodes(skillTree.nodes[circledNode])
-      .filter((n) => {
-        return !n.isJewelSocket && !n.isMastery;
-      })
-      .filter((n) => {
-        return !disabled.has(n.skill);
-      })
-      .map((n) => window['TreeToPassive'][n.skill]);
-
     const query: ReverseSearchConfig = {
       jewel: selectedJewel.value,
       conqueror: selectedConqueror.value,
-      nodes: affectedNodes,
+      nodes: affectedNodes
+        .filter((n) => {
+          return !disabled.has(n.skill);
+        })
+        .map((n) => window['TreeToPassive'][n.skill]),
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
@@ -167,9 +175,9 @@
   };
 
   let highlighted: number[] = [];
-  const highlight = (newSeed: number, passives: SearchWithSeed['skills']) => {
+  const highlight = (newSeed: number, passives: number[]) => {
     seed = newSeed;
-    highlighted = passives.map((s) => s.passive);
+    highlighted = passives;
     updateUrl();
   };
 
@@ -180,7 +188,7 @@
   };
 
   const selectAllNotables = () => {
-    getAffectedNodes(skillTree.nodes[circledNode]).forEach((n) => {
+    affectedNodes.forEach((n) => {
       if (n.isNotable) {
         disabled.delete(n.skill);
       }
@@ -190,7 +198,7 @@
   };
 
   const selectAllPassives = () => {
-    getAffectedNodes(skillTree.nodes[circledNode]).forEach((n) => {
+    affectedNodes.forEach((n) => {
       if (!n.isNotable) {
         disabled.delete(n.skill);
       }
@@ -200,7 +208,7 @@
   };
 
   const deselectAll = () => {
-    getAffectedNodes(skillTree.nodes[circledNode])
+    affectedNodes
       .filter((n) => {
         return !n.isJewelSocket && !n.isMastery;
       })
@@ -220,6 +228,43 @@
 
   let groupResults = true;
   let collapsed = false;
+
+  type CombinedResult = {
+    stat: string;
+    passives: number[];
+  };
+
+  const combineResults = (results: unknown[]): CombinedResult[] => {
+    const mappedStats: { [key: number]: number[] } = {};
+    results.forEach((r) => {
+      if ('alternatePassiveSkill' in r.result) {
+        const alt = GetAlternatePassiveSkillByIndex(r.result['alternatePassiveSkill']);
+        if ('statsKeys' in alt) {
+          alt['statsKeys'].forEach((key) => {
+            mappedStats[key] = [...(mappedStats[key] || []), r.node];
+          });
+        }
+      }
+
+      if ('alternatePassiveAdditionInformations' in r.result) {
+        r.result['alternatePassiveAdditionInformations'].forEach((info) => {
+          const addition = GetAlternatePassiveAdditionByIndex(info['alternatePassiveSkillAddition']);
+          if ('statsKeys' in addition) {
+            addition['statsKeys'].forEach((key) => {
+              mappedStats[key] = [...(mappedStats[key] || []), r.node];
+            });
+          }
+        });
+      }
+    });
+
+    return Object.keys(mappedStats)
+      .map((statID) => ({
+        stat: translateStat(parseInt(statID)),
+        passives: mappedStats[statID]
+      }))
+      .sort((a, b) => b.passives.length - a.passives.length);
+  };
 </script>
 
 <SkillTree
@@ -301,6 +346,17 @@
                   </div>
                 {/if}
               </div>
+
+              {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                <ul class="mt-4 overflow-auto">
+                  {#each combineResults(seedResults) as r}
+                    <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                      <span class="font-bold">({r.passives.length})</span>
+                      {r.stat}
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
             {:else if mode === 'stats'}
               <div class="mt-4">
                 <h3 class="mb-2">Add Stat</h3>
@@ -364,7 +420,7 @@
                     <button
                       class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 flex-grow"
                       on:click={deselectAll}
-                      disabled={searching}
+                      disabled={searching || disabled.size >= affectedNodes.length}
                     >
                       Deselect
                     </button>

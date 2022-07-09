@@ -2,13 +2,17 @@
   import type { SearchWithSeed } from '../skill_tree';
   import { skillTree, translateStat } from '../skill_tree';
 
-  export let highlight: (newSeed: number, passives: SearchWithSeed['skills']) => void;
+  export let highlight: (newSeed: number, passives: number[]) => void;
   export let set: SearchWithSeed;
 </script>
 
 <div
   class="my-2 border-white/50 border p-2 flex flex-col cursor-pointer"
-  on:click={() => highlight(set.seed, set.skills)}
+  on:click={() =>
+    highlight(
+      set.seed,
+      set.skills.map((s) => s.passive)
+    )}
 >
   <div class="font-bold text-orange-500 text-center">
     Seed {set.seed} (weight {set.weight})
