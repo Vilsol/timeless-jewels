@@ -39,7 +39,7 @@
     ? parseInt(searchParams.get('location'))
     : undefined;
 
-  $: affectedNodes = getAffectedNodes(skillTree.nodes[circledNode]).filter((n) => !n.isJewelSocket && !n.isMastery);
+  $: affectedNodes = circledNode ? getAffectedNodes(skillTree.nodes[circledNode]).filter((n) => !n.isJewelSocket && !n.isMastery) : [];
 
   $: seedResults =
     !seed ||
