@@ -6,6 +6,8 @@
   export let searchResults: SearchResults;
   export let highlight: (newSeed: number, passives: number[]) => void;
   export let groupResults = true;
+  export let jewel: number;
+  export let conqueror: string;
 
   const computeSize = (r: SearchWithSeed) => {
     return 8 + 48 + r.skills.reduce((o, s) => o + 32 + Object.keys(s.stats).length * 24, 0);
@@ -41,7 +43,7 @@
             itemSize={searchResults.grouped[k].map(computeSize)}
           >
             <div slot="item" let:index let:style {style}>
-              <SearchResult set={searchResults.grouped[k][index]} {highlight} />
+              <SearchResult set={searchResults.grouped[k][index]} {highlight} {jewel} {conqueror} />
             </div>
           </VirtualList>
         </div>
@@ -57,7 +59,7 @@
       itemSize={searchResults.raw.map(computeSize)}
     >
       <div slot="item" let:index let:style {style}>
-        <SearchResult set={searchResults.raw[index]} {highlight} />
+        <SearchResult set={searchResults.raw[index]} {highlight} {jewel} {conqueror} />
       </div>
     </VirtualList>
   </div>

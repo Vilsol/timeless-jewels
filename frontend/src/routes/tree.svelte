@@ -4,10 +4,10 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import type { Node } from '../lib/types';
-  import { constructQuery, getAffectedNodes, skillTree, translateStat } from '../lib/skill_tree';
+  import { getAffectedNodes, skillTree, translateStat, openTrade } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
   import { proxy } from 'comlink';
-  import type { SearchWithSeed, ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
+  import type { ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
   import SearchResults from '../lib/components/SearchResults.svelte';
 
   const searchParams = $page.url.searchParams;
@@ -39,7 +39,9 @@
     ? parseInt(searchParams.get('location'))
     : undefined;
 
-  $: affectedNodes = circledNode ? getAffectedNodes(skillTree.nodes[circledNode]).filter((n) => !n.isJewelSocket && !n.isMastery) : [];
+  $: affectedNodes = circledNode
+    ? getAffectedNodes(skillTree.nodes[circledNode]).filter((n) => !n.isJewelSocket && !n.isMastery)
+    : [];
 
   $: seedResults =
     !seed ||
@@ -142,11 +144,15 @@
   let searching = false;
   let currentSeed = 0;
   let searchResults: SearchResults;
+  let searchJewel = 1;
+  let searchConqueror = '';
   const search = () => {
     if (!circledNode) {
       return;
     }
 
+    searchJewel = selectedJewel.value;
+    searchConqueror = selectedConqueror.value;
     searching = true;
     searchResults = undefined;
 
@@ -217,15 +223,6 @@
     disabled = disabled;
   };
 
-  const trade = () => {
-    const url = new URL('https://www.pathofexile.com/trade/search/Sentinel');
-    url.searchParams.set(
-      'q',
-      JSON.stringify(constructQuery(selectedJewel.value, selectedConqueror.value, searchResults.raw))
-    );
-    window.open(url, '_blank');
-  };
-
   let groupResults = true;
   let collapsed = false;
 
@@ -289,7 +286,7 @@
             {#if collapsed}
               <button
                 class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
-                on:click={trade}
+                on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
                 disabled={!searchResults}
               >
                 Trade
@@ -450,7 +447,7 @@
       {/if}
 
       {#if searchResults && collapsed}
-        <SearchResults {searchResults} {groupResults} {highlight} />
+        <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} />
       {/if}
     </div>
   </div>

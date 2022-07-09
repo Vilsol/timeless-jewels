@@ -387,6 +387,49 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
     seeds.push(r.seed);
   }
 
+  let stats;
+  if (seeds.length * 4 < maxQueries) {
+    stats = [
+      {
+        type: 'count',
+        value: {
+          min: 1
+        },
+        filters: Object.keys(tradeStatNames[jewel])
+          .map((c) => {
+            return seeds.map((seed) => {
+              return {
+                id: tradeStatNames[jewel][c],
+                disabled: false,
+                value: {
+                  min: seed,
+                  max: seed
+                }
+              };
+            });
+          })
+          .flat(),
+        disabled: false
+      }
+    ];
+  } else {
+    stats = Object.keys(tradeStatNames[jewel]).map((c) => ({
+      type: 'count',
+      value: {
+        min: 1
+      },
+      filters: seeds.map((seed) => ({
+        id: tradeStatNames[jewel][c],
+        disabled: false,
+        value: {
+          min: seed,
+          max: seed
+        }
+      })),
+      disabled: c != conqueror
+    }));
+  }
+
   return {
     query: {
       status: {
@@ -394,25 +437,16 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
       },
       name: window['TimelessJewels'][jewel],
       type: 'Timeless Jewel',
-      stats: Object.keys(tradeStatNames[jewel]).map((c) => ({
-        type: 'weight',
-        value: {
-          min: 1
-        },
-        filters: seeds.map((seed, i) => ({
-          id: tradeStatNames[jewel][c],
-          disabled: false,
-          value: {
-            weight: ((window['TimelessJewelSeedRanges'][jewel].max / seeds.length) * (seeds.length - i)) / seed,
-            min: seed,
-            max: seed
-          }
-        })),
-        disabled: c != conqueror
-      }))
+      stats
     },
     sort: {
       price: 'asc'
     }
   };
+};
+
+export const openTrade = (jewel: number, conqueror: string, results: SearchWithSeed[]) => {
+  const url = new URL('https://www.pathofexile.com/trade/search/Sentinel');
+  url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
+  window.open(url, '_blank');
 };
