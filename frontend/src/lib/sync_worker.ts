@@ -1,7 +1,7 @@
 import { expose } from 'comlink';
 import '../wasm_exec.js';
 import { loadSkillTree, passiveToTree } from './skill_tree';
-import type { SearchWithSeed, ReverseSearchConfig } from './skill_tree';
+import type { SearchWithSeed, ReverseSearchConfig, SearchResults } from './skill_tree';
 
 const obj = {
   boot(data: ArrayBuffer) {
@@ -16,7 +16,7 @@ const obj = {
       loadSkillTree(SkillTree, PassiveTranslations, TreeToPassive);
     });
   },
-  search(args: ReverseSearchConfig, callback: (seed: number) => void) {
+  search(args: ReverseSearchConfig, callback: (seed: number) => void): SearchResults {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const searchResult = ReverseSearch(
@@ -60,8 +60,12 @@ const obj = {
     Object.keys(searchGrouped).forEach((len) => {
       const nLen = parseInt(len);
       searchGrouped[nLen] = searchGrouped[nLen].filter((g) => {
+        if (g.weight < args.minTotalWeight) {
+          return false;
+        }
+
         for (const stat of args.stats) {
-          if (g.statCounts[stat.id] === undefined || g.statCounts[stat.id] < stat.min) {
+          if ((g.statCounts[stat.id] === undefined && stat.min > 0) || g.statCounts[stat.id] < stat.min) {
             return false;
           }
         }
@@ -78,7 +82,13 @@ const obj = {
       }
     });
 
-    return searchGrouped;
+    return {
+      grouped: searchGrouped,
+      raw: Object.keys(searchGrouped)
+        .map((x) => searchGrouped[parseInt(x)])
+        .flat()
+        .sort((a, b) => b.weight - a.weight)
+    };
   }
 };
 

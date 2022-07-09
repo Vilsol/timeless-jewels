@@ -300,6 +300,7 @@ export interface ReverseSearchConfig {
   conqueror: string;
   nodes: number[];
   stats: StatConfig[];
+  minTotalWeight: number;
 }
 
 export interface StatConfig {
@@ -316,6 +317,11 @@ export interface SearchWithSeed {
     passive: number;
     stats: { [key: string]: number };
   }[];
+}
+
+export interface SearchResults {
+  grouped: { [key: number]: SearchWithSeed[] };
+  raw: SearchWithSeed[];
 }
 
 export const translateStat = (id: number, roll?: number | undefined): string => {
@@ -370,27 +376,15 @@ const tradeStatNames: { [key: number]: { [key: string]: string } } = {
 
 // TODO Figure out what the actual limit is
 const maxQueries = 28;
-export const constructQuery = (jewel: number, conqueror: string, result: { [key: number]: SearchWithSeed[] }) => {
+export const constructQuery = (jewel: number, conqueror: string, result: SearchWithSeed[]) => {
   const seeds: number[] = [];
 
-  const groupOrder = Object.keys(result)
-    .map((x) => parseInt(x))
-    .sort((a, b) => a - b)
-    .reverse();
-
-  for (let i = 0; i < groupOrder.length; i++) {
+  for (const r of result) {
     if (seeds.length >= maxQueries) {
       break;
     }
 
-    const group = result[groupOrder[i]];
-    for (const r of group) {
-      if (seeds.length >= maxQueries) {
-        break;
-      }
-
-      seeds.push(r.seed);
-    }
+    seeds.push(r.seed);
   }
 
   return {
