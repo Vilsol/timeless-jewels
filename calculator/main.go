@@ -1,6 +1,6 @@
 package calculator
 
-import "timeless-jewels/data"
+import "github.com/Vilsol/timeless-jewels/data"
 
 type UpdateFunc func(seed uint32)
 

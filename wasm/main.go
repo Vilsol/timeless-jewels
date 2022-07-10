@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"syscall/js"
 
-	"timeless-jewels/calculator"
-	"timeless-jewels/data"
+	"github.com/Vilsol/timeless-jewels/calculator"
+	"github.com/Vilsol/timeless-jewels/data"
 )
 
 func main() {

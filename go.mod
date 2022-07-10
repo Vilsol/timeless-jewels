@@ -1,4 +1,4 @@
-module timeless-jewels
+module github.com/Vilsol/timeless-jewels
 
 go 1.18
 

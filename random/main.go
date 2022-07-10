@@ -1,6 +1,6 @@
 package random
 
-import "timeless-jewels/data"
+import "github.com/Vilsol/timeless-jewels/data"
 
 const (
 	InitialStateConstant0 = 0x40336050

@@ -1,8 +1,8 @@
 package calculator
 
 import (
-	"timeless-jewels/data"
-	"timeless-jewels/random"
+	"github.com/Vilsol/timeless-jewels/data"
+	"github.com/Vilsol/timeless-jewels/random"
 )
 
 type AlternateTreeManager struct {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/MarvinJWendt/testza"
 
-	"timeless-jewels/calculator"
-	"timeless-jewels/data"
+	"github.com/Vilsol/timeless-jewels/calculator"
+	"github.com/Vilsol/timeless-jewels/data"
 )
 
 func TestGloriousVanity(t *testing.T) {

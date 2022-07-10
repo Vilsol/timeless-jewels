@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"os"
 
-	"timeless-jewels/calculator"
-	"timeless-jewels/data"
+	"github.com/Vilsol/timeless-jewels/calculator"
+	"github.com/Vilsol/timeless-jewels/data"
 )
 
 // Uses separate steps so finder step has the new data loaded by data package
