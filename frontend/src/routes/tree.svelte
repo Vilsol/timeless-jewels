@@ -362,6 +362,7 @@
   selectedConqueror={selectedConqueror?.value}
   {highlighted}
   {seed}
+  highlightJewels={!circledNode}
   disabled={[...disabled]}>
   <div
     class="w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen">

@@ -27,9 +27,10 @@
   export let seed: number;
   export let highlighted: number[] = [];
   export let disabled: number[] = [];
+  export let highlightJewels = false;
 
   const slowTime = derived(t, (values) => {
-    if (!highlighted || !highlighted.length) {
+    if ((!highlighted || !highlighted.length) && !highlightJewels) {
       return 0;
     }
 
@@ -310,7 +311,7 @@
         }
       }
 
-      if (highlighted.indexOf(node.skill) >= 0) {
+      if (highlighted.indexOf(node.skill) >= 0 || (highlightJewels && node.isJewelSocket)) {
         context.strokeStyle = `hsl(${$slowTime}, 100%, 50%)`;
         context.lineWidth = 3;
         context.beginPath();
