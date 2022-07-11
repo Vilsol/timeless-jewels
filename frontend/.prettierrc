@@ -1,11 +1,13 @@
 {
-  "useTabs": false,
-  "singleQuote": true,
-  "trailingComma": "none",
+  "bracketSameLine": true,
+  "bracketSpacing": true,
+  "endOfLine": "lf",
   "printWidth": 120,
-  "svelteStrictMode": false,
+  "quoteProps": "as-needed",
+  "singleQuote": true,
   "svelteAllowShorthand": true,
-  "svelteBracketNewLine": false,
   "svelteIndentScriptAndStyle": true,
-  "jsxBracketSameLine": true
+  "svelteStrictMode": false,
+  "trailingComma": "none",
+  "useTabs": false
 }

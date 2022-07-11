@@ -9,6 +9,7 @@
   import { proxy } from 'comlink';
   import type { ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
   import SearchResults from '../lib/components/SearchResults.svelte';
+  import { statValues } from '../lib/values';
 
   const searchParams = $page.url.searchParams;
 
@@ -223,15 +224,49 @@
     disabled = disabled;
   };
 
-  let groupResults = true;
+  let groupResults =
+    localStorage.getItem('groupResults') === null ? true : localStorage.getItem('groupResults') === 'true';
+  $: localStorage.setItem('groupResults', groupResults ? 'true' : 'false');
+
   let collapsed = false;
 
   type CombinedResult = {
+    id: string;
+    rawStat: string;
     stat: string;
     passives: number[];
   };
 
-  const combineResults = (results: unknown[]): CombinedResult[] => {
+  export const colorKeys = {
+    physical: '#c79d93',
+    cast: '#b3f8fe',
+    fire: '#ff9a77',
+    cold: '#93d8ff',
+    lightning: '#f8cb76',
+    attack: '#da814d',
+    life: '#c96e6e',
+    chaos: '#d8a7d3',
+    unique: '#af6025',
+    critical: '#b2a7d6'
+  };
+
+  const colorMessage = (message: string): string => {
+    Object.keys(colorKeys).forEach((key) => {
+      const value = colorKeys[key];
+      message = message.replace(
+        new RegExp(`(${key}(?:$|\\s))|((?:^|\\s)${key})`, 'gi'),
+        `<span style='color: ${value}; font-weight: bold'>$1$2</span>`
+      );
+    });
+
+    return message;
+  };
+
+  const combineResults = (
+    results: unknown[],
+    order: 'count' | 'alphabet' | 'rarity' | 'value',
+    withColors: boolean
+  ): CombinedResult[] => {
     const mappedStats: { [key: number]: number[] } = {};
     results.forEach((r) => {
       if ('alternatePassiveSkill' in r.result) {
@@ -255,13 +290,69 @@
       }
     });
 
-    return Object.keys(mappedStats)
-      .map((statID) => ({
-        stat: translateStat(parseInt(statID)),
+    const unsorted = Object.keys(mappedStats).map((statID) => {
+      const translated = translateStat(parseInt(statID));
+      return {
+        stat: withColors ? colorMessage(translated) : translated,
+        rawStat: translated,
+        id: statID,
         passives: mappedStats[statID]
-      }))
-      .sort((a, b) => b.passives.length - a.passives.length);
+      };
+    });
+
+    switch (order) {
+      case 'alphabet':
+        return unsorted.sort((a, b) =>
+          a.rawStat
+            .replace(/[#+%]/gi, '')
+            .trim()
+            .toLowerCase()
+            .localeCompare(b.rawStat.replace(/[#+%]/gi, '').trim().toLowerCase())
+        );
+      case 'count':
+        return unsorted.sort((a, b) => b.passives.length - a.passives.length);
+      case 'rarity':
+        return unsorted.sort(
+          (a, b) => allPossibleStats[selectedJewel.value][a.id] - allPossibleStats[selectedJewel.value][b.id]
+        );
+      case 'value':
+        return unsorted.sort((a, b) => {
+          const aValue = statValues[a.id] || 0;
+          const bValue = statValues[b.id] || 0;
+          if (aValue != bValue) {
+            return bValue - aValue;
+          }
+          return allPossibleStats[selectedJewel.value][a.id] - allPossibleStats[selectedJewel.value][b.id];
+        });
+    }
+
+    return unsorted;
   };
+
+  const sortResults = [
+    {
+      label: 'Count',
+      value: 'count'
+    },
+    {
+      label: 'Alphabetical',
+      value: 'alphabet'
+    },
+    {
+      label: 'Rarity',
+      value: 'rarity'
+    },
+    {
+      label: 'Value',
+      value: 'value'
+    }
+  ] as const;
+
+  let sortOrder = sortResults.find((r) => r.value === (localStorage.getItem('sortOrder') || 'count'));
+  $: localStorage.setItem('sortOrder', sortOrder.value);
+
+  let colored = localStorage.getItem('colored') === null ? true : localStorage.getItem('colored') === 'true';
+  $: localStorage.setItem('colored', colored ? 'true' : 'false');
 </script>
 
 <SkillTree
@@ -271,11 +362,9 @@
   selectedConqueror={selectedConqueror?.value}
   {highlighted}
   {seed}
-  disabled={[...disabled]}
->
+  disabled={[...disabled]}>
   <div
-    class="w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen"
-  >
+    class="w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen">
     <div class="p-4 max-h-screen flex flex-col">
       <div class="flex flex-row justify-between mb-2">
         <h3 class="flex-grow">
@@ -287,16 +376,14 @@
               <button
                 class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
                 on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
-                disabled={!searchResults}
-              >
+                disabled={!searchResults}>
                 Trade
               </button>
               <button
                 class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
                 class:grouped={groupResults}
                 on:click={() => (groupResults = !groupResults)}
-                disabled={!searchResults}
-              >
+                disabled={!searchResults}>
                 Grouped
               </button>
             {/if}
@@ -334,8 +421,7 @@
                   bind:value={seed}
                   on:blur={updateUrl}
                   min={window['TimelessJewelSeedRanges'][selectedJewel.value].min}
-                  max={window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                />
+                  max={window['TimelessJewelSeedRanges'][selectedJewel.value].max} />
                 {#if seed < window['TimelessJewelSeedRanges'][selectedJewel.value].min || seed > window['TimelessJewelSeedRanges'][selectedJewel.value].max}
                   <div class="mt-2">
                     Seed must be between {window['TimelessJewelSeedRanges'][selectedJewel.value].min}
@@ -345,11 +431,27 @@
               </div>
 
               {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                <ul class="mt-4 overflow-auto">
-                  {#each combineResults(seedResults) as r}
+                <div class="flex flex-row mt-4 items-end">
+                  <div class="flex-grow">
+                    <h3 class="mb-2">Sort Order</h3>
+                    <Select items={sortResults} bind:value={sortOrder} />
+                  </div>
+                  <div class="ml-2">
+                    <button
+                      class="bg-neutral-500/20 p-2 px-4 rounded"
+                      class:selected={colored}
+                      on:click={() => (colored = !colored)}>
+                      Colors
+                    </button>
+                  </div>
+                </div>
+
+                <ul class="mt-4 overflow-auto" class:rainbow={colored}>
+                  {#each combineResults(seedResults, sortOrder.value, colored) as r}
                     <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
-                      <span class="font-bold">({r.passives.length})</span>
-                      {r.stat}
+                      <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                        >({r.passives.length})</span>
+                      <span class="text-white">{@html r.stat}</span>
                     </li>
                   {/each}
                 </ul>
@@ -366,8 +468,7 @@
                       <div>
                         <button
                           class="p-2 px-4 bg-red-500/40 rounded mr-2"
-                          on:click={() => removeStat(selectedStats[s].id)}
-                        >
+                          on:click={() => removeStat(selectedStats[s].id)}>
                           -
                         </button>
                         <span>{translateStat(selectedStats[s].id)}</span>
@@ -396,29 +497,25 @@
                     <button
                       class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
                       on:click={selectAll}
-                      disabled={searching || disabled.size == 0}
-                    >
+                      disabled={searching || disabled.size == 0}>
                       Select All
                     </button>
                     <button
                       class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
                       on:click={selectAllNotables}
-                      disabled={searching || disabled.size == 0}
-                    >
+                      disabled={searching || disabled.size == 0}>
                       Notables
                     </button>
                     <button
                       class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
                       on:click={selectAllPassives}
-                      disabled={searching || disabled.size == 0}
-                    >
+                      disabled={searching || disabled.size == 0}>
                       Passives
                     </button>
                     <button
                       class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 flex-grow"
                       on:click={deselectAll}
-                      disabled={searching || disabled.size >= affectedNodes.length}
-                    >
+                      disabled={searching || disabled.size >= affectedNodes.length}>
                       Deselect
                     </button>
                   </div>
@@ -426,8 +523,7 @@
                     <button
                       class="p-2 px-3 bg-green-500/40 rounded disabled:bg-green-900/40 flex-grow"
                       on:click={() => search()}
-                      disabled={searching}
-                    >
+                      disabled={searching}>
                       {#if searching}
                         {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
                       {:else}
@@ -451,9 +547,13 @@
       {/if}
     </div>
   </div>
+
+  <div class="text-orange-500 absolute bottom-0 right-0 m-2">
+    <a href="https://github.com/Vilsol/timeless-jewels" target="_blank" rel="noopener">Source (Github)</a>
+  </div>
 </SkillTree>
 
-<style>
+<style lang="postcss">
   .selection-button {
     @apply bg-neutral-500/20 p-2 px-4 flex-grow;
   }
@@ -472,5 +572,27 @@
 
   .grouped {
     @apply bg-pink-500/40 disabled:bg-pink-900/40;
+  }
+
+  .rainbow {
+    animation: colorRotate 2s linear 0s infinite;
+  }
+
+  @keyframes colorRotate {
+    from {
+      color: hsl(0, 100%, 50%);
+    }
+    25% {
+      color: hsl(90, 100%, 50%);
+    }
+    50% {
+      color: hsl(180, 100%, 50%);
+    }
+    75% {
+      color: hsl(270, 100%, 50%);
+    }
+    100% {
+      color: hsl(359, 100%, 50%);
+    }
   }
 </style>

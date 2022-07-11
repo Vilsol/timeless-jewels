@@ -12,4 +12,9 @@ declare namespace App {
 
 declare global {
   function Calculate(passiveID: number, seed: number, jewelType: number, conqueror: string);
+
+  const TimelessJewelSeedRanges: Record<number, { min: number; max: number }>;
+  const TimelessJewels: Record<string, string>;
+  const TimelessJewelConquerors: Record<number, string[]>;
+  const TreeToPassive: Record<number, number>;
 }

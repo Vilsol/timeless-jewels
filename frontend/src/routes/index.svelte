@@ -3,7 +3,6 @@
   import { browser } from '$app/env';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import type { SkillTreeData } from '../lib/types';
   import { base } from '$app/paths';
 
   const searchParams = $page.url.searchParams;
@@ -29,16 +28,10 @@
       }
     : undefined;
 
-  const skillTree: SkillTreeData = JSON.parse(window['SkillTree']);
-
-  const passiveSkills = Object.keys(PassiveSkills)
-    .map((k) => ({
-      value: PassiveSkills[k],
-      label: k
-    }))
-    .filter((entry) => {
-      return true;
-    });
+  const passiveSkills = Object.keys(PassiveSkills).map((k) => ({
+    value: PassiveSkills[k],
+    label: k
+  }));
 
   let selectedPassiveSkill = searchParams.has('passive_skill')
     ? passiveSkills.find((j) => j.value == searchParams.get('passive_skill'))
@@ -121,8 +114,7 @@
                   class="seed"
                   on:blur={updateUrl}
                   min={TimelessJewelSeedRanges[selectedJewel.value].min}
-                  max={TimelessJewelSeedRanges[selectedJewel.value].max}
-                />
+                  max={TimelessJewelSeedRanges[selectedJewel.value].max} />
                 {#if seed < TimelessJewelSeedRanges[selectedJewel.value].min || seed > TimelessJewelSeedRanges[selectedJewel.value].max}
                   <div class="mt-2">
                     Seed must be between {TimelessJewelSeedRanges[selectedJewel.value].min} and {TimelessJewelSeedRanges[

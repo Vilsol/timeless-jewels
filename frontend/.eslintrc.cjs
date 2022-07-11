@@ -6,7 +6,8 @@ module.exports = {
   ignorePatterns: ['*.cjs'],
   overrides: [{ files: ['*.svelte'], processor: 'svelte3/svelte3' }],
   settings: {
-    'svelte3/typescript': () => require('typescript')
+    'svelte3/typescript': () => require('typescript'),
+    'svelte3/ignore-warnings': ({ code }) => code === 'missing-declaration'
   },
   parserOptions: {
     sourceType: 'module',
@@ -16,5 +17,9 @@ module.exports = {
     browser: true,
     es2017: true,
     node: true
+  },
+  rules: {
+    'no-undef': 'off',
+    'missing-declaration': 'off'
   }
 };

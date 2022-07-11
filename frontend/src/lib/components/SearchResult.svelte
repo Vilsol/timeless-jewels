@@ -14,8 +14,7 @@
     highlight(
       set.seed,
       set.skills.map((s) => s.passive)
-    )}
->
+    )}>
   <div class="flex flex-row justify-between">
     <!-- Padding -->
     <button class="px-3 invisible">Trade</button>
