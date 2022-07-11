@@ -259,7 +259,6 @@
     withColors: boolean,
     only: 'notables' | 'passives' | 'all'
   ): CombinedResult[] => {
-    console.log(results);
     const mappedStats: { [key: number]: number[] } = {};
     results.forEach((r) => {
       if (skillTree.nodes[r.node].isKeystone) {
@@ -368,7 +367,53 @@
 
   let split = localStorage.getItem('split') === null ? true : localStorage.getItem('split') === 'true';
   $: localStorage.setItem('split', split ? 'true' : 'false');
+
+  const onPaste = (event: ClipboardEvent) => {
+    if (event.type !== 'paste') {
+      return;
+    }
+
+    const paste = (event.clipboardData || window['clipboardData']).getData('text');
+    const lines = paste.split('\n');
+
+    if (lines.length < 14) {
+      return;
+    }
+
+    const jewel = jewels.find((j) => j.label === lines[2]);
+    if (!jewel) {
+      return;
+    }
+
+    let newSeed: number | undefined;
+    let conqueror: string | undefined;
+    for (let i = 10; i < lines.length; i++) {
+      conqueror = window['TimelessJewelConquerors'][jewel.value].find((k) => lines[i].indexOf(k) >= 0);
+      if (conqueror) {
+        const matches = /(\d+)/.exec(lines[i]);
+        if (matches.length === 0) {
+          continue;
+        }
+
+        newSeed = parseInt(matches[1]);
+        break;
+      }
+    }
+
+    if (!conqueror || !newSeed) {
+      return;
+    }
+
+    collapsed = false;
+    mode = 'seed';
+    seed = newSeed;
+    selectedJewel = jewel;
+    selectedConqueror = { label: conqueror, value: conqueror };
+    updateUrl();
+  };
 </script>
+
+<svelte:window on:paste={onPaste} />
 
 <SkillTree
   {clickNode}
