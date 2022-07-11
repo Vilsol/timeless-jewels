@@ -5,6 +5,11 @@ on:
     tags:
       - v*
 
+env:
+  NODE_VERSION: "18"
+  PNPM_VERSION: "7.5.0"
+  GO_VERSION: "1.18"
+
 jobs:
   release:
     name: Release
@@ -13,11 +18,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: ${{ env.GO_VERSION }}
 
       - uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Check out
         uses: actions/checkout@v2
@@ -25,7 +30,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2.2.1
         with:
-          version: 7
+          version: ${{ env.PNPM_VERSION }}
           run_install: |
             - cwd: frontend
 

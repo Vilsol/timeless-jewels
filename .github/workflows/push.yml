@@ -4,25 +4,53 @@ permissions: read-all
 
 on: [push, pull_request]
 
+env:
+  NODE_VERSION: "18"
+  PNPM_VERSION: "7.5.0"
+  GO_VERSION: "1.18"
+
 jobs:
-  lint:
-    name: Lint
+  lint-backend:
+    name: Lint Backend
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: golangci-lint
+      - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
           skip-pkg-cache: true
           skip-build-cache: true
           args: --timeout 5m
+
+  lint-frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: |
+            - cwd: frontend
+
+      - name: Lint
+        working-directory: ./frontend
+        run: pnpm run lint
 
   test:
     name: Test
@@ -31,7 +59,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Check out code
         uses: actions/checkout@v2
