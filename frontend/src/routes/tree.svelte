@@ -55,21 +55,19 @@
           result: Calculate(TreeToPassive[n.skill], seed, selectedJewel.value, selectedConqueror.value)
         }));
 
-  let disabled = new Set();
-  const clickNode = (node: Node) => {
-    if (node.isJewelSocket) {
-      circledNode = node.skill;
-      updateUrl();
-    } else if (!node.isMastery) {
-      if (disabled.has(node.skill)) {
-        disabled.delete(node.skill);
-      } else {
-        disabled.add(node.skill);
-      }
-      // Re-assign to update svelte
-      disabled = disabled;
-    }
-  };
+  let selectedStats: Record<number, StatConfig> = {};
+  if (searchParams.has('stat')) {
+    searchParams.getAll('stat').forEach((s) => {
+      const nStat = parseInt(s);
+      selectedStats[nStat] = {
+        weight: 1,
+        min: 0,
+        id: nStat
+      };
+    });
+  }
+
+  let mode = searchParams.has('mode') ? searchParams.get('mode') : '';
 
   const updateUrl = () => {
     const url = new URL(window.location.origin + window.location.pathname);
@@ -86,25 +84,28 @@
     goto(url.toString());
   };
 
-  let mode = searchParams.has('mode') ? searchParams.get('mode') : '';
   const setMode = (newMode: string) => {
     mode = newMode;
     updateUrl();
   };
 
-  let allPossibleStats: { [key: string]: { [key: string]: number } } = JSON.parse(window['PossibleStats']);
+  let disabled = new Set();
+  const clickNode = (node: Node) => {
+    if (node.isJewelSocket) {
+      circledNode = node.skill;
+      updateUrl();
+    } else if (!node.isMastery) {
+      if (disabled.has(node.skill)) {
+        disabled.delete(node.skill);
+      } else {
+        disabled.add(node.skill);
+      }
+      // Re-assign to update svelte
+      disabled = disabled;
+    }
+  };
 
-  let selectedStats: Record<number, StatConfig> = {};
-  if (searchParams.has('stat')) {
-    searchParams.getAll('stat').map((s) => {
-      const nStat = parseInt(s);
-      selectedStats[nStat] = {
-        weight: 1,
-        min: 0,
-        id: nStat
-      };
-    });
-  }
+  const allPossibleStats: { [key: string]: { [key: string]: number } } = JSON.parse(window['PossibleStats']);
 
   $: availableStats = !selectedJewel ? [] : Object.keys(allPossibleStats[selectedJewel.value]);
   $: statItems = availableStats
@@ -141,6 +142,7 @@
     updateUrl();
   };
 
+  let collapsed = false;
   let minTotalWeight = 0;
   let searching = false;
   let currentSeed = 0;
@@ -160,11 +162,7 @@
     const query: ReverseSearchConfig = {
       jewel: selectedJewel.value,
       conqueror: selectedConqueror.value,
-      nodes: affectedNodes
-        .filter((n) => {
-          return !disabled.has(n.skill);
-        })
-        .map((n) => window['TreeToPassive'][n.skill]),
+      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => window['TreeToPassive'][n.skill]),
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
@@ -215,11 +213,7 @@
   };
 
   const deselectAll = () => {
-    affectedNodes
-      .filter((n) => {
-        return !n.isJewelSocket && !n.isMastery;
-      })
-      .forEach((n) => disabled.add(n.skill));
+    affectedNodes.filter((n) => !n.isJewelSocket && !n.isMastery).forEach((n) => disabled.add(n.skill));
     // Re-assign to update svelte
     disabled = disabled;
   };
@@ -227,8 +221,6 @@
   let groupResults =
     localStorage.getItem('groupResults') === null ? true : localStorage.getItem('groupResults') === 'true';
   $: localStorage.setItem('groupResults', groupResults ? 'true' : 'false');
-
-  let collapsed = false;
 
   type CombinedResult = {
     id: string;
@@ -264,11 +256,26 @@
 
   const combineResults = (
     results: unknown[],
-    order: 'count' | 'alphabet' | 'rarity' | 'value',
-    withColors: boolean
+    withColors: boolean,
+    only: 'notables' | 'passives' | 'all'
   ): CombinedResult[] => {
+    console.log(results);
     const mappedStats: { [key: number]: number[] } = {};
     results.forEach((r) => {
+      if (skillTree.nodes[r.node].isKeystone) {
+        return;
+      }
+
+      if (only !== 'all') {
+        if (only === 'notables' && !skillTree.nodes[r.node].isNotable) {
+          return;
+        }
+
+        if (only === 'passives' && skillTree.nodes[r.node].isNotable) {
+          return;
+        }
+      }
+
       if ('alternatePassiveSkill' in r.result) {
         const alt = GetAlternatePassiveSkillByIndex(r.result['alternatePassiveSkill']);
         if ('statsKeys' in alt) {
@@ -290,7 +297,7 @@
       }
     });
 
-    const unsorted = Object.keys(mappedStats).map((statID) => {
+    return Object.keys(mappedStats).map((statID) => {
       const translated = translateStat(parseInt(statID));
       return {
         stat: withColors ? colorMessage(translated) : translated,
@@ -299,10 +306,15 @@
         passives: mappedStats[statID]
       };
     });
+  };
 
+  const sortCombined = (
+    results: CombinedResult[],
+    order: 'count' | 'alphabet' | 'rarity' | 'value'
+  ): CombinedResult[] => {
     switch (order) {
       case 'alphabet':
-        return unsorted.sort((a, b) =>
+        return results.sort((a, b) =>
           a.rawStat
             .replace(/[#+%]/gi, '')
             .trim()
@@ -310,13 +322,13 @@
             .localeCompare(b.rawStat.replace(/[#+%]/gi, '').trim().toLowerCase())
         );
       case 'count':
-        return unsorted.sort((a, b) => b.passives.length - a.passives.length);
+        return results.sort((a, b) => b.passives.length - a.passives.length);
       case 'rarity':
-        return unsorted.sort(
+        return results.sort(
           (a, b) => allPossibleStats[selectedJewel.value][a.id] - allPossibleStats[selectedJewel.value][b.id]
         );
       case 'value':
-        return unsorted.sort((a, b) => {
+        return results.sort((a, b) => {
           const aValue = statValues[a.id] || 0;
           const bValue = statValues[b.id] || 0;
           if (aValue != bValue) {
@@ -326,7 +338,7 @@
         });
     }
 
-    return unsorted;
+    return results;
   };
 
   const sortResults = [
@@ -353,6 +365,9 @@
 
   let colored = localStorage.getItem('colored') === null ? true : localStorage.getItem('colored') === 'true';
   $: localStorage.setItem('colored', colored ? 'true' : 'false');
+
+  let split = localStorage.getItem('split') === null ? true : localStorage.getItem('split') === 'true';
+  $: localStorage.setItem('split', split ? 'true' : 'false');
 </script>
 
 <SkillTree
@@ -445,17 +460,51 @@
                       Colors
                     </button>
                   </div>
+                  <div class="ml-2">
+                    <button
+                      class="bg-neutral-500/20 p-2 px-4 rounded"
+                      class:selected={split}
+                      on:click={() => (split = !split)}>
+                      Split
+                    </button>
+                  </div>
                 </div>
 
-                <ul class="mt-4 overflow-auto" class:rainbow={colored}>
-                  {#each combineResults(seedResults, sortOrder.value, colored) as r}
-                    <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
-                      <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
-                        >({r.passives.length})</span>
-                      <span class="text-white">{@html r.stat}</span>
-                    </li>
-                  {/each}
-                </ul>
+                {#if !split}
+                  <ul class="mt-4 overflow-auto" class:rainbow={colored}>
+                    {#each sortCombined(combineResults(seedResults, colored, 'all'), sortOrder.value) as r}
+                      <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                        <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                          >({r.passives.length})</span>
+                        <span class="text-white">{@html r.stat}</span>
+                      </li>
+                    {/each}
+                  </ul>
+                {:else}
+                  <div class="overflow-auto mt-4">
+                    <h3>Notables</h3>
+                    <ul class="mt-1" class:rainbow={colored}>
+                      {#each sortCombined(combineResults(seedResults, colored, 'notables'), sortOrder.value) as r}
+                        <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                          <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                            >({r.passives.length})</span>
+                          <span class="text-white">{@html r.stat}</span>
+                        </li>
+                      {/each}
+                    </ul>
+
+                    <h3 class="mt-2">Smalls</h3>
+                    <ul class="mt-1" class:rainbow={colored}>
+                      {#each sortCombined(combineResults(seedResults, colored, 'passives'), sortOrder.value) as r}
+                        <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                          <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                            >({r.passives.length})</span>
+                          <span class="text-white">{@html r.stat}</span>
+                        </li>
+                      {/each}
+                    </ul>
+                  </div>
+                {/if}
               {/if}
             {:else if mode === 'stats'}
               <div class="mt-4">

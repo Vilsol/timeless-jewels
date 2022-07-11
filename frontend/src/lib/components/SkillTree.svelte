@@ -395,7 +395,7 @@
       context.font = titleFont;
       const textMetrics = context.measureText(nodeName);
 
-      const width = Math.max(textMetrics.width + 50, 600);
+      const maxWidth = Math.max(textMetrics.width + 50, 600);
 
       context.font = statsFont;
 
@@ -420,7 +420,7 @@
               offset += 10;
             }
 
-            const lines = wrapText(line, context, width - padding);
+            const lines = wrapText(line, context, maxWidth - padding);
             lines.forEach((l) => {
               allLines.push({
                 text: l,
@@ -444,15 +444,15 @@
       const titleHeight = 55;
 
       context.fillStyle = 'rgba(75,63,24,0.9)';
-      context.fillRect(mousePos.x, mousePos.y, width, titleHeight);
+      context.fillRect(mousePos.x, mousePos.y, maxWidth, titleHeight);
 
       context.fillStyle = '#ffffff';
       context.font = titleFont;
       context.textAlign = 'center';
-      context.fillText(nodeName, mousePos.x + width / 2, mousePos.y + 35);
+      context.fillText(nodeName, mousePos.x + maxWidth / 2, mousePos.y + 35);
 
       context.fillStyle = 'rgba(0,0,0,0.8)';
-      context.fillRect(mousePos.x, mousePos.y + titleHeight, width, offset - titleHeight);
+      context.fillRect(mousePos.x, mousePos.y + titleHeight, maxWidth, offset - titleHeight);
 
       context.font = statsFont;
       context.textAlign = 'left';

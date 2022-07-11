@@ -9,9 +9,8 @@
   export let jewel: number;
   export let conqueror: string;
 
-  const computeSize = (r: SearchWithSeed) => {
-    return 8 + 48 + r.skills.reduce((o, s) => o + 32 + Object.keys(s.stats).length * 24, 0);
-  };
+  const computeSize = (r: SearchWithSeed) =>
+    8 + 48 + r.skills.reduce((o, s) => o + 32 + Object.keys(s.stats).length * 24, 0);
 
   let expandedGroup = '';
 </script>

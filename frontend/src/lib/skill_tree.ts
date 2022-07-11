@@ -140,12 +140,10 @@ export type Point = {
   y: number;
 };
 
-export const toCanvasCoords = (x: number, y: number, offsetX: number, offsetY: number, scaling: number): Point => {
-  return {
-    x: (Math.abs(skillTree.min_x) + x + offsetX) / scaling,
-    y: (Math.abs(skillTree.min_y) + y + offsetY) / scaling
-  };
-};
+export const toCanvasCoords = (x: number, y: number, offsetX: number, offsetY: number, scaling: number): Point => ({
+  x: (Math.abs(skillTree.min_x) + x + offsetX) / scaling,
+  y: (Math.abs(skillTree.min_y) + y + offsetY) / scaling
+});
 
 export const rotateAroundPoint = (center: Point, target: Point, angle: number): Point => {
   const radians = (Math.PI / 180) * angle;
@@ -195,9 +193,8 @@ export const calculateNodePos = (node: Node, offsetX: number, offsetY: number, s
   return rotateAroundPoint(targetGroupPos, targetNodePos, targetAngle);
 };
 
-export const distance = (p1: Point, p2: Point): number => {
-  return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-};
+export const distance = (p1: Point, p2: Point): number =>
+  Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 
 export const formatStats = (translation: Translation, stat: number): string | undefined => {
   let selectedTranslation = -1;
@@ -295,18 +292,18 @@ export const getStat = (id: number | string): Stat => {
   return statCache[nId];
 };
 
+export interface StatConfig {
+  min: number;
+  id: number;
+  weight: number;
+}
+
 export interface ReverseSearchConfig {
   jewel: number;
   conqueror: string;
   nodes: number[];
   stats: StatConfig[];
   minTotalWeight: number;
-}
-
-export interface StatConfig {
-  min: number;
-  id: number;
-  weight: number;
 }
 
 export interface SearchWithSeed {
@@ -396,18 +393,16 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
           min: 1
         },
         filters: Object.keys(tradeStatNames[jewel])
-          .map((c) => {
-            return seeds.map((seed) => {
-              return {
-                id: tradeStatNames[jewel][c],
-                disabled: false,
-                value: {
-                  min: seed,
-                  max: seed
-                }
-              };
-            });
-          })
+          .map((c) =>
+            seeds.map((seed) => ({
+              id: tradeStatNames[jewel][c],
+              disabled: false,
+              value: {
+                min: seed,
+                max: seed
+              }
+            }))
+          )
           .flat(),
         disabled: false
       }

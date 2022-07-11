@@ -76,9 +76,7 @@ const obj = {
       if (Object.keys(searchGrouped[nLen]).length == 0) {
         delete searchGrouped[nLen];
       } else {
-        searchGrouped[nLen] = searchGrouped[nLen].sort((a, b) => {
-          return b.weight - a.weight;
-        });
+        searchGrouped[nLen] = searchGrouped[nLen].sort((a, b) => b.weight - a.weight);
       }
     });
 

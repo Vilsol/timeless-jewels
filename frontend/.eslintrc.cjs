@@ -20,6 +20,25 @@ module.exports = {
   },
   rules: {
     'no-undef': 'off',
-    'missing-declaration': 'off'
+    'array-callback-return': 'error',
+    'no-constant-binary-expression': 'error',
+    'no-self-compare': 'error',
+    'no-template-curly-in-string': 'error',
+    'no-unmodified-loop-condition': 'error',
+    'no-unreachable-loop': 'error',
+    'arrow-body-style': ['error', 'as-needed'],
+    'block-scoped-var': 'error',
+    curly: ['error', 'all'],
+    'no-eval': 'error',
+    'no-implied-eval': 'error',
+    'no-var': 'error',
+    'one-var': ['error', 'never'],
+    'prefer-arrow-callback': 'error',
+    'prefer-const': 'error',
+    yoda: 'error',
+    'array-bracket-newline': ['error', { multiline: true }],
+    'brace-style': 'error',
+    'no-shadow': 'error',
+    'no-use-before-define': 'error'
   }
 };
