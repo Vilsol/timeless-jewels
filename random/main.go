@@ -1,35 +1,40 @@
 package random
 
-import "github.com/Vilsol/timeless-jewels/data"
+import (
+	"github.com/Vilsol/timeless-jewels/data"
+)
 
 const (
 	InitialStateConstant0 = 0x40336050
 	InitialStateConstant1 = 0xCFA3723C
 	InitialStateConstant2 = 0x3CAC5F6F
 	InitialStateConstant3 = 0x3793FDFF
+
+	TinyMT32SH0   = 1
+	TinyMT32SH1   = 10
+	TinyMT32Mask  = 0x7FFFFFFF
+	TinyMT32Alpha = 0x19660D
+	TinyMT32Bravo = 0x5D588B65
 )
 
 type NumberGenerator struct {
-	state []uint32
+	state [4]uint32
 }
 
-func NewRNG(passiveSkill *data.PassiveSkill, timelessJewel *data.TimelessJewel) *NumberGenerator {
-	rng := &NumberGenerator{
-		state: []uint32{
-			0,
-			InitialStateConstant0,
-			InitialStateConstant1,
-			InitialStateConstant2,
-			InitialStateConstant3,
-		},
-	}
+func NewRNG() *NumberGenerator {
+	return &NumberGenerator{state: [4]uint32{}}
+}
 
-	rng.Initialize([]uint32{
+func (g *NumberGenerator) Reset(passiveSkill *data.PassiveSkill, timelessJewel data.TimelessJewel) {
+	g.state[0] = InitialStateConstant0
+	g.state[1] = InitialStateConstant1
+	g.state[2] = InitialStateConstant2
+	g.state[3] = InitialStateConstant3
+
+	g.Initialize([]uint32{
 		passiveSkill.PassiveSkillGraphID,
 		timelessJewel.GetSeed(),
 	})
-
-	return rng
 }
 
 func (g *NumberGenerator) Initialize(seeds []uint32) {
@@ -37,48 +42,48 @@ func (g *NumberGenerator) Initialize(seeds []uint32) {
 
 	for _, seed := range seeds {
 		roundState := ManipulateAlpha(
-			g.state[(index%4)+1] ^
-				g.state[((index+1)%4)+1] ^
-				g.state[(((index+4)-1)%4)+1])
+			g.state[(index%4)] ^
+				g.state[((index+1)%4)] ^
+				g.state[(((index+4)-1)%4)])
 
-		g.state[((index+1)%4)+1] += roundState
+		g.state[((index + 1) % 4)] += roundState
 
 		roundState += seed + index
 
-		g.state[(((index+1)+1)%4)+1] += roundState
-		g.state[(index%4)+1] = roundState
+		g.state[(((index + 1) + 1) % 4)] += roundState
+		g.state[(index % 4)] = roundState
 
 		index = (index + 1) % 4
 	}
 
 	for i := 0; i < 5; i++ {
 		roundState := ManipulateAlpha(
-			g.state[(index%4)+1] ^
-				g.state[((index+1)%4)+1] ^
-				g.state[(((index+4)-1)%4)+1])
+			g.state[(index%4)] ^
+				g.state[((index+1)%4)] ^
+				g.state[(((index+4)-1)%4)])
 
-		g.state[((index+1)%4)+1] += roundState
+		g.state[((index + 1) % 4)] += roundState
 
 		roundState += index
 
-		g.state[(((index+1)+1)%4)+1] += roundState
-		g.state[(index%4)+1] = roundState
+		g.state[(((index + 1) + 1) % 4)] += roundState
+		g.state[(index % 4)] = roundState
 
 		index = (index + 1) % 4
 	}
 
 	for i := 0; i < 4; i++ {
 		roundState := ManipulateBravo(
-			g.state[(index%4)+1] +
-				g.state[((index+1)%4)+1] +
-				g.state[(((index+4)-1)%4)+1])
+			g.state[(index%4)] +
+				g.state[((index+1)%4)] +
+				g.state[(((index+4)-1)%4)])
 
-		g.state[((index+1)%4)+1] ^= roundState
+		g.state[((index + 1) % 4)] ^= roundState
 
 		roundState -= index
 
-		g.state[(((index+1)+1)%4)+1] ^= roundState
-		g.state[(index%4)+1] = roundState
+		g.state[(((index + 1) + 1) % 4)] ^= roundState
+		g.state[(index % 4)] = roundState
 
 		index = (index + 1) % 4
 	}
@@ -89,35 +94,27 @@ func (g *NumberGenerator) Initialize(seeds []uint32) {
 }
 
 func (g *NumberGenerator) GenerateNextState() {
-	a := uint32(0)
-	b := uint32(0)
+	a := g.state[3]
+	b := ((g.state[0] & TinyMT32Mask) ^ g.state[1]) ^ g.state[2]
 
-	a = g.state[4]
-	b = ((g.state[1] & 0x7FFFFFFF) ^ g.state[2]) ^ g.state[3]
+	a ^= a << TinyMT32SH0
+	b ^= (b >> TinyMT32SH0) ^ a
 
-	a ^= a << 1
-	b ^= (b >> 1) ^ a
-
+	g.state[0] = g.state[1]
 	g.state[1] = g.state[2]
-	g.state[2] = g.state[3]
-	g.state[3] = a ^ (b << 10)
-	g.state[4] = b
+	g.state[2] = a ^ (b << TinyMT32SH1)
+	g.state[3] = b
 
-	g.state[2] ^= (uint32)(-((int)(b & 1)) & 0x8F7011EE)
-	g.state[3] ^= (uint32)(-((int)(b & 1)) & 0xFC78FF1F)
-
-	g.state[0]++
+	g.state[1] ^= -(b & 1) & 0x8F7011EE
+	g.state[2] ^= -(b & 1) & 0xFC78FF1F
 }
 
 func (g *NumberGenerator) Temper() uint32 {
-	a := g.state[4]
-
-	b := g.state[1] + (g.state[3] >> 8)
-
-	a ^= b
+	b := g.state[0] + (g.state[2] >> 8)
+	a := g.state[3] ^ b
 
 	if (b & 1) != 0 {
-		a ^= 0x3793FDFF
+		return a ^ 0x3793FDFF
 	}
 
 	return a
@@ -129,27 +126,7 @@ func (g *NumberGenerator) GenerateUInt() uint32 {
 }
 
 func (g *NumberGenerator) GenerateSingle(exclusiveMaximumValue uint32) uint32 {
-	maximumValue := exclusiveMaximumValue - 1
-	roundState := uint32(0)
-	value := uint32(0)
-
-	for {
-		for {
-			value = g.GenerateUInt() | (2 * (value << 31))
-
-			roundState = 0xFFFFFFFF | (2 * (roundState << 31))
-
-			if !(roundState < maximumValue) {
-				break
-			}
-		}
-
-		if !(((value / exclusiveMaximumValue) >= roundState) && ((roundState % exclusiveMaximumValue) != maximumValue)) {
-			break
-		}
-	}
-
-	return value % exclusiveMaximumValue
+	return g.GenerateUInt() % exclusiveMaximumValue
 }
 
 func (g *NumberGenerator) Generate(min uint32, max uint32) uint32 {
@@ -170,9 +147,9 @@ func (g *NumberGenerator) Generate(min uint32, max uint32) uint32 {
 }
 
 func ManipulateAlpha(value uint32) uint32 {
-	return (value ^ (value >> 27)) * 0x19660D
+	return (value ^ (value >> 27)) * TinyMT32Alpha
 }
 
 func ManipulateBravo(value uint32) uint32 {
-	return (value ^ (value >> 27)) * 0x5D588B65
+	return (value ^ (value >> 27)) * TinyMT32Bravo
 }

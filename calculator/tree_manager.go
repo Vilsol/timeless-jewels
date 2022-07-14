@@ -7,10 +7,10 @@ import (
 
 type AlternateTreeManager struct {
 	PassiveSkill  *data.PassiveSkill
-	TimelessJewel *data.TimelessJewel
+	TimelessJewel data.TimelessJewel
 }
 
-func (a *AlternateTreeManager) IsPassiveSkillReplaced() bool {
+func (a *AlternateTreeManager) IsPassiveSkillReplaced(rng *random.NumberGenerator) bool {
 	if a.PassiveSkill.IsKeystone {
 		return true
 	}
@@ -24,7 +24,7 @@ func (a *AlternateTreeManager) IsPassiveSkillReplaced() bool {
 			return false
 		}
 
-		rng := random.NewRNG(a.PassiveSkill, a.TimelessJewel)
+		rng.Reset(a.PassiveSkill, a.TimelessJewel)
 		return rng.Generate(0, 100) < a.TimelessJewel.AlternateTreeVersion.NotableReplacementSpawnWeight
 	}
 
@@ -35,20 +35,14 @@ func (a *AlternateTreeManager) IsPassiveSkillReplaced() bool {
 	return a.TimelessJewel.AlternateTreeVersion.AreSmallNormalPassiveSkillsReplaced
 }
 
-func (a *AlternateTreeManager) AugmentPassiveSkill() []data.AlternatePassiveAdditionInformation {
-	rng := random.NewRNG(a.PassiveSkill, a.TimelessJewel)
-	passiveSkillType := data.GetPassiveSkillType(a.PassiveSkill)
+func (a *AlternateTreeManager) AugmentPassiveSkill(rng *random.NumberGenerator) []data.AlternatePassiveAdditionInformation {
+	rng.Reset(a.PassiveSkill, a.TimelessJewel)
 
-	if passiveSkillType == data.Notable {
+	if data.GetPassiveSkillType(a.PassiveSkill) == data.Notable {
 		rng.Generate(0, 100)
 	}
 
-	minAdditions := a.TimelessJewel.AlternateTreeVersion.MinimumAdditions
-	maxAdditions := a.TimelessJewel.AlternateTreeVersion.MaximumAdditions
-
-	alternatePassiveAdditionInformations := a.RollAdditions(minAdditions, maxAdditions, rng)
-
-	return alternatePassiveAdditionInformations
+	return a.RollAdditions(a.TimelessJewel.AlternateTreeVersion.MinimumAdditions, a.TimelessJewel.AlternateTreeVersion.MaximumAdditions, rng)
 }
 
 func (a *AlternateTreeManager) RollAlternatePassiveAddition(rng *random.NumberGenerator) *data.AlternatePassiveAddition {
@@ -72,69 +66,42 @@ func (a *AlternateTreeManager) RollAlternatePassiveAddition(rng *random.NumberGe
 	return nil
 }
 
-func (a *AlternateTreeManager) ReplacePassiveSkill() data.AlternatePassiveSkillInformation {
+func (a *AlternateTreeManager) ReplacePassiveSkill(rng *random.NumberGenerator) data.AlternatePassiveSkillInformation {
 	if a.PassiveSkill.IsKeystone {
 		alternatePassiveSkillKeyStone := data.GetAlternatePassiveSkillKeyStone(a.TimelessJewel)
-
-		alternatePassiveSkillKeyStoneStatRolls := map[uint32]uint32{
-			0: alternatePassiveSkillKeyStone.Stat1Min,
-		}
-
 		return data.AlternatePassiveSkillInformation{
 			AlternatePassiveSkill: alternatePassiveSkillKeyStone,
-			StatRolls:             alternatePassiveSkillKeyStoneStatRolls,
+			StatRolls: map[uint32]uint32{
+				0: alternatePassiveSkillKeyStone.Stat1Min,
+			},
 		}
 	}
 
 	applicableAlternatePassiveSkills := data.GetApplicableAlternatePassiveSkills(a.PassiveSkill, a.TimelessJewel)
 
 	var rolledAlternatePassiveSkill *data.AlternatePassiveSkill
-	rng := random.NewRNG(a.PassiveSkill, a.TimelessJewel)
-
-	currentSpawnWeight := uint32(0)
+	rng.Reset(a.PassiveSkill, a.TimelessJewel)
 
 	if data.GetPassiveSkillType(a.PassiveSkill) == data.Notable {
 		rng.Generate(0, 100)
 	}
 
+	currentSpawnWeight := uint32(0)
 	for _, skill := range applicableAlternatePassiveSkills {
 		currentSpawnWeight += skill.SpawnWeight
-
-		roll := rng.GenerateSingle(currentSpawnWeight)
-
-		if roll < skill.SpawnWeight {
+		if rng.GenerateSingle(currentSpawnWeight) < skill.SpawnWeight {
 			rolledAlternatePassiveSkill = skill
 		}
 	}
 
-	alternatePassiveSkillStatRollRanges := map[uint32]data.Range{
-		0: {
-			Min: rolledAlternatePassiveSkill.Stat1Min,
-			Max: rolledAlternatePassiveSkill.Stat1Max,
-		},
-		1: {
-			Min: rolledAlternatePassiveSkill.Stat2Min,
-			Max: rolledAlternatePassiveSkill.Stat2Max,
-		},
-		2: {
-			Min: rolledAlternatePassiveSkill.Stat3Min,
-			Max: rolledAlternatePassiveSkill.Stat3Max,
-		},
-		3: {
-			Min: rolledAlternatePassiveSkill.Stat4Min,
-			Max: rolledAlternatePassiveSkill.Stat4Max,
-		},
-	}
+	elements := min(uint32(len(rolledAlternatePassiveSkill.StatsKeys)), 4)
+	alternatePassiveSkillStatRolls := make(map[uint32]uint32, elements)
+	for i := uint32(0); i < elements; i++ {
+		alternatePassiveSkillStatRolls[i] = rolledAlternatePassiveSkill.GetStatMinMax(true, i)
 
-	alternatePassiveSkillStatRolls := make(map[uint32]uint32)
-	for i := uint32(0); i < min(uint32(len(rolledAlternatePassiveSkill.StatsKeys)), 4); i++ {
-		alternatePassiveSkillStatRoll := alternatePassiveSkillStatRollRanges[i].Min
-
-		if alternatePassiveSkillStatRollRanges[i].Max > alternatePassiveSkillStatRollRanges[i].Min {
-			alternatePassiveSkillStatRoll = rng.Generate(alternatePassiveSkillStatRollRanges[i].Min, alternatePassiveSkillStatRollRanges[i].Max)
+		if rolledAlternatePassiveSkill.GetStatMinMax(false, i) > rolledAlternatePassiveSkill.GetStatMinMax(true, i) {
+			alternatePassiveSkillStatRolls[i] = rng.Generate(rolledAlternatePassiveSkill.GetStatMinMax(true, i), rolledAlternatePassiveSkill.GetStatMinMax(false, i))
 		}
-
-		alternatePassiveSkillStatRolls[i] = alternatePassiveSkillStatRoll
 	}
 
 	if (rolledAlternatePassiveSkill.RandomMin == 0) && (rolledAlternatePassiveSkill.RandomMax == 0) {
@@ -147,12 +114,10 @@ func (a *AlternateTreeManager) ReplacePassiveSkill() data.AlternatePassiveSkillI
 	minAdditions := a.TimelessJewel.AlternateTreeVersion.MinimumAdditions + rolledAlternatePassiveSkill.RandomMin
 	maxAdditions := a.TimelessJewel.AlternateTreeVersion.MaximumAdditions + rolledAlternatePassiveSkill.RandomMax
 
-	alternatePassiveAdditionInformations := a.RollAdditions(minAdditions, maxAdditions, rng)
-
 	return data.AlternatePassiveSkillInformation{
 		AlternatePassiveSkill:                rolledAlternatePassiveSkill,
 		StatRolls:                            alternatePassiveSkillStatRolls,
-		AlternatePassiveAdditionInformations: alternatePassiveAdditionInformations,
+		AlternatePassiveAdditionInformations: a.RollAdditions(minAdditions, maxAdditions, rng),
 	}
 }
 
@@ -172,27 +137,14 @@ func (a *AlternateTreeManager) RollAdditions(minimumAdditions uint32, maximumAdd
 			rolledAlternatePassiveAddition = a.RollAlternatePassiveAddition(rng)
 		}
 
-		alternatePassiveAdditionStatRollRanges := map[uint32]data.Range{
-			0: {
-				Min: rolledAlternatePassiveAddition.Stat1Min,
-				Max: rolledAlternatePassiveAddition.Stat1Max,
-			},
-			1: {
-				Min: rolledAlternatePassiveAddition.Stat2Min,
-				Max: rolledAlternatePassiveAddition.Stat2Max,
-			},
-		}
+		elements := min(uint32(len(rolledAlternatePassiveAddition.StatsKeys)), 2)
+		alternatePassiveAdditionStatRolls := make(map[uint32]uint32, elements)
+		for j := uint32(0); j < elements; j++ {
+			alternatePassiveAdditionStatRolls[j] = rolledAlternatePassiveAddition.GetStatMinMax(true, j)
 
-		alternatePassiveAdditionStatRolls := make(map[uint32]uint32)
-
-		for j := uint32(0); j < min(uint32(len(rolledAlternatePassiveAddition.StatsKeys)), 2); j++ {
-			alternatePassiveAdditionStatRoll := alternatePassiveAdditionStatRollRanges[j].Min
-
-			if alternatePassiveAdditionStatRollRanges[j].Max > alternatePassiveAdditionStatRollRanges[j].Min {
-				alternatePassiveAdditionStatRoll = rng.Generate(alternatePassiveAdditionStatRollRanges[j].Min, alternatePassiveAdditionStatRollRanges[j].Max)
+			if rolledAlternatePassiveAddition.GetStatMinMax(false, j) > rolledAlternatePassiveAddition.GetStatMinMax(true, j) {
+				alternatePassiveAdditionStatRolls[j] = rng.Generate(rolledAlternatePassiveAddition.GetStatMinMax(true, j), rolledAlternatePassiveAddition.GetStatMinMax(false, j))
 			}
-
-			alternatePassiveAdditionStatRolls[j] = alternatePassiveAdditionStatRoll
 		}
 
 		alternatePassiveAdditionInformations = append(alternatePassiveAdditionInformations, data.AlternatePassiveAdditionInformation{

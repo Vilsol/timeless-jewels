@@ -88,9 +88,23 @@ func findAll() {
 		}
 
 		println(jewelType.String())
-		for seed := data.TimelessJewelSeedRanges[jewelType].Min; seed <= data.TimelessJewelSeedRanges[jewelType].Max; seed++ {
-			if seed%500 == 0 {
-				println(seed)
+
+		min := data.TimelessJewelSeedRanges[jewelType].Min
+		max := data.TimelessJewelSeedRanges[jewelType].Max
+
+		if data.TimelessJewelSeedRanges[jewelType].Special {
+			min /= 20
+			max /= 20
+		}
+
+		for seed := min; seed <= max; seed++ {
+			realSeed := seed
+			if data.TimelessJewelSeedRanges[jewelType].Special {
+				realSeed *= 20
+			}
+
+			if realSeed%500 == 0 {
+				println(realSeed)
 			}
 
 			for _, skill := range applicable {
@@ -98,7 +112,7 @@ func findAll() {
 					continue
 				}
 
-				results := calculator.Calculate(skill.Index, seed, jewelType, firstConqueror)
+				results := calculator.Calculate(skill.Index, realSeed, jewelType, firstConqueror)
 				if results.AlternatePassiveSkill != nil {
 					for _, key := range results.AlternatePassiveSkill.StatsKeys {
 						foundStats[jewelType][key]++

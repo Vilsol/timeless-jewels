@@ -142,7 +142,7 @@
     updateUrl();
   };
 
-  let collapsed = false;
+  let results = false;
   let minTotalWeight = 0;
   let searching = false;
   let currentSeed = 0;
@@ -175,7 +175,7 @@
       .then((result) => {
         searchResults = result;
         searching = false;
-        collapsed = true;
+        results = true;
       });
   };
 
@@ -404,13 +404,15 @@
       return;
     }
 
-    collapsed = false;
+    results = false;
     mode = 'seed';
     seed = newSeed;
     selectedJewel = jewel;
     selectedConqueror = { label: conqueror, value: conqueror };
     updateUrl();
   };
+
+  let collapsed = false;
 </script>
 
 <svelte:window on:paste={onPaste} />
@@ -424,224 +426,242 @@
   {seed}
   highlightJewels={!circledNode}
   disabled={[...disabled]}>
-  <div
-    class="w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen">
-    <div class="p-4 max-h-screen flex flex-col">
-      <div class="flex flex-row justify-between mb-2">
-        <h3 class="flex-grow">
-          {collapsed ? 'Results' : 'Timeless Jewel'}
-        </h3>
-        {#if searchResults}
-          <div class="flex flex-row">
-            {#if collapsed}
-              <button
-                class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
-                on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
-                disabled={!searchResults}>
-                Trade
-              </button>
-              <button
-                class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
-                class:grouped={groupResults}
-                on:click={() => (groupResults = !groupResults)}
-                disabled={!searchResults}>
-                Grouped
-              </button>
-            {/if}
-            <button class="bg-neutral-100/20 px-4 p-1 rounded" on:click={() => (collapsed = !collapsed)}>
-              {collapsed ? 'Config' : 'Results'}
+  {#if !collapsed}
+    <div
+      class="w-screen md:w-10/12 lg:w-2/3 xl:w-1/2 2xl:w-5/12 3xl:w-1/3 4xl:w-1/4 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen">
+      <div class="p-4 max-h-screen flex flex-col">
+        <div class="flex flex-row justify-between mb-2">
+          <div class="flex flex-row items-center">
+            <button class="burger-menu mr-3" on:click={() => (collapsed = true)}>
+              <div />
+              <div />
+              <div />
             </button>
+
+            <h3 class="flex-grow">
+              {results ? 'Results' : 'Timeless Jewel'}
+            </h3>
           </div>
-        {/if}
-      </div>
-
-      {#if !collapsed}
-        <Select items={jewels} bind:value={selectedJewel} on:select={changeJewel} />
-
-        {#if selectedJewel}
-          <div class="mt-4">
-            <h3 class="mb-2">Conqueror</h3>
-            <Select items={conquerors} bind:value={selectedConqueror} on:select={updateUrl} />
-          </div>
-
-          {#if selectedConqueror && window['TimelessJewelConquerors'][selectedJewel.value].indexOf(selectedConqueror.value) >= 0}
-            <div class="mt-4 w-full flex flex-row">
-              <button class="selection-button" class:selected={mode === 'seed'} on:click={() => setMode('seed')}>
-                Enter Seed
-              </button>
-              <button class="selection-button" class:selected={mode === 'stats'} on:click={() => setMode('stats')}>
-                Select Stats
+          {#if searchResults}
+            <div class="flex flex-row">
+              {#if results}
+                <button
+                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
+                  on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
+                  disabled={!searchResults}>
+                  Trade
+                </button>
+                <button
+                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
+                  class:grouped={groupResults}
+                  on:click={() => (groupResults = !groupResults)}
+                  disabled={!searchResults}>
+                  Grouped
+                </button>
+              {/if}
+              <button class="bg-neutral-100/20 px-4 p-1 rounded" on:click={() => (results = !results)}>
+                {results ? 'Config' : 'Results'}
               </button>
             </div>
+          {/if}
+        </div>
 
-            {#if mode === 'seed'}
-              <div class="mt-4">
-                <h3 class="mb-2">Seed</h3>
-                <input
-                  type="number"
-                  bind:value={seed}
-                  on:blur={updateUrl}
-                  min={window['TimelessJewelSeedRanges'][selectedJewel.value].min}
-                  max={window['TimelessJewelSeedRanges'][selectedJewel.value].max} />
-                {#if seed < window['TimelessJewelSeedRanges'][selectedJewel.value].min || seed > window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                  <div class="mt-2">
-                    Seed must be between {window['TimelessJewelSeedRanges'][selectedJewel.value].min}
-                    and {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                  </div>
-                {/if}
+        {#if !results}
+          <Select items={jewels} bind:value={selectedJewel} on:select={changeJewel} />
+
+          {#if selectedJewel}
+            <div class="mt-4">
+              <h3 class="mb-2">Conqueror</h3>
+              <Select items={conquerors} bind:value={selectedConqueror} on:select={updateUrl} />
+            </div>
+
+            {#if selectedConqueror && window['TimelessJewelConquerors'][selectedJewel.value].indexOf(selectedConqueror.value) >= 0}
+              <div class="mt-4 w-full flex flex-row">
+                <button class="selection-button" class:selected={mode === 'seed'} on:click={() => setMode('seed')}>
+                  Enter Seed
+                </button>
+                <button class="selection-button" class:selected={mode === 'stats'} on:click={() => setMode('stats')}>
+                  Select Stats
+                </button>
               </div>
 
-              {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                <div class="flex flex-row mt-4 items-end">
-                  <div class="flex-grow">
-                    <h3 class="mb-2">Sort Order</h3>
-                    <Select items={sortResults} bind:value={sortOrder} />
-                  </div>
-                  <div class="ml-2">
-                    <button
-                      class="bg-neutral-500/20 p-2 px-4 rounded"
-                      class:selected={colored}
-                      on:click={() => (colored = !colored)}>
-                      Colors
-                    </button>
-                  </div>
-                  <div class="ml-2">
-                    <button
-                      class="bg-neutral-500/20 p-2 px-4 rounded"
-                      class:selected={split}
-                      on:click={() => (split = !split)}>
-                      Split
-                    </button>
-                  </div>
-                </div>
-
-                {#if !split}
-                  <ul class="mt-4 overflow-auto" class:rainbow={colored}>
-                    {#each sortCombined(combineResults(seedResults, colored, 'all'), sortOrder.value) as r}
-                      <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
-                        <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
-                          >({r.passives.length})</span>
-                        <span class="text-white">{@html r.stat}</span>
-                      </li>
-                    {/each}
-                  </ul>
-                {:else}
-                  <div class="overflow-auto mt-4">
-                    <h3>Notables</h3>
-                    <ul class="mt-1" class:rainbow={colored}>
-                      {#each sortCombined(combineResults(seedResults, colored, 'notables'), sortOrder.value) as r}
-                        <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
-                          <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
-                            >({r.passives.length})</span>
-                          <span class="text-white">{@html r.stat}</span>
-                        </li>
-                      {/each}
-                    </ul>
-
-                    <h3 class="mt-2">Smalls</h3>
-                    <ul class="mt-1" class:rainbow={colored}>
-                      {#each sortCombined(combineResults(seedResults, colored, 'passives'), sortOrder.value) as r}
-                        <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
-                          <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
-                            >({r.passives.length})</span>
-                          <span class="text-white">{@html r.stat}</span>
-                        </li>
-                      {/each}
-                    </ul>
-                  </div>
-                {/if}
-              {/if}
-            {:else if mode === 'stats'}
-              <div class="mt-4">
-                <h3 class="mb-2">Add Stat</h3>
-                <Select items={statItems} on:select={selectStat} bind:this={statSelector} />
-              </div>
-              {#if Object.keys(selectedStats).length > 0}
-                <div class="mt-4 flex flex-col overflow-auto min-h-[100px]">
-                  {#each Object.keys(selectedStats) as s}
-                    <div class="mb-4 flex flex-row items-start flex-col border-neutral-100/40 border-b pb-4">
-                      <div>
-                        <button
-                          class="p-2 px-4 bg-red-500/40 rounded mr-2"
-                          on:click={() => removeStat(selectedStats[s].id)}>
-                          -
-                        </button>
-                        <span>{translateStat(selectedStats[s].id)}</span>
-                      </div>
-                      <div class="mt-2 flex flex-row">
-                        <div class="mr-4 flex flex-row items-center">
-                          <div class="mr-2">Min:</div>
-                          <input type="number" min="0" bind:value={selectedStats[s].min} />
-                        </div>
-                        <div class="flex flex-row items-center">
-                          <div class="mr-2">Weight:</div>
-                          <input type="number" min="0" bind:value={selectedStats[s].weight} />
-                        </div>
-                      </div>
+              {#if mode === 'seed'}
+                <div class="mt-4">
+                  <h3 class="mb-2">Seed</h3>
+                  <input
+                    type="number"
+                    bind:value={seed}
+                    on:blur={updateUrl}
+                    min={window['TimelessJewelSeedRanges'][selectedJewel.value].min}
+                    max={window['TimelessJewelSeedRanges'][selectedJewel.value].max} />
+                  {#if seed < window['TimelessJewelSeedRanges'][selectedJewel.value].min || seed > window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                    <div class="mt-2">
+                      Seed must be between {window['TimelessJewelSeedRanges'][selectedJewel.value].min}
+                      and {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
                     </div>
-                  {/each}
+                  {/if}
                 </div>
-                <div class="flex flex-col mt-2">
-                  <div class="flex flex-row items-center">
-                    <div class="mr-2 min-w-fit">Min Total Weight:</div>
-                    <input type="number" min="0" bind:value={minTotalWeight} />
-                  </div>
-                </div>
-                <div class="flex flex-col mt-4">
-                  <div class="flex flex-row">
-                    <button
-                      class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
-                      on:click={selectAll}
-                      disabled={searching || disabled.size == 0}>
-                      Select All
-                    </button>
-                    <button
-                      class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
-                      on:click={selectAllNotables}
-                      disabled={searching || disabled.size == 0}>
-                      Notables
-                    </button>
-                    <button
-                      class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
-                      on:click={selectAllPassives}
-                      disabled={searching || disabled.size == 0}>
-                      Passives
-                    </button>
-                    <button
-                      class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 flex-grow"
-                      on:click={deselectAll}
-                      disabled={searching || disabled.size >= affectedNodes.length}>
-                      Deselect
-                    </button>
-                  </div>
-                  <div class="flex flex-row mt-2">
-                    <button
-                      class="p-2 px-3 bg-green-500/40 rounded disabled:bg-green-900/40 flex-grow"
-                      on:click={() => search()}
-                      disabled={searching}>
-                      {#if searching}
-                        {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
-                      {:else}
-                        Search
-                      {/if}
-                    </button>
-                  </div>
-                </div>
-              {/if}
-            {/if}
 
-            {#if !circledNode}
-              <h2 class="mt-4">Click on a jewel socket</h2>
+                {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                  <div class="flex flex-row mt-4 items-end">
+                    <div class="flex-grow">
+                      <h3 class="mb-2">Sort Order</h3>
+                      <Select items={sortResults} bind:value={sortOrder} />
+                    </div>
+                    <div class="ml-2">
+                      <button
+                        class="bg-neutral-500/20 p-2 px-4 rounded"
+                        class:selected={colored}
+                        on:click={() => (colored = !colored)}>
+                        Colors
+                      </button>
+                    </div>
+                    <div class="ml-2">
+                      <button
+                        class="bg-neutral-500/20 p-2 px-4 rounded"
+                        class:selected={split}
+                        on:click={() => (split = !split)}>
+                        Split
+                      </button>
+                    </div>
+                  </div>
+
+                  {#if !split}
+                    <ul class="mt-4 overflow-auto" class:rainbow={colored}>
+                      {#each sortCombined(combineResults(seedResults, colored, 'all'), sortOrder.value) as r}
+                        <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                          <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                            >({r.passives.length})</span>
+                          <span class="text-white">{@html r.stat}</span>
+                        </li>
+                      {/each}
+                    </ul>
+                  {:else}
+                    <div class="overflow-auto mt-4">
+                      <h3>Notables</h3>
+                      <ul class="mt-1" class:rainbow={colored}>
+                        {#each sortCombined(combineResults(seedResults, colored, 'notables'), sortOrder.value) as r}
+                          <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                            <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                              >({r.passives.length})</span>
+                            <span class="text-white">{@html r.stat}</span>
+                          </li>
+                        {/each}
+                      </ul>
+
+                      <h3 class="mt-2">Smalls</h3>
+                      <ul class="mt-1" class:rainbow={colored}>
+                        {#each sortCombined(combineResults(seedResults, colored, 'passives'), sortOrder.value) as r}
+                          <li class="cursor-pointer" on:click={() => highlight(seed, r.passives)}>
+                            <span class="font-bold" class:text-white={(statValues[r.id] || 0) < 3}
+                              >({r.passives.length})</span>
+                            <span class="text-white">{@html r.stat}</span>
+                          </li>
+                        {/each}
+                      </ul>
+                    </div>
+                  {/if}
+                {/if}
+              {:else if mode === 'stats'}
+                <div class="mt-4">
+                  <h3 class="mb-2">Add Stat</h3>
+                  <Select items={statItems} on:select={selectStat} bind:this={statSelector} />
+                </div>
+                {#if Object.keys(selectedStats).length > 0}
+                  <div class="mt-4 flex flex-col overflow-auto min-h-[100px]">
+                    {#each Object.keys(selectedStats) as s}
+                      <div class="mb-4 flex flex-row items-start flex-col border-neutral-100/40 border-b pb-4">
+                        <div>
+                          <button
+                            class="p-2 px-4 bg-red-500/40 rounded mr-2"
+                            on:click={() => removeStat(selectedStats[s].id)}>
+                            -
+                          </button>
+                          <span>{translateStat(selectedStats[s].id)}</span>
+                        </div>
+                        <div class="mt-2 flex flex-row">
+                          <div class="mr-4 flex flex-row items-center">
+                            <div class="mr-2">Min:</div>
+                            <input type="number" min="0" bind:value={selectedStats[s].min} />
+                          </div>
+                          <div class="flex flex-row items-center">
+                            <div class="mr-2">Weight:</div>
+                            <input type="number" min="0" bind:value={selectedStats[s].weight} />
+                          </div>
+                        </div>
+                      </div>
+                    {/each}
+                  </div>
+                  <div class="flex flex-col mt-2">
+                    <div class="flex flex-row items-center">
+                      <div class="mr-2 min-w-fit">Min Total Weight:</div>
+                      <input type="number" min="0" bind:value={minTotalWeight} />
+                    </div>
+                  </div>
+                  <div class="flex flex-col mt-4">
+                    <div class="flex flex-row">
+                      <button
+                        class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
+                        on:click={selectAll}
+                        disabled={searching || disabled.size == 0}>
+                        Select All
+                      </button>
+                      <button
+                        class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
+                        on:click={selectAllNotables}
+                        disabled={searching || disabled.size == 0}>
+                        Notables
+                      </button>
+                      <button
+                        class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
+                        on:click={selectAllPassives}
+                        disabled={searching || disabled.size == 0}>
+                        Passives
+                      </button>
+                      <button
+                        class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 flex-grow"
+                        on:click={deselectAll}
+                        disabled={searching || disabled.size >= affectedNodes.length}>
+                        Deselect
+                      </button>
+                    </div>
+                    <div class="flex flex-row mt-2">
+                      <button
+                        class="p-2 px-3 bg-green-500/40 rounded disabled:bg-green-900/40 flex-grow"
+                        on:click={() => search()}
+                        disabled={searching}>
+                        {#if searching}
+                          {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                        {:else}
+                          Search
+                        {/if}
+                      </button>
+                    </div>
+                  </div>
+                {/if}
+              {/if}
+
+              {#if !circledNode}
+                <h2 class="mt-4">Click on a jewel socket</h2>
+              {/if}
             {/if}
           {/if}
         {/if}
-      {/if}
 
-      {#if searchResults && collapsed}
-        <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} />
-      {/if}
+        {#if searchResults && results}
+          <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} />
+        {/if}
+      </div>
     </div>
-  </div>
+  {:else}
+    <button
+      class="burger-menu absolute top-0 left-0 bg-black/80 backdrop-blur-sm rounded-br-lg p-4 pt-5"
+      on:click={() => (collapsed = false)}>
+      <div />
+      <div />
+      <div />
+    </button>
+  {/if}
 
   <div class="text-orange-500 absolute bottom-0 right-0 m-2">
     <a href="https://github.com/Vilsol/timeless-jewels" target="_blank" rel="noopener">Source (Github)</a>

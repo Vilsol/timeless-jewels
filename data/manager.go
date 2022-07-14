@@ -2,9 +2,8 @@ package data
 
 import "strconv"
 
-func GetApplicableAlternatePassiveAdditions(passiveSkill *PassiveSkill, timelessJewel *TimelessJewel) []*AlternatePassiveAddition {
-	skillType := GetPassiveSkillType(passiveSkill)
-	return reverseAlternatePassiveAdditions[skillType][timelessJewel.AlternateTreeVersion.Index]
+func GetApplicableAlternatePassiveAdditions(passiveSkill *PassiveSkill, timelessJewel TimelessJewel) []*AlternatePassiveAddition {
+	return reverseAlternatePassiveAdditions[GetPassiveSkillType(passiveSkill)][timelessJewel.AlternateTreeVersion.Index]
 }
 
 func GetPassiveSkillType(passiveSkill *PassiveSkill) PassiveSkillType {
@@ -21,7 +20,7 @@ func GetPassiveSkillType(passiveSkill *PassiveSkill) PassiveSkillType {
 	return SmallNormal
 }
 
-func GetAlternatePassiveSkillKeyStone(timelessJewel *TimelessJewel) *AlternatePassiveSkill {
+func GetAlternatePassiveSkillKeyStone(timelessJewel TimelessJewel) *AlternatePassiveSkill {
 	var alternatePassiveSkillKeyStone *AlternatePassiveSkill
 	for _, skill := range AlternatePassiveSkills {
 		if skill.AlternateTreeVersionsKey != timelessJewel.AlternateTreeVersion.Index {
@@ -59,9 +58,8 @@ func GetAlternatePassiveSkillKeyStone(timelessJewel *TimelessJewel) *AlternatePa
 	return alternatePassiveSkillKeyStone
 }
 
-func GetApplicableAlternatePassiveSkills(passiveSkill *PassiveSkill, timelessJewel *TimelessJewel) []*AlternatePassiveSkill {
-	skillType := GetPassiveSkillType(passiveSkill)
-	return reverseAlternatePassiveSkills[skillType][timelessJewel.AlternateTreeVersion.Index]
+func GetApplicableAlternatePassiveSkills(passiveSkill *PassiveSkill, timelessJewel TimelessJewel) []*AlternatePassiveSkill {
+	return reverseAlternatePassiveSkills[GetPassiveSkillType(passiveSkill)][timelessJewel.AlternateTreeVersion.Index]
 }
 
 func IsSmallAttribute(stat uint32) bool {
@@ -95,51 +93,6 @@ func GetAlternatePassiveAdditionByIndex(index uint32) *AlternatePassiveAddition 
 
 func GetAlternateTreeVersionIndex(index uint32) *AlternateTreeVersion {
 	return idToAlternateTreeVersion[index]
-}
-
-func FindSkillsWithStats(stat *Stat) []*AlternatePassiveSkill {
-	skills := make([]*AlternatePassiveSkill, 0)
-	for _, skill := range AlternatePassiveSkills {
-		for _, key := range skill.StatsKeys {
-			if key == stat.Index {
-				skills = append(skills, skill)
-				break
-			}
-		}
-	}
-	return skills
-}
-
-func FindAlternatePassiveAdditionsWithStats(stat *Stat) []*AlternatePassiveAddition {
-	additions := make([]*AlternatePassiveAddition, 0)
-	for _, addition := range AlternatePassiveAdditions {
-		for _, key := range addition.StatsKeys {
-			if key == stat.Index {
-				additions = append(additions, addition)
-				break
-			}
-		}
-	}
-	return additions
-}
-
-func FindSkillsMatchingAdditions(additions []*AlternatePassiveAddition) []*PassiveSkill {
-	additionPassiveTypes := make(map[PassiveSkillType]bool)
-	for _, addition := range additions {
-		for _, skillType := range addition.PassiveType {
-			additionPassiveTypes[skillType] = true
-		}
-	}
-
-	skills := make([]*PassiveSkill, 0)
-	for _, skill := range PassiveSkills {
-		skillType := GetPassiveSkillType(skill)
-		if _, ok := additionPassiveTypes[skillType]; ok {
-			skills = append(skills, skill)
-		}
-	}
-
-	return skills
 }
 
 func GetApplicablePassives() []*PassiveSkill {
