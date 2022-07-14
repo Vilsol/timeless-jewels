@@ -255,12 +255,12 @@
   };
 
   const combineResults = (
-    results: unknown[],
+    rawResults: unknown[],
     withColors: boolean,
     only: 'notables' | 'passives' | 'all'
   ): CombinedResult[] => {
     const mappedStats: { [key: number]: number[] } = {};
-    results.forEach((r) => {
+    rawResults.forEach((r) => {
       if (skillTree.nodes[r.node].isKeystone) {
         return;
       }
@@ -308,12 +308,12 @@
   };
 
   const sortCombined = (
-    results: CombinedResult[],
+    combinedResults: CombinedResult[],
     order: 'count' | 'alphabet' | 'rarity' | 'value'
   ): CombinedResult[] => {
     switch (order) {
       case 'alphabet':
-        return results.sort((a, b) =>
+        return combinedResults.sort((a, b) =>
           a.rawStat
             .replace(/[#+%]/gi, '')
             .trim()
@@ -321,13 +321,13 @@
             .localeCompare(b.rawStat.replace(/[#+%]/gi, '').trim().toLowerCase())
         );
       case 'count':
-        return results.sort((a, b) => b.passives.length - a.passives.length);
+        return combinedResults.sort((a, b) => b.passives.length - a.passives.length);
       case 'rarity':
-        return results.sort(
+        return combinedResults.sort(
           (a, b) => allPossibleStats[selectedJewel.value][a.id] - allPossibleStats[selectedJewel.value][b.id]
         );
       case 'value':
-        return results.sort((a, b) => {
+        return combinedResults.sort((a, b) => {
           const aValue = statValues[a.id] || 0;
           const bValue = statValues[b.id] || 0;
           if (aValue != bValue) {
@@ -337,7 +337,7 @@
         });
     }
 
-    return results;
+    return combinedResults;
   };
 
   const sortResults = [
