@@ -15,7 +15,7 @@
   let selectedJewel = searchParams.has('jewel') ? jewels.find((j) => j.value == searchParams.get('jewel')) : undefined;
 
   $: conquerors = selectedJewel
-    ? TimelessJewelConquerors[selectedJewel.value].map((k) => ({
+    ? Object.keys(TimelessJewelConquerors[selectedJewel.value]).map((k) => ({
         value: k,
         label: k
       }))
@@ -28,9 +28,9 @@
       }
     : undefined;
 
-  const passiveSkills = Object.keys(PassiveSkills).map((k) => ({
-    value: PassiveSkills[k],
-    label: k
+  const passiveSkills = Object.values(PassiveSkills).map((passive) => ({
+    value: passive.Index,
+    label: passive.Name + ' (' + passive.ID + ')'
   }));
 
   let selectedPassiveSkill = searchParams.has('passive_skill')
@@ -99,7 +99,7 @@
             <Select items={conquerors} bind:value={selectedConqueror} on:select={updateUrl} />
           </div>
 
-          {#if selectedConqueror && TimelessJewelConquerors[selectedJewel.value].indexOf(selectedConqueror.value) >= 0}
+          {#if selectedConqueror && Object.keys(TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
             <div class="mt-4">
               <h3 class="mb-2">Passive Skill</h3>
               <Select items={passiveSkills} bind:value={selectedPassiveSkill} on:select={updateUrl} />
@@ -113,49 +113,50 @@
                   bind:value={seed}
                   class="seed"
                   on:blur={updateUrl}
-                  min={TimelessJewelSeedRanges[selectedJewel.value].min}
-                  max={TimelessJewelSeedRanges[selectedJewel.value].max} />
-                {#if seed < TimelessJewelSeedRanges[selectedJewel.value].min || seed > TimelessJewelSeedRanges[selectedJewel.value].max}
+                  min={TimelessJewelSeedRanges[selectedJewel.value].Min}
+                  max={TimelessJewelSeedRanges[selectedJewel.value].Max} />
+                {#if seed < TimelessJewelSeedRanges[selectedJewel.value].Min || seed > TimelessJewelSeedRanges[selectedJewel.value].Max}
                   <div class="mt-2">
-                    Seed must be between {TimelessJewelSeedRanges[selectedJewel.value].min} and {TimelessJewelSeedRanges[
+                    Seed must be between {TimelessJewelSeedRanges[selectedJewel.value].Min} and {TimelessJewelSeedRanges[
                       selectedJewel.value
-                    ].max}
+                    ].Max}
                   </div>
                 {/if}
               </div>
 
               {#if result}
-                {#if 'alternatePassiveSkill' in result}
-                  {@const alt = GetAlternatePassiveSkillByIndex(result['alternatePassiveSkill'])}
+                {#if 'AlternatePassiveSkill' in result}
                   <div class="mt-4">
                     <h3>Alternate Passive Skill</h3>
-                    <span>{alt.name} ({alt.id}) ({result['alternatePassiveSkill']})</span>
+                    <span
+                      >{result['AlternatePassiveSkill'].Name} ({result['AlternatePassiveSkill'].ID}) ({result[
+                        'AlternatePassiveSkill'
+                      ]})</span>
                   </div>
 
-                  {#if 'statRolls' in result && Object.keys(result['statRolls']).length > 0}
+                  {#if 'StatRolls' in result && Object.keys(result['StatRolls']).length > 0}
                     <ol class="mt-4 list-decimal pl-8">
-                      {#each Object.keys(result['statRolls']) as roll, i}
-                        {@const stat = GetStatByIndex(alt.statsKeys[i])}
-                        <li>{stat.text || '<no name>'} ({stat.id}) - {result['statRolls'][roll]}</li>
+                      {#each Object.keys(result['StatRolls']) as roll, i}
+                        {@const stat = GetStatByIndex(result['AlternatePassiveSkill'].StatsKeys[i])}
+                        <li>{stat.Text || '<no name>'} ({stat.ID}) - {result['StatRolls'][roll]}</li>
                       {/each}
                     </ol>
                   {/if}
                 {/if}
 
-                {#if 'alternatePassiveAdditionInformations' in result && result.alternatePassiveAdditionInformations.length > 0}
+                {#if 'AlternatePassiveAdditionInformations' in result && result.AlternatePassiveAdditionInformations?.length > 0}
                   <div class="mt-4">
                     <h3>Additions</h3>
                     <ul class="list-disc pl-8">
-                      {#each result.alternatePassiveAdditionInformations as info}
-                        {@const addition = GetAlternatePassiveAdditionByIndex(info.alternatePassiveSkillAddition)}
+                      {#each result.AlternatePassiveAdditionInformations as info}
                         <li class="mt-4">
-                          <span>{addition.id} ({addition.index})</span>
+                          <span>{info.AlternatePassiveAddition.ID} ({info.AlternatePassiveAddition.Index})</span>
 
-                          {#if 'statRolls' in info && Object.keys(info['statRolls']).length > 0}
+                          {#if 'StatRolls' in info && Object.keys(info['StatRolls']).length > 0}
                             <ol class="list-decimal pl-8">
-                              {#each Object.keys(info['statRolls']) as roll, i}
-                                {@const stat = GetStatByIndex(addition.statsKeys[i])}
-                                <li>{stat.text || '<no name>'} ({stat.id}) - {info['statRolls'][roll]}</li>
+                              {#each Object.keys(info['StatRolls']) as roll, i}
+                                {@const stat = GetStatByIndex(info.AlternatePassiveAddition.StatsKeys[i])}
+                                <li>{stat.Text || '<no name>'} ({stat.ID}) - {info['StatRolls'][roll]}</li>
                               {/each}
                             </ol>
                           {/if}

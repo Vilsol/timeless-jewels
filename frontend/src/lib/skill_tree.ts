@@ -82,7 +82,7 @@ export const loadSkillTree = (tree?: string, translationData?: string, treeToPas
   });
 
   Object.keys(treeToPassive || window['TreeToPassive']).forEach((k) => {
-    passiveToTree[(treeToPassive || window['TreeToPassive'])[k]] = parseInt(k);
+    passiveToTree[(treeToPassive || window['TreeToPassive'])[k].Index] = parseInt(k);
   });
 };
 
@@ -281,7 +281,7 @@ export const getAffectedNodes = (socket: Node): Node[] => {
   return result;
 };
 
-type Stat = { index: number; id: string; text: string };
+type Stat = { Index: number; ID: string; Text: string };
 
 const statCache: Record<number, Stat> = {};
 export const getStat = (id: number | string): Stat => {
@@ -323,12 +323,12 @@ export interface SearchResults {
 
 export const translateStat = (id: number, roll?: number | undefined): string => {
   const stat = getStat(id);
-  const translation = inverseTranslations[stat.id];
+  const translation = inverseTranslations[stat.ID];
   if (roll) {
-    return formatStats(translation, roll) || stat.id;
+    return formatStats(translation, roll) || stat.ID;
   }
 
-  let translationText = stat.text || stat.id;
+  let translationText = stat.text || stat.ID;
   if (translation && translation.English && translation.English.length) {
     translationText = translation.English[0].string;
     translation.English[0].format.forEach((f, i) => {

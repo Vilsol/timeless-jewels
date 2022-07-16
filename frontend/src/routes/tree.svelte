@@ -21,7 +21,7 @@
   let selectedJewel = searchParams.has('jewel') ? jewels.find((j) => j.value == searchParams.get('jewel')) : undefined;
 
   $: conquerors = selectedJewel
-    ? window['TimelessJewelConquerors'][selectedJewel.value].map((k) => ({
+    ? Object.keys(window['TimelessJewelConquerors'][selectedJewel.value]).map((k) => ({
         value: k,
         label: k
       }))
@@ -48,11 +48,11 @@
     !seed ||
     !selectedJewel ||
     !selectedConqueror ||
-    window['TimelessJewelConquerors'][selectedJewel.value].indexOf(selectedConqueror.value) < 0
+    Object.keys(window['TimelessJewelConquerors'][selectedJewel.value]).indexOf(selectedConqueror.value) < 0
       ? []
       : affectedNodes.map((n) => ({
           node: n.skill,
-          result: Calculate(TreeToPassive[n.skill], seed, selectedJewel.value, selectedConqueror.value)
+          result: Calculate(TreeToPassive[n.skill].Index, seed, selectedJewel.value, selectedConqueror.value)
         }));
 
   let selectedStats: Record<number, StatConfig> = {};
@@ -162,7 +162,7 @@
     const query: ReverseSearchConfig = {
       jewel: selectedJewel.value,
       conqueror: selectedConqueror.value,
-      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => window['TreeToPassive'][n.skill]),
+      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => window['TreeToPassive'][n.skill].Index),
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
@@ -275,20 +275,18 @@
         }
       }
 
-      if ('alternatePassiveSkill' in r.result) {
-        const alt = GetAlternatePassiveSkillByIndex(r.result['alternatePassiveSkill']);
-        if ('statsKeys' in alt) {
-          alt['statsKeys'].forEach((key) => {
+      if ('AlternatePassiveSkill' in r.result && r.result.AlternatePassiveSkill) {
+        if ('StatsKeys' in r.result.AlternatePassiveSkill) {
+          r.result.AlternatePassiveSkill['StatsKeys'].forEach((key) => {
             mappedStats[key] = [...(mappedStats[key] || []), r.node];
           });
         }
       }
 
-      if ('alternatePassiveAdditionInformations' in r.result) {
-        r.result['alternatePassiveAdditionInformations'].forEach((info) => {
-          const addition = GetAlternatePassiveAdditionByIndex(info['alternatePassiveSkillAddition']);
-          if ('statsKeys' in addition) {
-            addition['statsKeys'].forEach((key) => {
+      if ('AlternatePassiveAdditionInformations' in r.result && r.result.AlternatePassiveAdditionInformations) {
+        r.result['AlternatePassiveAdditionInformations'].forEach((info) => {
+          if ('StatsKeys' in info.AlternatePassiveAddition) {
+            info.AlternatePassiveAddition['StatsKeys'].forEach((key) => {
               mappedStats[key] = [...(mappedStats[key] || []), r.node];
             });
           }
@@ -388,7 +386,7 @@
     let newSeed: number | undefined;
     let conqueror: string | undefined;
     for (let i = 10; i < lines.length; i++) {
-      conqueror = window['TimelessJewelConquerors'][jewel.value].find((k) => lines[i].indexOf(k) >= 0);
+      conqueror = Object.keys(window['TimelessJewelConquerors'][jewel.value]).find((k) => lines[i].indexOf(k) >= 0);
       if (conqueror) {
         const matches = /(\d+)/.exec(lines[i]);
         if (matches.length === 0) {
@@ -475,7 +473,7 @@
               <Select items={conquerors} bind:value={selectedConqueror} on:select={updateUrl} />
             </div>
 
-            {#if selectedConqueror && window['TimelessJewelConquerors'][selectedJewel.value].indexOf(selectedConqueror.value) >= 0}
+            {#if selectedConqueror && Object.keys(window['TimelessJewelConquerors'][selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
               <div class="mt-4 w-full flex flex-row">
                 <button class="selection-button" class:selected={mode === 'seed'} on:click={() => setMode('seed')}>
                   Enter Seed
@@ -492,17 +490,17 @@
                     type="number"
                     bind:value={seed}
                     on:blur={updateUrl}
-                    min={window['TimelessJewelSeedRanges'][selectedJewel.value].min}
-                    max={window['TimelessJewelSeedRanges'][selectedJewel.value].max} />
-                  {#if seed < window['TimelessJewelSeedRanges'][selectedJewel.value].min || seed > window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                    min={window['TimelessJewelSeedRanges'][selectedJewel.value].Min}
+                    max={window['TimelessJewelSeedRanges'][selectedJewel.value].Max} />
+                  {#if seed < window['TimelessJewelSeedRanges'][selectedJewel.value].Min || seed > window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
                     <div class="mt-2">
-                      Seed must be between {window['TimelessJewelSeedRanges'][selectedJewel.value].min}
-                      and {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                      Seed must be between {window['TimelessJewelSeedRanges'][selectedJewel.value].Min}
+                      and {window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
                     </div>
                   {/if}
                 </div>
 
-                {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].Min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
                   <div class="flex flex-row mt-4 items-end">
                     <div class="flex-grow">
                       <h3 class="mb-2">Sort Order</h3>
@@ -631,7 +629,7 @@
                         on:click={() => search()}
                         disabled={searching}>
                         {#if searching}
-                          {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].max}
+                          {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
                         {:else}
                           Search
                         {/if}

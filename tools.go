@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/tkrajina/typescriptify-golang-structs/typescriptify"
+
 	"github.com/Vilsol/timeless-jewels/calculator"
 	"github.com/Vilsol/timeless-jewels/data"
 )
@@ -15,6 +17,7 @@ import (
 
 //go:generate go run tools.go re-zip
 //go:generate go run tools.go find
+//go:generate go run tools.go types
 
 func main() {
 	if len(os.Args) < 2 {
@@ -26,6 +29,8 @@ func main() {
 		reZip()
 	case "find":
 		findAll()
+	case "types":
+		generateTypes()
 	}
 }
 
@@ -131,4 +136,24 @@ func findAll() {
 	}
 
 	writeZipped("./data/possible_stats.json.gz", foundStats)
+}
+
+func generateTypes() {
+	converter := typescriptify.New().
+		Add(data.Stat{}).
+		Add(data.PassiveSkill{}).
+		Add(data.AlternatePassiveSkill{}).
+		Add(data.AlternatePassiveAddition{}).
+		Add(data.AlternatePassiveSkillInformation{})
+
+	converter.WithConstructor(false)
+	converter.WithBackupDir("")
+	converter.WithFieldNames(true)
+	converter.WithInterface(true)
+	converter.WithMethods(true)
+
+	err := converter.ConvertToFile("models.ts")
+	if err != nil {
+		panic(err.Error())
+	}
 }
