@@ -3,25 +3,26 @@
   import Select from 'svelte-select';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import type { Node } from '../lib/types';
+  import type { Node } from '../lib/skill_tree_types';
   import { getAffectedNodes, skillTree, translateStat, openTrade } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
   import { proxy } from 'comlink';
   import type { ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
   import SearchResults from '../lib/components/SearchResults.svelte';
   import { statValues } from '../lib/values';
+  import { data, calculator } from '../lib/types';
 
   const searchParams = $page.url.searchParams;
 
-  const jewels = Object.keys(window['TimelessJewels']).map((k) => ({
+  const jewels = Object.keys(data.TimelessJewels).map((k) => ({
     value: parseInt(k),
-    label: window['TimelessJewels'][k]
+    label: data.TimelessJewels[k]
   }));
 
   let selectedJewel = searchParams.has('jewel') ? jewels.find((j) => j.value == searchParams.get('jewel')) : undefined;
 
   $: conquerors = selectedJewel
-    ? Object.keys(window['TimelessJewelConquerors'][selectedJewel.value]).map((k) => ({
+    ? Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).map((k) => ({
         value: k,
         label: k
       }))
@@ -48,11 +49,16 @@
     !seed ||
     !selectedJewel ||
     !selectedConqueror ||
-    Object.keys(window['TimelessJewelConquerors'][selectedJewel.value]).indexOf(selectedConqueror.value) < 0
+    Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) < 0
       ? []
       : affectedNodes.map((n) => ({
           node: n.skill,
-          result: Calculate(TreeToPassive[n.skill].Index, seed, selectedJewel.value, selectedConqueror.value)
+          result: calculator.Calculate(
+            data.TreeToPassive[n.skill].Index,
+            seed,
+            selectedJewel.value,
+            selectedConqueror.value
+          )
         }));
 
   let selectedStats: Record<number, StatConfig> = {};
@@ -105,7 +111,7 @@
     }
   };
 
-  const allPossibleStats: { [key: string]: { [key: string]: number } } = JSON.parse(window['PossibleStats']);
+  const allPossibleStats: { [key: string]: { [key: string]: number } } = JSON.parse(data.PossibleStats);
 
   $: availableStats = !selectedJewel ? [] : Object.keys(allPossibleStats[selectedJewel.value]);
   $: statItems = availableStats
@@ -126,7 +132,7 @@
       id: stat.detail.value
     };
     selectedStats = selectedStats;
-    statSelector['handleClear']();
+    statSelector.handleClear();
     updateUrl();
   };
 
@@ -162,7 +168,7 @@
     const query: ReverseSearchConfig = {
       jewel: selectedJewel.value,
       conqueror: selectedConqueror.value,
-      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => window['TreeToPassive'][n.skill].Index),
+      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => data.TreeToPassive[n.skill].Index),
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
@@ -255,7 +261,7 @@
   };
 
   const combineResults = (
-    rawResults: unknown[],
+    rawResults: { result: data.AlternatePassiveSkillInformation; node: number }[],
     withColors: boolean,
     only: 'notables' | 'passives' | 'all'
   ): CombinedResult[] => {
@@ -275,18 +281,16 @@
         }
       }
 
-      if ('AlternatePassiveSkill' in r.result && r.result.AlternatePassiveSkill) {
-        if ('StatsKeys' in r.result.AlternatePassiveSkill) {
-          r.result.AlternatePassiveSkill['StatsKeys'].forEach((key) => {
-            mappedStats[key] = [...(mappedStats[key] || []), r.node];
-          });
-        }
+      if (r.result.AlternatePassiveSkill && r.result.AlternatePassiveSkill.StatsKeys) {
+        r.result.AlternatePassiveSkill.StatsKeys.forEach((key) => {
+          mappedStats[key] = [...(mappedStats[key] || []), r.node];
+        });
       }
 
-      if ('AlternatePassiveAdditionInformations' in r.result && r.result.AlternatePassiveAdditionInformations) {
-        r.result['AlternatePassiveAdditionInformations'].forEach((info) => {
-          if ('StatsKeys' in info.AlternatePassiveAddition) {
-            info.AlternatePassiveAddition['StatsKeys'].forEach((key) => {
+      if (r.result.AlternatePassiveAdditionInformations) {
+        r.result.AlternatePassiveAdditionInformations.forEach((info) => {
+          if (info.AlternatePassiveAddition.StatsKeys) {
+            info.AlternatePassiveAddition.StatsKeys.forEach((key) => {
               mappedStats[key] = [...(mappedStats[key] || []), r.node];
             });
           }
@@ -371,7 +375,7 @@
       return;
     }
 
-    const paste = (event.clipboardData || window['clipboardData']).getData('text');
+    const paste = (event.clipboardData || window.clipboardData).getData('text');
     const lines = paste.split('\n');
 
     if (lines.length < 14) {
@@ -386,7 +390,7 @@
     let newSeed: number | undefined;
     let conqueror: string | undefined;
     for (let i = 10; i < lines.length; i++) {
-      conqueror = Object.keys(window['TimelessJewelConquerors'][jewel.value]).find((k) => lines[i].indexOf(k) >= 0);
+      conqueror = Object.keys(data.TimelessJewelConquerors[jewel.value]).find((k) => lines[i].indexOf(k) >= 0);
       if (conqueror) {
         const matches = /(\d+)/.exec(lines[i]);
         if (matches.length === 0) {
@@ -473,7 +477,7 @@
               <Select items={conquerors} bind:value={selectedConqueror} on:select={updateUrl} />
             </div>
 
-            {#if selectedConqueror && Object.keys(window['TimelessJewelConquerors'][selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
+            {#if selectedConqueror && Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
               <div class="mt-4 w-full flex flex-row">
                 <button class="selection-button" class:selected={mode === 'seed'} on:click={() => setMode('seed')}>
                   Enter Seed
@@ -490,17 +494,17 @@
                     type="number"
                     bind:value={seed}
                     on:blur={updateUrl}
-                    min={window['TimelessJewelSeedRanges'][selectedJewel.value].Min}
-                    max={window['TimelessJewelSeedRanges'][selectedJewel.value].Max} />
-                  {#if seed < window['TimelessJewelSeedRanges'][selectedJewel.value].Min || seed > window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
+                    min={data.TimelessJewelSeedRanges[selectedJewel.value].Min}
+                    max={data.TimelessJewelSeedRanges[selectedJewel.value].Max} />
+                  {#if seed < data.TimelessJewelSeedRanges[selectedJewel.value].Min || seed > data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                     <div class="mt-2">
-                      Seed must be between {window['TimelessJewelSeedRanges'][selectedJewel.value].Min}
-                      and {window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
+                      Seed must be between {data.TimelessJewelSeedRanges[selectedJewel.value].Min}
+                      and {data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                     </div>
                   {/if}
                 </div>
 
-                {#if seed >= window['TimelessJewelSeedRanges'][selectedJewel.value].Min && seed <= window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
+                {#if seed >= data.TimelessJewelSeedRanges[selectedJewel.value].Min && seed <= data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                   <div class="flex flex-row mt-4 items-end">
                     <div class="flex-grow">
                       <h3 class="mb-2">Sort Order</h3>
@@ -629,7 +633,7 @@
                         on:click={() => search()}
                         disabled={searching}>
                         {#if searching}
-                          {currentSeed} / {window['TimelessJewelSeedRanges'][selectedJewel.value].Max}
+                          {currentSeed} / {data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                         {:else}
                           Search
                         {/if}

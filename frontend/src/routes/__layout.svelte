@@ -5,6 +5,7 @@
   import { browser } from '$app/env';
   import { loadSkillTree } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
+  import { initializeCrystalline } from '../lib/types';
 
   let wasmLoading = true;
 
@@ -18,6 +19,7 @@
         WebAssembly.instantiate(data, go.importObject).then((result) => {
           go.run(result.instance);
           wasmLoading = false;
+          initializeCrystalline();
           loadSkillTree();
         });
 

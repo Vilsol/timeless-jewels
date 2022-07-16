@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Canvas, Layer, t } from 'svelte-canvas';
-  import type { RenderFunc, Node } from '../types';
+  import type { RenderFunc, Node } from '../skill_tree_types';
   import {
     baseJewelRadius,
     calculateNodePos,
@@ -18,6 +18,7 @@
   } from '../skill_tree';
   import type { Point } from '../skill_tree';
   import { derived } from 'svelte/store';
+  import { calculator, data } from '../types';
 
   export let clickNode: (node: Node) => void;
   export let circledNode: number | undefined;
@@ -344,7 +345,12 @@
 
       if (!hoveredNode.isJewelSocket && hoveredNodeActive) {
         if (hoveredNode.skill && seed && selectedJewel && selectedConqueror) {
-          const result = Calculate(TreeToPassive[hoveredNode.skill].Index, seed, selectedJewel, selectedConqueror);
+          const result = calculator.Calculate(
+            data.TreeToPassive[hoveredNode.skill].Index,
+            seed,
+            selectedJewel,
+            selectedConqueror
+          );
 
           if (result) {
             if ('AlternatePassiveSkill' in result && result.AlternatePassiveSkill) {
@@ -352,8 +358,8 @@
               nodeName = result.AlternatePassiveSkill.Name;
 
               if ('StatsKeys' in result.AlternatePassiveSkill) {
-                result.AlternatePassiveSkill['StatsKeys'].forEach((statId, i) => {
-                  const stat = GetStatByIndex(statId);
+                result.AlternatePassiveSkill.StatsKeys.forEach((statId, i) => {
+                  const stat = data.GetStatByIndex(statId);
                   const translation = inverseTranslations[stat.ID] || '';
                   if (translation) {
                     nodeStats.push({
@@ -365,19 +371,15 @@
               }
             }
 
-            if (
-              'AlternatePassiveAdditionInformations' in result &&
-              result['AlternatePassiveAdditionInformations'] &&
-              result['AlternatePassiveAdditionInformations'].length > 0
-            ) {
-              result['AlternatePassiveAdditionInformations'].forEach((info) => {
+            if (result.AlternatePassiveAdditionInformations) {
+              result.AlternatePassiveAdditionInformations.forEach((info) => {
                 if ('StatsKeys' in info.AlternatePassiveAddition) {
-                  info.AlternatePassiveAddition['StatsKeys'].forEach((statId, i) => {
-                    const stat = GetStatByIndex(statId);
+                  info.AlternatePassiveAddition.StatsKeys.forEach((statId, i) => {
+                    const stat = data.GetStatByIndex(statId);
                     const translation = inverseTranslations[stat.ID] || '';
                     if (translation) {
                       nodeStats.push({
-                        text: formatStats(translation, info.statRolls[i]) || stat.ID,
+                        text: formatStats(translation, info.StatRolls[i]) || stat.ID,
                         special: true
                       });
                     }

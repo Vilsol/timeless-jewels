@@ -1,6 +1,7 @@
-import type { Translation, Node, SkillTreeData, Group, Sprite } from './types';
+import type { Translation, Node, SkillTreeData, Group, Sprite } from './skill_tree_types';
 import type { Readable } from 'svelte/store';
 import { writable } from 'svelte/store';
+import { data } from './types';
 
 export let skillTree: SkillTreeData;
 
@@ -14,8 +15,8 @@ export const inverseTranslations: Record<string, Translation> = {};
 
 export const passiveToTree: Record<number, number> = {};
 
-export const loadSkillTree = (tree?: string, translationData?: string, treeToPassive?: unknown) => {
-  skillTree = JSON.parse(tree || window['SkillTree']);
+export const loadSkillTree = () => {
+  skillTree = JSON.parse(data.SkillTree);
   console.log('Loaded skill tree', skillTree);
 
   Object.keys(skillTree.groups).forEach((groupId) => {
@@ -73,7 +74,7 @@ export const loadSkillTree = (tree?: string, translationData?: string, treeToPas
     Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
   );
 
-  const translations: Translation[] = JSON.parse(translationData || window['PassiveTranslations']);
+  const translations: Translation[] = JSON.parse(data.PassiveTranslations);
 
   translations.forEach((t) => {
     t.ids.forEach((id) => {
@@ -81,8 +82,8 @@ export const loadSkillTree = (tree?: string, translationData?: string, treeToPas
     });
   });
 
-  Object.keys(treeToPassive || window['TreeToPassive']).forEach((k) => {
-    passiveToTree[(treeToPassive || window['TreeToPassive'])[k].Index] = parseInt(k);
+  Object.keys(data.TreeToPassive).forEach((k) => {
+    passiveToTree[data.TreeToPassive[parseInt(k)].Index] = parseInt(k);
   });
 };
 
@@ -287,7 +288,7 @@ const statCache: Record<number, Stat> = {};
 export const getStat = (id: number | string): Stat => {
   const nId = typeof id === 'string' ? parseInt(id) : id;
   if (!(nId in statCache)) {
-    statCache[nId] = window['GetStatByIndex'](nId);
+    statCache[nId] = data.GetStatByIndex(nId);
   }
   return statCache[nId];
 };
@@ -328,7 +329,7 @@ export const translateStat = (id: number, roll?: number | undefined): string => 
     return formatStats(translation, roll) || stat.ID;
   }
 
-  let translationText = stat.text || stat.ID;
+  let translationText = stat.Text || stat.ID;
   if (translation && translation.English && translation.English.length) {
     translationText = translation.English[0].string;
     translation.English[0].format.forEach((f, i) => {
@@ -430,7 +431,7 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
       status: {
         option: 'online'
       },
-      name: window['TimelessJewels'][jewel],
+      name: data.TimelessJewels[jewel],
       type: 'Timeless Jewel',
       stats
     },

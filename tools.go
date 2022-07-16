@@ -7,10 +7,9 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/tkrajina/typescriptify-golang-structs/typescriptify"
-
 	"github.com/Vilsol/timeless-jewels/calculator"
 	"github.com/Vilsol/timeless-jewels/data"
+	"github.com/Vilsol/timeless-jewels/wasm/exposition"
 )
 
 // Uses separate steps so finder step has the new data loaded by data package
@@ -139,21 +138,26 @@ func findAll() {
 }
 
 func generateTypes() {
-	converter := typescriptify.New().
-		Add(data.Stat{}).
-		Add(data.PassiveSkill{}).
-		Add(data.AlternatePassiveSkill{}).
-		Add(data.AlternatePassiveAddition{}).
-		Add(data.AlternatePassiveSkillInformation{})
-
-	converter.WithConstructor(false)
-	converter.WithBackupDir("")
-	converter.WithFieldNames(true)
-	converter.WithInterface(true)
-	converter.WithMethods(true)
-
-	err := converter.ConvertToFile("models.ts")
+	e := exposition.Expose()
+	tsFile, jsFile, err := e.Build()
 	if err != nil {
-		panic(err.Error())
+		panic(err)
+	}
+
+	tsFile = "/* eslint-disable */\n" + tsFile
+	jsFile = "/* eslint-disable */\n" + jsFile
+
+	if err := os.MkdirAll("./frontend/src/lib/types", 0777); err != nil {
+		if !os.IsExist(err) {
+			panic(err)
+		}
+	}
+
+	if err := os.WriteFile("./frontend/src/lib/types/index.js", []byte(jsFile), 0777); err != nil {
+		panic(err)
+	}
+
+	if err := os.WriteFile("./frontend/src/lib/types/index.d.ts", []byte(tsFile), 0777); err != nil {
+		panic(err)
 	}
 }

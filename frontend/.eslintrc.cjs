@@ -39,6 +39,7 @@ module.exports = {
     'array-bracket-newline': ['error', { multiline: true }],
     'brace-style': 'error',
     'no-shadow': 'error',
-    'no-use-before-define': 'error'
+    'no-use-before-define': 'error',
+    'dot-notation': 'error'
   }
 };

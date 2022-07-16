@@ -1,14 +1,8 @@
-// noinspection JSUnusedGlobalSymbols
-
 export interface Asset {
   '0.1246': string;
   '0.2109': string;
   '0.2972': string;
   '0.3835': string;
-}
-
-export interface JewelCircle {
-  '1': string;
 }
 
 export interface FlavourTextRect {
