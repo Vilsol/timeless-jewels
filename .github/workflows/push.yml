@@ -68,3 +68,48 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    needs:
+      - lint-backend
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          stable: false
+
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Build wasm
+        run: go build -ldflags="-s -w" -v ./wasm
+        env:
+          GOOS: js
+          GOARCH: wasm
+
+  build-frontend:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - lint-frontend
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: |
+            - cwd: frontend
+
+      - name: Build frontend
+        working-directory: frontend
+        run: pnpm run build
