@@ -91,7 +91,7 @@ jobs:
           GOARCH: wasm
 
   build-frontend:
-    name: Release
+    name: Build Frontend
     runs-on: ubuntu-latest
     needs:
       - lint-frontend
