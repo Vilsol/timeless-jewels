@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/MarvinJWendt/testza v0.4.2
-	github.com/Vilsol/crystalline v0.0.0-20220716045120-113af77d011b
+	github.com/Vilsol/crystalline v0.0.0-20220724211952-a8bc9473aded
 )
 
 require (

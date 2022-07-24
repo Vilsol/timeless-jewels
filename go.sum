@@ -6,8 +6,8 @@ github.com/MarvinJWendt/testza v0.2.12/go.mod h1:JOIegYyV7rX+7VZ9r77L/eH6CfJHHzX
 github.com/MarvinJWendt/testza v0.3.0/go.mod h1:eFcL4I0idjtIx8P9C6KkAuLgATNKpX4/2oUqKc6bF2c=
 github.com/MarvinJWendt/testza v0.4.2 h1:Vbw9GkSB5erJI2BPnBL9SVGV9myE+XmUSFahBGUhW2Q=
 github.com/MarvinJWendt/testza v0.4.2/go.mod h1:mSdhXiKH8sg/gQehJ63bINcCKp7RtYewEjXsvsVUPbE=
-github.com/Vilsol/crystalline v0.0.0-20220716045120-113af77d011b h1:lwE9vIkaCyrWOEOhpr1qm4wzj3s9oVznG0dcI+8PUw8=
-github.com/Vilsol/crystalline v0.0.0-20220716045120-113af77d011b/go.mod h1:VM8Yehl1oHujCeXOBaUIlwE40j75AsMNWg2tM0rPz/c=
+github.com/Vilsol/crystalline v0.0.0-20220724211952-a8bc9473aded h1:OwsczeFhueFCbY5PAaP4ix8o5UwYJ396/os1stNhGwk=
+github.com/Vilsol/crystalline v0.0.0-20220724211952-a8bc9473aded/go.mod h1:VM8Yehl1oHujCeXOBaUIlwE40j75AsMNWg2tM0rPz/c=
 github.com/atomicgo/cursor v0.0.1 h1:xdogsqa6YYlLfM+GyClC/Lchf7aiMerFiZQn7soTOoU=
 github.com/atomicgo/cursor v0.0.1/go.mod h1:cBON2QmmrysudxNBFthvMtN32r3jxVRIvzkUiF/RuIk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

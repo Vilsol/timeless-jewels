@@ -1,7 +1,7 @@
 /* eslint-disable */
 export declare namespace calculator {
-  function Calculate(arg1: number, arg2: number, arg3: number, arg4: string): data.AlternatePassiveSkillInformation;
-  function ReverseSearch(arg1?: Array<number>, arg2?: Array<number>, arg3: number, arg4: string, arg5: (arg1: number) => void): (Record<number, Record<number, Record<number, number> | undefined> | undefined> | undefined);
+  function Calculate(passiveID: number, seed: number, timelessJewelType: number, conqueror: string): data.AlternatePassiveSkillInformation;
+  function ReverseSearch(passiveIDs?: Array<number>, statIDs?: Array<number>, timelessJewelType: number, conqueror: string, updates: (arg1: number) => void): (Record<number, Record<number, Record<number, number> | undefined> | undefined> | undefined);
 }
 export declare namespace data {
   interface AlternatePassiveAddition {
@@ -15,6 +15,7 @@ export declare namespace data {
     Stat2Min: number;
     Stat2Max: number;
     PassiveType?: Array<number>;
+    GetStatMinMax(min: boolean, index: number): number;
   }
   interface AlternatePassiveAdditionInformation {
     AlternatePassiveAddition?: data.AlternatePassiveAddition;
@@ -40,6 +41,7 @@ export declare namespace data {
     RandomMin: number;
     RandomMax: number;
     ConquerorVersion: number;
+    GetStatMinMax(min: boolean, index: number): number;
   }
   interface AlternatePassiveSkillInformation {
     AlternatePassiveSkill?: data.AlternatePassiveSkill;
@@ -71,10 +73,10 @@ export declare namespace data {
     Index: number;
     Version: number;
   }
-  function GetAlternatePassiveAdditionByIndex(arg1: number): (data.AlternatePassiveAddition | undefined);
-  function GetAlternatePassiveSkillByIndex(arg1: number): (data.AlternatePassiveSkill | undefined);
-  function GetPassiveSkillByIndex(arg1: number): (data.PassiveSkill | undefined);
-  function GetStatByIndex(arg1: number): (data.Stat | undefined);
+  function GetAlternatePassiveAdditionByIndex(index: number): (data.AlternatePassiveAddition | undefined);
+  function GetAlternatePassiveSkillByIndex(index: number): (data.AlternatePassiveSkill | undefined);
+  function GetPassiveSkillByIndex(index: number): (data.PassiveSkill | undefined);
+  function GetStatByIndex(index: number): (data.Stat | undefined);
   const PassiveSkills: Array<data.PassiveSkill | undefined> | undefined;
   const PassiveTranslations: string;
   const PossibleStats: string;
