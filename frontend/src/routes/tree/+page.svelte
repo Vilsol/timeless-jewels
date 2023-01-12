@@ -1,16 +1,16 @@
 <script lang="ts">
-  import SkillTree from '../lib/components/SkillTree.svelte';
+  import SkillTree from '../../lib/components/SkillTree.svelte';
   import Select from 'svelte-select';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import type { Node } from '../lib/skill_tree_types';
-  import { getAffectedNodes, skillTree, translateStat, openTrade } from '../lib/skill_tree';
-  import { syncWrap } from '../lib/worker';
+  import type { Node } from '../../lib/skill_tree_types';
+  import { getAffectedNodes, skillTree, translateStat, openTrade } from '../../lib/skill_tree';
+  import { syncWrap } from '../../lib/worker';
   import { proxy } from 'comlink';
-  import type { ReverseSearchConfig, StatConfig } from '../lib/skill_tree';
-  import SearchResults from '../lib/components/SearchResults.svelte';
-  import { statValues } from '../lib/values';
-  import { data, calculator } from '../lib/types';
+  import type { ReverseSearchConfig, StatConfig } from '../../lib/skill_tree';
+  import SearchResults from '../../lib/components/SearchResults.svelte';
+  import { statValues } from '../../lib/values';
+  import { data, calculator } from '../../lib/types';
 
   const searchParams = $page.url.searchParams;
 

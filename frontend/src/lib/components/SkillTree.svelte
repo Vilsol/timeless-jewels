@@ -8,7 +8,6 @@
     drawnGroups,
     drawnNodes,
     formatStats,
-    getAsset,
     inverseSprites,
     inverseSpritesActive,
     inverseTranslations,
@@ -51,39 +50,16 @@
   $: jewelRadius = baseJewelRadius / scaling;
 
   const drawScaling = 2.6;
-  const drawScaledCenter = (context: CanvasRenderingContext2D, asset: HTMLImageElement, pos: Point) => {
-    const newWidth = (asset.width / scaling) * drawScaling;
-    const newHeight = (asset.height / scaling) * drawScaling;
-
-    const topLeftX = pos.x - newWidth / 2;
-    const topLeftY = pos.y - newHeight / 2;
-
-    context.drawImage(asset, topLeftX, topLeftY, newWidth, newHeight);
-  };
-
-  const drawMirror = (context: CanvasRenderingContext2D, asset: HTMLImageElement, pos: Point) => {
-    const newWidth = (asset.width / scaling) * drawScaling;
-    const newHeight = (asset.height / scaling) * drawScaling;
-
-    const topLeftX = pos.x - newWidth / 2;
-    const topLeftY = pos.y - newHeight / 2;
-
-    const finalY = topLeftY - newHeight / 2;
-
-    context.drawImage(asset, topLeftX, finalY, newWidth, newHeight);
-    context.save();
-
-    context.translate(topLeftX, topLeftY);
-    context.rotate(Math.PI);
-
-    context.drawImage(asset, -newWidth, -(newHeight / 2), newWidth, -newHeight);
-
-    context.restore();
-  };
 
   const spriteCache: Record<string, HTMLImageElement> = {};
   const spriteCacheActive: Record<string, HTMLImageElement> = {};
-  const drawSprite = (context: CanvasRenderingContext2D, path: string, pos: Point, active = false) => {
+  const drawSprite = (
+    context: CanvasRenderingContext2D,
+    path: string,
+    pos: Point,
+    active = false,
+    mirrored = false
+  ) => {
     let sprite = active ? inverseSpritesActive[path] : inverseSprites[path];
 
     if (!sprite && active) {
@@ -105,6 +81,12 @@
     const topLeftX = pos.x - newWidth / 2;
     const topLeftY = pos.y - newHeight / 2;
 
+    let finalY = topLeftY;
+
+    if (mirrored) {
+      finalY = topLeftY - newHeight / 2;
+    }
+
     context.drawImage(
       (active ? spriteCacheActive : spriteCache)[spriteSheetUrl],
       self.x,
@@ -112,10 +94,31 @@
       self.w,
       self.h,
       topLeftX,
-      topLeftY,
+      finalY,
       newWidth,
       newHeight
     );
+
+    if (mirrored) {
+      context.save();
+
+      context.translate(topLeftX, topLeftY);
+      context.rotate(Math.PI);
+
+      context.drawImage(
+        (active ? spriteCacheActive : spriteCache)[spriteSheetUrl],
+        self.x,
+        self.y,
+        self.w,
+        self.h,
+        -newWidth,
+        -(newHeight / 2),
+        newWidth,
+        -newHeight
+      );
+
+      context.restore();
+    }
   };
 
   const wrapText = (text: string, context: CanvasRenderingContext2D, width: number): string[] => {
@@ -146,19 +149,6 @@
 
   let cursor = 'unset';
 
-  const PSGroupBackground1 = getAsset('PSGroupBackground1');
-  const PSGroupBackground2 = getAsset('PSGroupBackground2');
-  const PSGroupBackground3 = getAsset('PSGroupBackground3');
-  const KeystoneFrameAllocated = getAsset('KeystoneFrameAllocated');
-  const KeystoneFrameUnallocated = getAsset('KeystoneFrameUnallocated');
-  const NotableFrameAllocated = getAsset('NotableFrameAllocated');
-  const NotableFrameUnallocated = getAsset('NotableFrameUnallocated');
-  const JewelSocketAltNormal = getAsset('JewelSocketAltNormal');
-  const JewelFrameAllocated = getAsset('JewelFrameAllocated');
-  const JewelFrameUnallocated = getAsset('JewelFrameUnallocated');
-  const PSSkillFrameActive = getAsset('PSSkillFrameActive');
-  const PSSkillFrame = getAsset('PSSkillFrame');
-
   let hoveredNode: Node | undefined;
   $: render = (({ context, width, height }) => {
     const start = window.performance.now();
@@ -177,11 +167,12 @@
       if (startGroups.indexOf(parseInt(groupId)) >= 0) {
         // Do not draw starter nodes
       } else if (maxOrbit == 1) {
-        drawScaledCenter(context, $PSGroupBackground1, groupPos);
+        drawSprite(context, 'PSGroupBackground1', groupPos, false);
       } else if (maxOrbit == 2) {
-        drawScaledCenter(context, $PSGroupBackground2, groupPos);
+        drawSprite(context, 'PSGroupBackground2', groupPos, false);
       } else if (maxOrbit == 3 || group.orbits.length > 1) {
-        drawMirror(context, $PSGroupBackground3, groupPos);
+        drawSprite(context, 'PSGroupBackground3', groupPos, false, true);
+        // drawMirror(context, $PSGroupBackground3, groupPos);
       }
     });
 
@@ -273,31 +264,31 @@
         touchDistance = 110;
         drawSprite(context, node.icon, rotatedPos, active);
         if (active) {
-          drawScaledCenter(context, $KeystoneFrameAllocated, rotatedPos);
+          drawSprite(context, 'KeystoneFrameAllocated', rotatedPos, false);
         } else {
-          drawScaledCenter(context, $KeystoneFrameUnallocated, rotatedPos);
+          drawSprite(context, 'KeystoneFrameUnallocated', rotatedPos, false);
         }
       } else if (node.isNotable) {
         touchDistance = 70;
         drawSprite(context, node.icon, rotatedPos, active);
         if (active) {
-          drawScaledCenter(context, $NotableFrameAllocated, rotatedPos);
+          drawSprite(context, 'NotableFrameAllocated', rotatedPos, false);
         } else {
-          drawScaledCenter(context, $NotableFrameUnallocated, rotatedPos);
+          drawSprite(context, 'NotableFrameUnallocated', rotatedPos, false);
         }
       } else if (node.isJewelSocket) {
         touchDistance = 70;
         if (node.expansionJewel) {
           if (active) {
-            drawScaledCenter(context, $JewelSocketAltNormal, rotatedPos);
+            drawSprite(context, 'JewelSocketAltNormal', rotatedPos, false);
           } else {
-            drawScaledCenter(context, $JewelSocketAltNormal, rotatedPos);
+            drawSprite(context, 'JewelSocketAltNormal', rotatedPos, false);
           }
         } else {
           if (active) {
-            drawScaledCenter(context, $JewelFrameAllocated, rotatedPos);
+            drawSprite(context, 'JewelFrameAllocated', rotatedPos, false);
           } else {
-            drawScaledCenter(context, $JewelFrameUnallocated, rotatedPos);
+            drawSprite(context, 'JewelFrameUnallocated', rotatedPos, false);
           }
         }
       } else if (node.isMastery) {
@@ -306,9 +297,9 @@
         touchDistance = 50;
         drawSprite(context, node.icon, rotatedPos, active);
         if (active) {
-          drawScaledCenter(context, $PSSkillFrameActive, rotatedPos);
+          drawSprite(context, 'PSSkillFrameActive', rotatedPos, false);
         } else {
-          drawScaledCenter(context, $PSSkillFrame, rotatedPos);
+          drawSprite(context, 'PSSkillFrame', rotatedPos, false);
         }
       }
 

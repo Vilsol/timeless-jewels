@@ -13,7 +13,7 @@ type SkillTree struct {
 	MaxY            int64                 `json:"max_y"`
 	Assets          Assets                `json:"assets"`
 	Constants       Constants             `json:"constants"`
-	SkillSprites    SkillSprites          `json:"skillSprites"`
+	Sprites         Sprites               `json:"sprites"`
 	ImageZoomLevels []float64             `json:"imageZoomLevels"`
 	Points          Points                `json:"points"`
 }
@@ -274,18 +274,20 @@ type Points struct {
 	AscendancyPoints int64 `json:"ascendancyPoints"`
 }
 
-type SkillSprites struct {
-	NormalActive          []Sprite `json:"normalActive"`
-	NotableActive         []Sprite `json:"notableActive"`
-	KeystoneActive        []Sprite `json:"keystoneActive"`
-	NormalInactive        []Sprite `json:"normalInactive"`
-	NotableInactive       []Sprite `json:"notableInactive"`
-	KeystoneInactive      []Sprite `json:"keystoneInactive"`
-	Mastery               []Sprite `json:"mastery"`
-	MasteryConnected      []Sprite `json:"masteryConnected"`
-	MasteryActiveSelected []Sprite `json:"masteryActiveSelected"`
-	MasteryInactive       []Sprite `json:"masteryInactive"`
-	MasteryActiveEffect   []Sprite `json:"masteryActiveEffect"`
+type Sprites struct {
+	NormalActive          map[string]Sprite `json:"normalActive"`
+	NotableActive         map[string]Sprite `json:"notableActive"`
+	KeystoneActive        map[string]Sprite `json:"keystoneActive"`
+	NormalInactive        map[string]Sprite `json:"normalInactive"`
+	NotableInactive       map[string]Sprite `json:"notableInactive"`
+	KeystoneInactive      map[string]Sprite `json:"keystoneInactive"`
+	Mastery               map[string]Sprite `json:"mastery"`
+	MasteryConnected      map[string]Sprite `json:"masteryConnected"`
+	MasteryActiveSelected map[string]Sprite `json:"masteryActiveSelected"`
+	MasteryInactive       map[string]Sprite `json:"masteryInactive"`
+	MasteryActiveEffect   map[string]Sprite `json:"masteryActiveEffect"`
+	GroupBackground       map[string]Sprite `json:"groupBackground"`
+	Frame                 map[string]Sprite `json:"frame"`
 }
 
 type Sprite struct {

@@ -19,8 +19,7 @@ const config = {
       base: '/timeless-jewels'
     },
     prerender: {
-      default: true,
-      enabled: true
+      entries: ['*']
     }
   }
 };

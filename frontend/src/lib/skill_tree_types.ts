@@ -123,18 +123,20 @@ export interface Sprite {
   coords: { [key: string]: Coord };
 }
 
-export interface SkillSprites {
-  normalActive: Sprite[];
-  notableActive: Sprite[];
-  keystoneActive: Sprite[];
-  normalInactive: Sprite[];
-  notableInactive: Sprite[];
-  keystoneInactive: Sprite[];
-  mastery: Sprite[];
-  masteryConnected: Sprite[];
-  masteryActiveSelected: Sprite[];
-  masteryInactive: Sprite[];
-  masteryActiveEffect: Sprite[];
+export interface Sprites {
+  normalActive: { [key: string]: Sprite };
+  notableActive: { [key: string]: Sprite };
+  keystoneActive: { [key: string]: Sprite };
+  normalInactive: { [key: string]: Sprite };
+  notableInactive: { [key: string]: Sprite };
+  keystoneInactive: { [key: string]: Sprite };
+  mastery: { [key: string]: Sprite };
+  masteryConnected: { [key: string]: Sprite };
+  masteryActiveSelected: { [key: string]: Sprite };
+  masteryInactive: { [key: string]: Sprite };
+  masteryActiveEffect: { [key: string]: Sprite };
+  groupBackground: { [key: string]: Sprite };
+  frame: { [key: string]: Sprite };
 }
 
 export interface RenderParams {
@@ -185,7 +187,7 @@ export interface SkillTreeData {
   max_y: number;
   assets: { [key: string]: Asset };
   constants: Constants;
-  skillSprites: SkillSprites;
+  sprites: Sprites;
   imageZoomLevels: number[];
   points: Points;
 }

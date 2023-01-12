@@ -1,4 +1,4 @@
-import { browser } from '$app/env';
+import { browser } from '$app/environment';
 import SyncWorker from './sync_worker?worker';
 import * as Comlink from 'comlink';
 import type { WorkerType } from './sync_worker';

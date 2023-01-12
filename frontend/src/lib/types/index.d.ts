@@ -1,7 +1,7 @@
 /* eslint-disable */
 export declare namespace calculator {
   function Calculate(passiveID: number, seed: number, timelessJewelType: number, conqueror: string): data.AlternatePassiveSkillInformation;
-  function ReverseSearch(passiveIDs?: Array<number>, statIDs?: Array<number>, timelessJewelType: number, conqueror: string, updates: (arg1: number) => void): (Record<number, Record<number, Record<number, number> | undefined> | undefined> | undefined);
+  function ReverseSearch(passiveIDs?: Array<number>, statIDs?: Array<number>, timelessJewelType: number, conqueror: string, updates: (arg1: number) => Promise<void>): Promise<(Record<number, Record<number, Record<number, number> | undefined> | undefined> | undefined)>;
 }
 export declare namespace data {
   interface AlternatePassiveAddition {

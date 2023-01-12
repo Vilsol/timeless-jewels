@@ -1,6 +1,4 @@
 import type { Translation, Node, SkillTreeData, Group, Sprite } from './skill_tree_types';
-import type { Readable } from 'svelte/store';
-import { writable } from 'svelte/store';
 import { data } from './types';
 
 export let skillTree: SkillTreeData;
@@ -56,22 +54,37 @@ export const loadSkillTree = () => {
     });
   });
 
-  skillTree.skillSprites.keystoneInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
-  skillTree.skillSprites.notableInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
-  skillTree.skillSprites.normalInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
-  skillTree.skillSprites.masteryInactive.forEach((k) => Object.keys(k.coords).forEach((c) => (inverseSprites[c] = k)));
+  Object.keys(skillTree.sprites.keystoneInactive['0.3835'].coords).forEach(
+    (c) => (inverseSprites[c] = skillTree.sprites.keystoneInactive['0.3835'])
+  );
+  Object.keys(skillTree.sprites.notableInactive['0.3835'].coords).forEach(
+    (c) => (inverseSprites[c] = skillTree.sprites.notableInactive['0.3835'])
+  );
+  Object.keys(skillTree.sprites.normalInactive['0.3835'].coords).forEach(
+    (c) => (inverseSprites[c] = skillTree.sprites.normalInactive['0.3835'])
+  );
+  Object.keys(skillTree.sprites.masteryInactive['0.3835'].coords).forEach(
+    (c) => (inverseSprites[c] = skillTree.sprites.masteryInactive['0.3835'])
+  );
 
-  skillTree.skillSprites.keystoneActive.forEach((k) =>
-    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  Object.keys(skillTree.sprites.keystoneActive['0.3835'].coords).forEach(
+    (c) => (inverseSpritesActive[c] = skillTree.sprites.keystoneActive['0.3835'])
   );
-  skillTree.skillSprites.notableActive.forEach((k) =>
-    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  Object.keys(skillTree.sprites.notableActive['0.3835'].coords).forEach(
+    (c) => (inverseSpritesActive[c] = skillTree.sprites.notableActive['0.3835'])
   );
-  skillTree.skillSprites.normalActive.forEach((k) =>
-    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  Object.keys(skillTree.sprites.normalActive['0.3835'].coords).forEach(
+    (c) => (inverseSpritesActive[c] = skillTree.sprites.normalActive['0.3835'])
   );
-  skillTree.skillSprites.masteryInactive.forEach((k) =>
-    Object.keys(k.coords).forEach((c) => (inverseSpritesActive[c] = k))
+  Object.keys(skillTree.sprites.masteryInactive['0.3835'].coords).forEach(
+    (c) => (inverseSpritesActive[c] = skillTree.sprites.masteryInactive['0.3835'])
+  );
+
+  Object.keys(skillTree.sprites.groupBackground['0.3835'].coords).forEach(
+    (c) => (inverseSprites[c] = skillTree.sprites.groupBackground['0.3835'])
+  );
+  Object.keys(skillTree.sprites.frame['0.3835'].coords).forEach(
+    (c) => (inverseSprites[c] = skillTree.sprites.frame['0.3835'])
   );
 
   const translations: Translation[] = JSON.parse(data.PassiveTranslations);
@@ -244,25 +257,6 @@ export const formatStats = (translation: Translation, stat: number): string | un
   }
 
   return datum.string.replace(`{0}`, datum.format[0].replace('#', finalStat.toString()));
-};
-
-const assetCache: Record<string, Readable<HTMLImageElement>> = {};
-export const getAsset = (name: string): Readable<HTMLImageElement> => {
-  if (name in assetCache) {
-    return assetCache[name];
-  }
-
-  const img = new Image();
-  const imageStore = writable(img);
-
-  img.src = skillTree.assets[name]['0.3835'];
-  img.onload = () => {
-    imageStore.set(img);
-  };
-
-  assetCache[name] = imageStore;
-
-  return assetCache[name];
 };
 
 export const baseJewelRadius = 1800;

@@ -2,7 +2,7 @@
   import '../app.scss';
   import '../wasm_exec.js';
   import { assets } from '$app/paths';
-  import { browser } from '$app/env';
+  import { browser } from '$app/environment';
   import { loadSkillTree } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
   import { initializeCrystalline } from '../lib/types';
