@@ -17,9 +17,6 @@ const config = {
     }),
     paths: {
       base: '/timeless-jewels'
-    },
-    prerender: {
-      entries: ['*']
     }
   }
 };
