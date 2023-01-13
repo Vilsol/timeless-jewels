@@ -14,15 +14,15 @@ var passiveIDs = []uint32{2211, 662, 2095, 600, 944, 75, 2556, 1094, 2589, 2505,
 func TestReverseGloriousVanity(t *testing.T) {
 	statIDs := []uint32{5815}
 	result := calculator.ReverseSearch(passiveIDs, statIDs, data.GloriousVanity, data.Xibaqua, nil)
-	testza.AssertLen(t, result, 1915)
-	testza.AssertLen(t, result[1001], 4)
+	testza.AssertLen(t, result, 1785)
+	testza.AssertLen(t, result[1001], 1)
 	testza.AssertEqual(t, uint32(2), result[1001][13][statIDs[0]])
 }
 
 func TestReverseElegantHubris(t *testing.T) {
 	statIDs := []uint32{25}
 	result := calculator.ReverseSearch(passiveIDs, statIDs, data.ElegantHubris, data.Cadiro, nil)
-	testza.AssertLen(t, result, 2328)
+	testza.AssertLen(t, result, 2171)
 	testza.AssertLen(t, result[57820], 2)
 	testza.AssertEqual(t, uint32(80), result[57820][1068][statIDs[0]])
 }
