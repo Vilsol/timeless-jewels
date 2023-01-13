@@ -51,7 +51,7 @@
     !selectedConqueror ||
     Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) < 0
       ? []
-      : affectedNodes.map((n) => ({
+      : affectedNodes.filter(n => !!data.TreeToPassive[n.skill]).map((n) => ({
           node: n.skill,
           result: calculator.Calculate(
             data.TreeToPassive[n.skill].Index,
@@ -168,7 +168,7 @@
     const query: ReverseSearchConfig = {
       jewel: selectedJewel.value,
       conqueror: selectedConqueror.value,
-      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => data.TreeToPassive[n.skill].Index),
+      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => data.TreeToPassive[n.skill]).filter(n => !!n).map(n => n.Index),
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
@@ -469,12 +469,12 @@
         </div>
 
         {#if !results}
-          <Select items={jewels} bind:value={selectedJewel} on:select={changeJewel} />
+          <Select items={jewels} bind:value={selectedJewel} on:change={changeJewel} />
 
           {#if selectedJewel}
             <div class="mt-4">
               <h3 class="mb-2">Conqueror</h3>
-              <Select items={conquerors} bind:value={selectedConqueror} on:select={updateUrl} />
+              <Select items={conquerors} bind:value={selectedConqueror} on:change={updateUrl} />
             </div>
 
             {#if selectedConqueror && Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
@@ -567,7 +567,7 @@
               {:else if mode === 'stats'}
                 <div class="mt-4">
                   <h3 class="mb-2">Add Stat</h3>
-                  <Select items={statItems} on:select={selectStat} bind:this={statSelector} />
+                  <Select items={statItems} on:change={selectStat} bind:this={statSelector} />
                 </div>
                 {#if Object.keys(selectedStats).length > 0}
                   <div class="mt-4 flex flex-col overflow-auto min-h-[100px]">
