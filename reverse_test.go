@@ -23,7 +23,7 @@ func TestReverseElegantHubris(t *testing.T) {
 	statIDs := []uint32{25}
 	result := calculator.ReverseSearch(passiveIDs, statIDs, data.ElegantHubris, data.Cadiro, nil)
 	testza.AssertLen(t, result, 2328)
-	testza.AssertLen(t, result[57820], 4)
+	testza.AssertLen(t, result[57820], 2)
 	testza.AssertEqual(t, uint32(80), result[57820][1068][statIDs[0]])
 }
 
