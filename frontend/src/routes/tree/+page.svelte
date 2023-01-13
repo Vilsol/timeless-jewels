@@ -51,15 +51,17 @@
     !selectedConqueror ||
     Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) < 0
       ? []
-      : affectedNodes.filter(n => !!data.TreeToPassive[n.skill]).map((n) => ({
-          node: n.skill,
-          result: calculator.Calculate(
-            data.TreeToPassive[n.skill].Index,
-            seed,
-            selectedJewel.value,
-            selectedConqueror.value
-          )
-        }));
+      : affectedNodes
+          .filter((n) => !!data.TreeToPassive[n.skill])
+          .map((n) => ({
+            node: n.skill,
+            result: calculator.Calculate(
+              data.TreeToPassive[n.skill].Index,
+              seed,
+              selectedJewel.value,
+              selectedConqueror.value
+            )
+          }));
 
   let selectedStats: Record<number, StatConfig> = {};
   if (searchParams.has('stat')) {
@@ -168,7 +170,11 @@
     const query: ReverseSearchConfig = {
       jewel: selectedJewel.value,
       conqueror: selectedConqueror.value,
-      nodes: affectedNodes.filter((n) => !disabled.has(n.skill)).map((n) => data.TreeToPassive[n.skill]).filter(n => !!n).map(n => n.Index),
+      nodes: affectedNodes
+        .filter((n) => !disabled.has(n.skill))
+        .map((n) => data.TreeToPassive[n.skill])
+        .filter((n) => !!n)
+        .map((n) => n.Index),
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
