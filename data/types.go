@@ -1,14 +1,14 @@
 package data
 
 type Stat struct {
-	Index    uint32  `json:"_rid"`
+	Index    uint32  `json:"_key"`
 	ID       string  `json:"Id"`
 	Text     string  `json:"Text"`
 	Category *uint32 `json:"Category"`
 }
 
 type PassiveSkill struct {
-	Index               uint32   `json:"_rid"`
+	Index               uint32   `json:"_key"`
 	ID                  string   `json:"Id"`
 	StatIndices         []uint32 `json:"Stats"`
 	PassiveSkillGraphID uint32   `json:"PassiveSkillGraphId"`
@@ -19,17 +19,17 @@ type PassiveSkill struct {
 }
 
 type AlternateTreeVersion struct {
-	Index                                  uint32 `json:"_rid"`
+	Index                                  uint32 `json:"_key"`
 	ID                                     string `json:"Id"`
-	AreSmallAttributePassiveSkillsReplaced bool   `json:"Unknown2"`
-	AreSmallNormalPassiveSkillsReplaced    bool   `json:"Unknown3"`
-	MinimumAdditions                       uint32 `json:"Unknown6"`
-	MaximumAdditions                       uint32 `json:"Unknown7"`
-	NotableReplacementSpawnWeight          uint32 `json:"Unknown10"`
+	AreSmallAttributePassiveSkillsReplaced bool   `json:"Var1"`
+	AreSmallNormalPassiveSkillsReplaced    bool   `json:"Var2"`
+	MinimumAdditions                       uint32 `json:"Var5"`
+	MaximumAdditions                       uint32 `json:"Var6"`
+	NotableReplacementSpawnWeight          uint32 `json:"Var9"`
 }
 
 type AlternatePassiveSkill struct {
-	Index                    uint32             `json:"_rid"`
+	Index                    uint32             `json:"_key"`
 	ID                       string             `json:"Id"`
 	AlternateTreeVersionsKey uint32             `json:"AlternateTreeVersionsKey"`
 	Name                     string             `json:"Name"`
@@ -39,15 +39,15 @@ type AlternatePassiveSkill struct {
 	Stat1Max                 uint32             `json:"Stat1Max"`
 	Stat2Min                 uint32             `json:"Stat2Min"`
 	Stat2Max                 uint32             `json:"Stat2Max"`
-	Stat3Min                 uint32             `json:"Unknown10"`
-	Stat3Max                 uint32             `json:"Unknown11"`
-	Stat4Min                 uint32             `json:"Unknown12"`
-	Stat4Max                 uint32             `json:"Unknown13"`
+	Stat3Min                 uint32             `json:"Var9"`
+	Stat3Max                 uint32             `json:"Var10"`
+	Stat4Min                 uint32             `json:"Var11"`
+	Stat4Max                 uint32             `json:"Var12"`
 	SpawnWeight              uint32             `json:"SpawnWeight"`
-	ConquerorIndex           uint32             `json:"Unknown19"`
+	ConquerorIndex           uint32             `json:"Var18"`
 	RandomMin                uint32             `json:"RandomMin"`
 	RandomMax                uint32             `json:"RandomMax"`
-	ConquerorVersion         uint32             `json:"Unknown25"`
+	ConquerorVersion         uint32             `json:"Var24"`
 }
 
 func (a *AlternatePassiveSkill) GetStatMinMax(min bool, index uint32) uint32 {
@@ -79,15 +79,15 @@ func (a *AlternatePassiveSkill) GetStatMinMax(min bool, index uint32) uint32 {
 }
 
 type AlternatePassiveAddition struct {
-	Index                    uint32             `json:"_rid"`
+	Index                    uint32             `json:"_key"`
 	ID                       string             `json:"Id"`
 	AlternateTreeVersionsKey uint32             `json:"AlternateTreeVersionsKey"`
 	SpawnWeight              uint32             `json:"SpawnWeight"`
 	StatsKeys                []uint32           `json:"StatsKeys"`
 	Stat1Min                 uint32             `json:"Stat1Min"`
 	Stat1Max                 uint32             `json:"Stat1Max"`
-	Stat2Min                 uint32             `json:"Unknown7"`
-	Stat2Max                 uint32             `json:"Unknown8"`
+	Stat2Min                 uint32             `json:"Var6"`
+	Stat2Max                 uint32             `json:"Var7"`
 	PassiveType              []PassiveSkillType `json:"PassiveType"`
 }
 

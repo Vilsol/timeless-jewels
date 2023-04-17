@@ -213,12 +213,12 @@ export const distance = (p1: Point, p2: Point): number =>
 export const formatStats = (translation: Translation, stat: number): string | undefined => {
   let selectedTranslation = -1;
 
-  for (let i = 0; i < translation.English.length; i++) {
-    const t = translation.English[i];
+  for (let i = 0; i < translation.list.length; i++) {
+    const t = translation.list[i];
 
     let matches = true;
-    if (t.condition.length > 0) {
-      const first = t.condition[0];
+    if (t.conditions?.length > 0) {
+      const first = t.conditions[0];
       if (first.min !== undefined) {
         if (stat < first.min) {
           matches = false;
@@ -246,17 +246,17 @@ export const formatStats = (translation: Translation, stat: number): string | un
     return undefined;
   }
 
-  const datum = translation.English[selectedTranslation];
+  const datum = translation.list[selectedTranslation];
 
   let finalStat = stat;
 
-  if (datum.index_handlers.length > 0) {
+  if (datum.index_handlers?.length > 0) {
     datum.index_handlers[0].forEach((handler) => {
       finalStat = finalStat / (indexHandlers[handler] || 1);
     });
   }
 
-  return datum.string.replace(`{0}`, datum.format[0].replace('#', finalStat.toString()));
+  return datum.string.replace(/\{0(?::(.*?)d(.*?))\}/, "$1" + finalStat.toString() + "$2").replace(`{0}`, finalStat.toString());
 };
 
 export const baseJewelRadius = 1800;
@@ -324,11 +324,9 @@ export const translateStat = (id: number, roll?: number | undefined): string => 
   }
 
   let translationText = stat.Text || stat.ID;
-  if (translation && translation.English && translation.English.length) {
-    translationText = translation.English[0].string;
-    translation.English[0].format.forEach((f, i) => {
-      translationText = translationText.replace(`{${i}}`, f);
-    });
+  if (translation && translation.list && translation.list.length) {
+    translationText = translation.list[0].string;
+    translationText = translationText.replace(/\{\d(?::(.*?)d(.*?))\}/, '$1#$2').replace(/\{\d\}/, '#');
   }
   return translationText;
 };

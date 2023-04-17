@@ -45,9 +45,9 @@ var skillTreeGz []byte
 var SkillTreeJSON []byte
 var SkillTreeData SkillTree
 
-//go:embed passive_skill.min.json.gz
-var passiveSkillTranslationsGz []byte
-var PassiveSkillTranslationsJSON []byte
+//go:embed stat_descriptions.json.gz
+var statTranslationsGz []byte
+var StatTranslationsJSON []byte
 
 //go:embed possible_stats.json.gz
 var possibleStatsGz []byte
@@ -108,12 +108,12 @@ func init() {
 		panic(err)
 	}
 
-	reader, err := gzip.NewReader(bytes.NewReader(passiveSkillTranslationsGz))
+	reader, err := gzip.NewReader(bytes.NewReader(statTranslationsGz))
 	if err != nil {
 		panic(err)
 	}
 
-	PassiveSkillTranslationsJSON, err = io.ReadAll(reader)
+	StatTranslationsJSON, err = io.ReadAll(reader)
 	if err != nil {
 		panic(err)
 	}

@@ -36,7 +36,7 @@ func Expose() *crystalline.Exposer {
 	}
 
 	e.ExposeOrPanic(treeToPassive, "data", "TreeToPassive")
-	e.ExposeOrPanic(string(data.PassiveSkillTranslationsJSON), "data", "PassiveTranslations")
+	e.ExposeOrPanic(string(data.StatTranslationsJSON), "data", "PassiveTranslations")
 	e.ExposeOrPanic(string(data.PossibleStatsJSON), "data", "PossibleStats")
 
 	return e

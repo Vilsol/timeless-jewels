@@ -14,7 +14,6 @@ import (
 
 // Uses separate steps so finder step has the new data loaded by data package
 
-//go:generate go run tools.go re-zip
 //go:generate go run tools.go find
 //go:generate go run tools.go types
 
@@ -24,37 +23,11 @@ func main() {
 	}
 
 	switch os.Args[1] {
-	case "re-zip":
-		reZip()
 	case "find":
 		findAll()
 	case "types":
 		generateTypes()
 	}
-}
-
-func reZip() {
-	reMarshalZip[[]*data.AlternatePassiveAddition]("alternate_passive_additions.json")
-	reMarshalZip[[]*data.AlternatePassiveSkill]("alternate_passive_skills.json")
-	reMarshalZip[[]*data.AlternateTreeVersion]("alternate_tree_versions.json")
-	reMarshalZip[[]*data.PassiveSkill]("passive_skills.json")
-	reMarshalZip[[]*data.Stat]("stats.json")
-	reMarshalZip[map[string]interface{}]("SkillTree.json")
-	reMarshalZip[[]interface{}]("passive_skill.min.json")
-}
-
-func reMarshalZip[T any](name string) {
-	in, err := os.ReadFile("./source_data/" + name)
-	if err != nil {
-		panic(err)
-	}
-
-	var blob = new(T)
-	if err := json.Unmarshal(in, &blob); err != nil {
-		panic(err)
-	}
-
-	writeZipped("./data/"+name+".gz", blob)
 }
 
 func writeZipped(path string, data interface{}) {
