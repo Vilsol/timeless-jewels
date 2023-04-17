@@ -256,7 +256,9 @@ export const formatStats = (translation: Translation, stat: number): string | un
     });
   }
 
-  return datum.string.replace(/\{0(?::(.*?)d(.*?))\}/, "$1" + finalStat.toString() + "$2").replace(`{0}`, finalStat.toString());
+  return datum.string
+    .replace(/\{0(?::(.*?)d(.*?))\}/, '$1' + finalStat.toString() + '$2')
+    .replace(`{0}`, finalStat.toString());
 };
 
 export const baseJewelRadius = 1800;
