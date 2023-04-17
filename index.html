@@ -16,21 +16,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
 
     <meta http-equiv="content-security-policy" content="">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/start-ff6d4445.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/paths-9eb3c566.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/singletons-9ac23c38.js">
+		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/entry/start.303c2865.js">
+		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/index.62a09d90.js">
+		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/singletons.53428080.js">
+		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/paths.732429ef.js">
+		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/entry/app.ad8f349a.js">
   </head>
   <body>
     <div>
-		<script type="module" data-sveltekit-hydrate="45h">
-			import { start } from "/timeless-jewels/_app/immutable/start-ff6d4445.js";
+			<script>
+				{
+					__sveltekit_2zx519 = {
+						env: {},
+						assets: "/timeless-jewels",
+						base: "/timeless-jewels",
+						element: document.currentScript.parentElement
+					};
 
-			start({
-				env: {},
-				paths: {"base":"/timeless-jewels","assets":"/timeless-jewels"},
-				target: document.querySelector('[data-sveltekit-hydrate="45h"]').parentNode,
-				version: "1673580427351"
-			});
-		</script></div>
+					Promise.all([
+						import("/timeless-jewels/_app/immutable/entry/start.303c2865.js"),
+						import("/timeless-jewels/_app/immutable/entry/app.ad8f349a.js")
+					]).then(([kit, app]) => {
+						kit.start(app, __sveltekit_2zx519.element);
+					});
+				}
+			</script>
+		</div>
   </body>
 </html>

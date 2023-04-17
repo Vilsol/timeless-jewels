@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="/timeless-jewels/favicon.png" />
+    <link rel="icon" href="./favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Timeless Jewel Calculator</title>
 
     <meta property="og:title" content="Timeless Jewel Calculator" />
-    <meta property="og:image" content="/timeless-jewels/favicon.png" />
+    <meta property="og:image" content="./favicon.png" />
     <meta property="og:description" content="Timeless Jewel calculator with a passive tree view" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,20 +16,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
 
     <meta http-equiv="content-security-policy" content="">
-		<link href="/timeless-jewels/_app/immutable/assets/_layout-23875bfd.css" rel="stylesheet">
-		<link href="/timeless-jewels/_app/immutable/assets/_page-9cce1a28.css" rel="stylesheet">
-		<link href="/timeless-jewels/_app/immutable/assets/navigation-b6fa8670.css" rel="stylesheet">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/start-ff6d4445.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/paths-9eb3c566.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/singletons-9ac23c38.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/components/pages/_layout.svelte-25aecde3.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/worker-6fe592d4.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/index-f119c485.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/modules/pages/_layout.ts-9cbb603b.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/_layout-da46b06b.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/components/pages/tree/_page.svelte-f29a1692.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/navigation-9e6cedbc.js">
-		<link rel="modulepreload" href="/timeless-jewels/_app/immutable/chunks/stores-139c5fee.js">
+		<link href="./_app/immutable/assets/_layout.a59e3c04.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/_page.9cce1a28.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/navigation.e61d6aa4.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.303c2865.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.62a09d90.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.53428080.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/paths.732429ef.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.ad8f349a.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_layout.svelte.a52ecfbb.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/worker.232e4197.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.f119c485.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_layout.ts.984db11e.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/_layout.da46b06b.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/tree-page.svelte.d25315d1.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/navigation.26e81368.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.a1ce8246.js">
   </head>
   <body>
     <div>
@@ -40,21 +42,31 @@
           <h2 class="text-center">Loading...</h2></div></div></div></div>
 
 
-		<script type="module" data-sveltekit-hydrate="6bvz3e">
-			import { start } from "/timeless-jewels/_app/immutable/start-ff6d4445.js";
+			
+			<script>
+				{
+					__sveltekit_2zx519 = {
+						env: {},
+						assets: "/timeless-jewels",
+						base: new URL(".", location).pathname.slice(0, -1),
+						element: document.currentScript.parentElement
+					};
 
-			start({
-				env: {},
-				paths: {"base":"/timeless-jewels","assets":"/timeless-jewels"},
-				target: document.querySelector('[data-sveltekit-hydrate="6bvz3e"]').parentNode,
-				version: "1673580427351",
-				hydrate: {
-					node_ids: [0, 3],
-					data: [null,null],
-					form: null
+					const data = [null,null];
+
+					Promise.all([
+						import("./_app/immutable/entry/start.303c2865.js"),
+						import("./_app/immutable/entry/app.ad8f349a.js")
+					]).then(([kit, app]) => {
+						kit.start(app, __sveltekit_2zx519.element, {
+							node_ids: [0, 3],
+							data,
+							form: null,
+							error: null
+						});
+					});
 				}
-			});
-		</script>
-	</div>
+			</script>
+		</div>
   </body>
 </html>
