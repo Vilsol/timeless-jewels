@@ -1,4 +1,4 @@
-import type {Translation, Node, SkillTreeData, Group, Sprite, TranslationFile} from './skill_tree_types';
+import type { Translation, Node, SkillTreeData, Group, Sprite, TranslationFile } from './skill_tree_types';
 import { data } from './types';
 
 export let skillTree: SkillTreeData;
@@ -91,9 +91,9 @@ export const loadSkillTree = () => {
     data.StatTranslationsJSON,
     data.PassiveSkillStatTranslationsJSON,
     data.PassiveSkillAuraStatTranslationsJSON
-  ]
+  ];
 
-  translationFiles.forEach(f => {
+  translationFiles.forEach((f) => {
     const translations: TranslationFile = JSON.parse(f);
 
     translations.descriptors.forEach((t) => {
