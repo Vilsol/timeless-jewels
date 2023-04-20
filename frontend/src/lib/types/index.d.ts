@@ -77,10 +77,12 @@ export declare namespace data {
   function GetAlternatePassiveSkillByIndex(index: number): (data.AlternatePassiveSkill | undefined);
   function GetPassiveSkillByIndex(index: number): (data.PassiveSkill | undefined);
   function GetStatByIndex(index: number): (data.Stat | undefined);
+  const PassiveSkillAuraStatTranslationsJSON: string;
+  const PassiveSkillStatTranslationsJSON: string;
   const PassiveSkills: Array<data.PassiveSkill | undefined> | undefined;
-  const PassiveTranslations: string;
   const PossibleStats: string;
   const SkillTree: string;
+  const StatTranslationsJSON: string;
   const TimelessJewelConquerors: Record<number, Record<string, data.TimelessJewelConqueror | undefined> | undefined> | undefined;
   const TimelessJewelSeedRanges: Record<number, data.Range> | undefined;
   const TimelessJewels: Record<number, string> | undefined;

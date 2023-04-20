@@ -3,7 +3,7 @@
   import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import { base } from '$app/paths';
+  import { base, assets } from '$app/paths';
   import { calculator, data } from '../lib/types';
 
   const searchParams = $page.url.searchParams;
@@ -159,8 +159,17 @@
       </div>
     </div>
 
-    <div class="text-right text-orange-500">
-      <a href="https://github.com/Vilsol/timeless-jewels" target="_blank" rel="noopener">Source (Github)</a>
+    <div class="flex justify-between">
+      <div class="text-right text-orange-500">
+        <a href="https://discord.gg/mfacademy" target="_blank" rel="noopener" class="flex flex-row align-middle">
+          <img src="{assets}/mf-academy-logo.png" width="24px" />
+          <span class="ml-2">MF Academy</span>
+        </a>
+      </div>
+
+      <div class="text-orange-500">
+        <a href="https://github.com/Vilsol/timeless-jewels" target="_blank" rel="noopener">Source (Github)</a>
+      </div>
     </div>
   </div>
 </div>
