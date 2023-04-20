@@ -17,7 +17,7 @@ const obj = {
       loadSkillTree();
     });
   },
-  async search(args: ReverseSearchConfig, callback: (seed: number) => void): Promise<SearchResults> {
+  async search(args: ReverseSearchConfig, callback: (seed: number) => Promise<void>): Promise<SearchResults> {
     const searchResult = await calculator.ReverseSearch(
       args.nodes,
       args.stats.map((s) => s.id),

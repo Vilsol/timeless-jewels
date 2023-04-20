@@ -165,6 +165,11 @@ export interface Translation {
   hidden?: boolean;
 }
 
+export interface TranslationFile {
+  descriptors: Translation[];
+  includes: string[];
+}
+
 export interface Class {
   name: string;
   base_str: number;
