@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -21,8 +19,8 @@
         outputBuf += decoder.decode(buf);
         const nl = outputBuf.lastIndexOf('\n');
         if (nl != -1) {
-          console.log(outputBuf.substr(0, nl));
-          outputBuf = outputBuf.substr(nl + 1);
+          console.log(outputBuf.substring(0, nl));
+          outputBuf = outputBuf.substring(nl + 1);
         }
         return buf.length;
       },
@@ -177,6 +175,10 @@
         this.mem.setUint32(addr + 4, Math.floor(v / 4294967296), true);
       };
 
+      const setInt32 = (addr, v) => {
+        this.mem.setUint32(addr + 0, v, true);
+      };
+
       const getInt64 = (addr) => {
         const low = this.mem.getUint32(addr + 0, true);
         const high = this.mem.getInt32(addr + 4, true);
@@ -270,7 +272,10 @@
 
       const timeOrigin = Date.now() - performance.now();
       this.importObject = {
-        go: {
+        _gotest: {
+          add: (a, b) => a + b
+        },
+        gojs: {
           // Go's SP does not change as long as no Go code is running. Some operations (e.g. calls, getters and setters)
           // may synchronously trigger a Go event handler. This makes Go code get executed in the middle of the imported
           // function. A goroutine can switch to a new stack if the current stack is too small (see morestack function).
@@ -325,18 +330,15 @@
             this._nextCallbackTimeoutID++;
             this._scheduledTimeouts.set(
               id,
-              setTimeout(
-                () => {
+              setTimeout(() => {
+                this._resume();
+                while (this._scheduledTimeouts.has(id)) {
+                  // for some reason Go failed to register the timeout event, log and try again
+                  // (temporary workaround for https://github.com/golang/go/issues/28975)
+                  console.warn('scheduleTimeoutEvent: missed timeout event');
                   this._resume();
-                  while (this._scheduledTimeouts.has(id)) {
-                    // for some reason Go failed to register the timeout event, log and try again
-                    // (temporary workaround for https://github.com/golang/go/issues/28975)
-                    console.warn('scheduleTimeoutEvent: missed timeout event');
-                    this._resume();
-                  }
-                },
-                getInt64(sp + 8) + 1 // setTimeout has been seen to fire up to 1 millisecond early
-              )
+                }
+              }, getInt64(sp + 8))
             );
             this.mem.setInt32(sp + 16, id, true);
           },
