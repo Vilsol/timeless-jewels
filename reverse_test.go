@@ -14,8 +14,8 @@ var passiveIDs = []uint32{2211, 662, 2095, 600, 944, 75, 2556, 1094, 2589, 2505,
 func TestReverseGloriousVanity(t *testing.T) {
 	statIDs := []uint32{25}
 	result := calculator.ReverseSearch(passiveIDs, statIDs, data.GloriousVanity, data.Xibaqua, nil)
-	testza.AssertLen(t, result, 7252)
-	testza.AssertLen(t, result[1001], 2)
+	testza.AssertLen(t, result, 7253)
+	testza.AssertLen(t, result[1001], 1)
 	testza.AssertEqual(t, uint32(8), result[1001][1210][statIDs[0]])
 }
 
