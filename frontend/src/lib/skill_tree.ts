@@ -401,7 +401,7 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
           .map((c) =>
             seeds.map((seed) => ({
               id: tradeStatNames[jewel][c],
-              disabled: false,
+              disabled: c != conqueror,
               value: {
                 min: seed,
                 max: seed
