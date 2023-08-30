@@ -155,7 +155,7 @@ export interface Condition {
 
 export interface TranslationData {
   conditions: Condition[];
-  index_handlers: Array<string[]>;
+  index_handlers: Array<string[]> | { [key: string]: unknown };
   string: string;
 }
 

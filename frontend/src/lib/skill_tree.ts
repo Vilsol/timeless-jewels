@@ -260,15 +260,23 @@ export const formatStats = (translation: Translation, stat: number): string | un
 
   let finalStat = stat;
 
-  if (datum.index_handlers?.length > 0) {
-    datum.index_handlers[0].forEach((handler) => {
-      finalStat = finalStat / (indexHandlers[handler] || 1);
-    });
+  if (datum.index_handlers !== undefined) {
+    if (Array.isArray(datum.index_handlers)) {
+      if (datum.index_handlers?.length > 0) {
+        datum.index_handlers[0].forEach((handler) => {
+          finalStat = finalStat / (indexHandlers[handler] || 1);
+        });
+      }
+    } else {
+      Object.keys(datum.index_handlers).forEach((handler) => {
+        finalStat = finalStat / (indexHandlers[handler] || 1);
+      });
+    }
   }
 
   return datum.string
     .replace(/\{0(?::(.*?)d(.*?))\}/, '$1' + finalStat.toString() + '$2')
-    .replace(`{0}`, finalStat.toString());
+    .replace(`{0}`, parseFloat(finalStat.toFixed(2)).toString());
 };
 
 export const baseJewelRadius = 1800;
