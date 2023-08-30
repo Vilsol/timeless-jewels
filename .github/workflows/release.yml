@@ -7,7 +7,7 @@ on:
 
 env:
   NODE_VERSION: "18"
-  PNPM_VERSION: "7.5.0"
+  PNPM_VERSION: "8.5.1"
   GO_VERSION: "1.21.0"
 
 jobs:
