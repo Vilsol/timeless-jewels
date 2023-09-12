@@ -386,19 +386,9 @@ const tradeStatNames: { [key: number]: { [key: string]: string } } = {
 
 // TODO Figure out what the actual limit is
 const maxQueries = 28;
-export const constructQuery = (jewel: number, conqueror: string, result: SearchWithSeed[]) => {
-  const seeds: number[] = [];
-
-  for (const r of result) {
-    if (seeds.length >= maxQueries) {
-      break;
-    }
-
-    seeds.push(r.seed);
-  }
-
+export const constructQuery = (jewel: number, conqueror: string, result: SearchWithSeed[], onlyConqueror = false) => {
   let stats;
-  if (seeds.length * 4 < maxQueries) {
+  if (result.length * 4 < maxQueries) {
     stats = [
       {
         type: 'count',
@@ -406,13 +396,14 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
           min: 1
         },
         filters: Object.keys(tradeStatNames[jewel])
+          .filter((c) => (onlyConqueror ? c == conqueror : true))
           .map((c) =>
-            seeds.map((seed) => ({
+            result.map((r) => ({
               id: tradeStatNames[jewel][c],
               disabled: c != conqueror,
               value: {
-                min: seed,
-                max: seed
+                min: r.seed,
+                max: r.seed
               }
             }))
           )
@@ -421,21 +412,33 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
       }
     ];
   } else {
-    stats = Object.keys(tradeStatNames[jewel]).map((c) => ({
-      type: 'count',
-      value: {
-        min: 1
-      },
-      filters: seeds.map((seed) => ({
-        id: tradeStatNames[jewel][c],
-        disabled: false,
-        value: {
-          min: seed,
-          max: seed
+    const seedGroups = Math.ceil(result.length / maxQueries);
+    stats = Object.keys(tradeStatNames[jewel])
+      .filter((c) => (onlyConqueror ? c == conqueror : true))
+      .map((c) => {
+        const groups = [];
+
+        for (let i = 0; i < seedGroups; i++) {
+          groups.push({
+            type: 'count',
+            value: {
+              min: 1
+            },
+            filters: result.slice(i * maxQueries, (i + 1) * maxQueries).map((r) => ({
+              id: tradeStatNames[jewel][c],
+              disabled: false,
+              value: {
+                min: r.seed,
+                max: r.seed
+              }
+            })),
+            disabled: c != conqueror || i > 0
+          });
         }
-      })),
-      disabled: c != conqueror
-    }));
+
+        return groups;
+      })
+      .flat();
   }
 
   return {
@@ -456,5 +459,12 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
 export const openTrade = (jewel: number, conqueror: string, results: SearchWithSeed[]) => {
   const url = new URL('https://www.pathofexile.com/trade/search/Sentinel');
   url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
+
+  // POE Trade has a 32k limit
+  if (url.toString().length > 32000) {
+    console.warn('URL too long, generating only selected conqueror');
+    url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results, true)));
+  }
+
   window.open(url, '_blank');
 };
