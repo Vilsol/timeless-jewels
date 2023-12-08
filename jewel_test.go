@@ -158,8 +158,8 @@ func TestLethalPride(t *testing.T) {
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(38),
-						StatRolls:                map[uint32]uint32{0: 2},
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
+						StatRolls:                map[uint32]uint32{0: 4},
 					},
 				},
 			},
@@ -282,8 +282,8 @@ func TestBrutalRestraint(t *testing.T) {
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(65),
-						StatRolls:                map[uint32]uint32{0: 2},
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
+						StatRolls:                map[uint32]uint32{0: 4},
 					},
 				},
 			},
@@ -404,8 +404,12 @@ func TestMilitantFaith(t *testing.T) {
 			conqueror: data.Venarius,
 			passive:   519, // Intelligence (intelligence879)
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(90),
-				StatRolls:             map[uint32]uint32{0: 10},
+				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
+						StatRolls:                map[uint32]uint32{0: 5},
+					},
+				},
 			},
 		},
 		{
