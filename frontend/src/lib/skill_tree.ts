@@ -457,7 +457,7 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
 };
 
 export const openTrade = (jewel: number, conqueror: string, results: SearchWithSeed[]) => {
-  const url = new URL('https://www.pathofexile.com/trade/search/Sentinel');
+  const url = new URL('https://www.pathofexile.com/trade/search/Affliction');
   url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
 
   // POE Trade has a 32k limit
