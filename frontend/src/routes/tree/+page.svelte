@@ -1,22 +1,24 @@
 <script lang="ts">
-  import SkillTree from '../../lib/components/SkillTree.svelte';
-  import Select from 'svelte-select';
-  import { page } from '$app/stores';
+  import { _ } from 'svelte-i18n';
+
   import { goto } from '$app/navigation';
-  import type { Node } from '../../lib/skill_tree_types';
-  import { getAffectedNodes, skillTree, translateStat, openTrade } from '../../lib/skill_tree';
-  import { syncWrap } from '../../lib/worker';
+  import { page } from '$app/stores';
   import { proxy } from 'comlink';
-  import type { ReverseSearchConfig, StatConfig } from '../../lib/skill_tree';
+  import Select from 'svelte-select';
   import SearchResults from '../../lib/components/SearchResults.svelte';
+  import SkillTree from '../../lib/components/SkillTree.svelte';
+  import type { ReverseSearchConfig, StatConfig } from '../../lib/skill_tree';
+  import { getAffectedNodes, openTrade, skillTree, translateStat } from '../../lib/skill_tree';
+  import type { Node } from '../../lib/skill_tree_types';
+  import { calculator, data } from '../../lib/types';
   import { statValues } from '../../lib/values';
-  import { data, calculator } from '../../lib/types';
+  import { syncWrap } from '../../lib/worker';
 
   const searchParams = $page.url.searchParams;
 
   const jewels = Object.keys(data.TimelessJewels).map((k) => ({
     value: parseInt(k),
-    label: data.TimelessJewels[k]
+    label: $_(data.TimelessJewels[k])
   }));
 
   let selectedJewel = searchParams.has('jewel') ? jewels.find((j) => j.value == searchParams.get('jewel')) : undefined;
@@ -24,7 +26,7 @@
   $: conquerors = selectedJewel
     ? Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).map((k) => ({
         value: k,
-        label: k
+        label: $_(k)
       }))
     : [];
 
@@ -350,19 +352,19 @@
 
   const sortResults = [
     {
-      label: 'Count',
+      label: $_('Count'),
       value: 'count'
     },
     {
-      label: 'Alphabetical',
+      label: $_('Alphabetical'),
       value: 'alphabet'
     },
     {
-      label: 'Rarity',
+      label: $_('Rarity'),
       value: 'rarity'
     },
     {
-      label: 'Value',
+      label: $_('Value'),
       value: 'value'
     }
   ] as const;
@@ -447,7 +449,7 @@
             </button>
 
             <h3 class="flex-grow">
-              {results ? 'Results' : 'Timeless Jewel'}
+              {results ? $_('Results') : $_('Timeless Jewel')}
             </h3>
           </div>
           {#if searchResults}
@@ -468,7 +470,7 @@
                 </button>
               {/if}
               <button class="bg-neutral-100/20 px-4 p-1 rounded" on:click={() => (results = !results)}>
-                {results ? 'Config' : 'Results'}
+                {results ? $_('Config') : $_('Results')}
               </button>
             </div>
           {/if}
@@ -479,23 +481,23 @@
 
           {#if selectedJewel}
             <div class="mt-4">
-              <h3 class="mb-2">Conqueror</h3>
+              <h3 class="mb-2">{$_('Conqueror')}</h3>
               <Select items={conquerors} bind:value={selectedConqueror} on:change={updateUrl} />
             </div>
 
             {#if selectedConqueror && Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
               <div class="mt-4 w-full flex flex-row">
                 <button class="selection-button" class:selected={mode === 'seed'} on:click={() => setMode('seed')}>
-                  Enter Seed
+                  {$_('Enter Seed')}
                 </button>
                 <button class="selection-button" class:selected={mode === 'stats'} on:click={() => setMode('stats')}>
-                  Select Stats
+                  {$_('Select Stats')}
                 </button>
               </div>
 
               {#if mode === 'seed'}
                 <div class="mt-4">
-                  <h3 class="mb-2">Seed</h3>
+                  <h3 class="mb-2">{$_('Seed')}</h3>
                   <input
                     type="number"
                     bind:value={seed}
@@ -504,8 +506,12 @@
                     max={data.TimelessJewelSeedRanges[selectedJewel.value].Max} />
                   {#if seed < data.TimelessJewelSeedRanges[selectedJewel.value].Min || seed > data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                     <div class="mt-2">
-                      Seed must be between {data.TimelessJewelSeedRanges[selectedJewel.value].Min}
-                      and {data.TimelessJewelSeedRanges[selectedJewel.value].Max}
+                      {$_('Seed must be between', {
+                        values: {
+                          min: data.TimelessJewelSeedRanges[selectedJewel.value].Min,
+                          max: data.TimelessJewelSeedRanges[selectedJewel.value].Max
+                        }
+                      })}
                     </div>
                   {/if}
                 </div>
@@ -513,7 +519,7 @@
                 {#if seed >= data.TimelessJewelSeedRanges[selectedJewel.value].Min && seed <= data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                   <div class="flex flex-row mt-4 items-end">
                     <div class="flex-grow">
-                      <h3 class="mb-2">Sort Order</h3>
+                      <h3 class="mb-2">{$_('Sort Order')}</h3>
                       <Select items={sortResults} bind:value={sortOrder} />
                     </div>
                     <div class="ml-2">
@@ -521,7 +527,7 @@
                         class="bg-neutral-500/20 p-2 px-4 rounded"
                         class:selected={colored}
                         on:click={() => (colored = !colored)}>
-                        Colors
+                        {$_('Colors')}
                       </button>
                     </div>
                     <div class="ml-2">
@@ -529,7 +535,7 @@
                         class="bg-neutral-500/20 p-2 px-4 rounded"
                         class:selected={split}
                         on:click={() => (split = !split)}>
-                        Split
+                        {$_('Split')}
                       </button>
                     </div>
                   </div>
@@ -572,7 +578,7 @@
                 {/if}
               {:else if mode === 'stats'}
                 <div class="mt-4">
-                  <h3 class="mb-2">Add Stat</h3>
+                  <h3 class="mb-2">{$_('Add Stat')}</h3>
                   <Select items={statItems} on:change={selectStat} bind:this={statSelector} />
                 </div>
                 {#if Object.keys(selectedStats).length > 0}
@@ -589,11 +595,11 @@
                         </div>
                         <div class="mt-2 flex flex-row">
                           <div class="mr-4 flex flex-row items-center">
-                            <div class="mr-2">Min:</div>
+                            <div class="mr-2">{$_('Min')}:</div>
                             <input type="number" min="0" bind:value={selectedStats[s].min} />
                           </div>
                           <div class="flex flex-row items-center">
-                            <div class="mr-2">Weight:</div>
+                            <div class="mr-2">{$_('Weight')}:</div>
                             <input type="number" min="0" bind:value={selectedStats[s].weight} />
                           </div>
                         </div>
@@ -602,7 +608,7 @@
                   </div>
                   <div class="flex flex-col mt-2">
                     <div class="flex flex-row items-center">
-                      <div class="mr-2 min-w-fit">Min Total Weight:</div>
+                      <div class="mr-2 min-w-fit">{$_('Min Total Weight')}</div>
                       <input type="number" min="0" bind:value={minTotalWeight} />
                     </div>
                   </div>
@@ -612,25 +618,25 @@
                         class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
                         on:click={selectAll}
                         disabled={searching || disabled.size == 0}>
-                        Select All
+                        {$_('Select All')}
                       </button>
                       <button
                         class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
                         on:click={selectAllNotables}
                         disabled={searching || disabled.size == 0}>
-                        Notables
+                        {$_('Notables')}
                       </button>
                       <button
                         class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 mr-2"
                         on:click={selectAllPassives}
                         disabled={searching || disabled.size == 0}>
-                        Passives
+                        {$_('Passives')}
                       </button>
                       <button
                         class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 flex-grow"
                         on:click={deselectAll}
                         disabled={searching || disabled.size >= affectedNodes.length}>
-                        Deselect
+                        {$_('Deselect')}
                       </button>
                     </div>
                     <div class="flex flex-row mt-2">
@@ -641,7 +647,7 @@
                         {#if searching}
                           {currentSeed} / {data.TimelessJewelSeedRanges[selectedJewel.value].Max}
                         {:else}
-                          Search
+                          {$_('Search')}
                         {/if}
                       </button>
                     </div>
@@ -650,7 +656,7 @@
               {/if}
 
               {#if !circledNode}
-                <h2 class="mt-4">Click on a jewel socket</h2>
+                <h2 class="mt-4">{$_('Click on a jewel socket')}</h2>
               {/if}
             {/if}
           {/if}

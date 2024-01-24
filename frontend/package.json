@@ -37,5 +37,8 @@
     "typescript": "^5.2.2",
     "vite": "^4.4.9"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "svelte-i18n": "^4.0.0"
+  }
 }

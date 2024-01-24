@@ -17,8 +17,12 @@ curl -L "https://go-pob-data.pages.dev/data/$2/raw/AlternateTreeVersions.json.gz
 curl -L "https://go-pob-data.pages.dev/data/$2/raw/PassiveSkills.json.gz" > ./data/passive_skills.json.gz
 curl -L "https://go-pob-data.pages.dev/data/$2/raw/Stats.json.gz" > ./data/stats.json.gz
 
-curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/en/stat_descriptions.json.gz" > ./data/stat_descriptions.json.gz
-curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/en/passive_skill_stat_descriptions.json.gz" > ./data/passive_skill_stat_descriptions.json.gz
-curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/en/passive_skill_aura_stat_descriptions.json.gz" > ./data/passive_skill_aura_stat_descriptions.json.gz
+curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/en/stat_descriptions.json.gz" > ./data/trs/en/stat_descriptions.json.gz
+curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/en/passive_skill_stat_descriptions.json.gz" > ./data/trs/en/passive_skill_stat_descriptions.json.gz
+curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/en/passive_skill_aura_stat_descriptions.json.gz" > ./data/trs/en/passive_skill_aura_stat_descriptions.json.gz
+
+curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/cn/stat_descriptions.json.gz" > ./data/trs/zh/stat_descriptions.json.gz
+curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/cn/passive_skill_stat_descriptions.json.gz" > ./data/trs/zh/passive_skill_stat_descriptions.json.gz
+curl -L "https://go-pob-data.pages.dev/data/$2/stat_translations/cn/passive_skill_aura_stat_descriptions.json.gz" > ./data/trs/zh/passive_skill_aura_stat_descriptions.json.gz
 
 go generate -tags tools -x ./...

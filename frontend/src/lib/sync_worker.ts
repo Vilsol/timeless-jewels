@@ -1,7 +1,7 @@
 import { expose } from 'comlink';
 import '../wasm_exec.js';
+import type { ReverseSearchConfig, SearchResults, SearchWithSeed } from './skill_tree';
 import { loadSkillTree, passiveToTree } from './skill_tree';
-import type { SearchWithSeed, ReverseSearchConfig, SearchResults } from './skill_tree';
 import { calculator, initializeCrystalline } from './types';
 
 const obj = {
@@ -14,7 +14,7 @@ const obj = {
 
       initializeCrystalline();
 
-      loadSkillTree();
+      loadSkillTree(navigator.language || 'en');
     });
   },
   async search(args: ReverseSearchConfig, callback: (seed: number) => Promise<void>): Promise<SearchResults> {

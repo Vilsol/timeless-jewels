@@ -3,9 +3,12 @@ package data
 import (
 	"bytes"
 	"compress/gzip"
-	_ "embed"
+	"embed"
 	"encoding/json"
+	"fmt"
 	"io"
+	"regexp"
+	"strings"
 )
 
 //go:embed alternate_passive_additions.json.gz
@@ -45,17 +48,8 @@ var skillTreeGz []byte
 var SkillTreeJSON []byte
 var SkillTreeData SkillTree
 
-//go:embed stat_descriptions.json.gz
-var statTranslationsGz []byte
-var StatTranslationsJSON []byte
-
-//go:embed passive_skill_stat_descriptions.json.gz
-var passiveSkillStatTranslationsGz []byte
-var PassiveSkillStatTranslationsJSON []byte
-
-//go:embed passive_skill_aura_stat_descriptions.json.gz
-var passiveSkillAuraStatTranslationsGz []byte
-var PassiveSkillAuraStatTranslationsJSON []byte
+//go:embed trs/*
+var trs embed.FS
 
 //go:embed possible_stats.json.gz
 var possibleStatsGz []byte
@@ -116,11 +110,43 @@ func init() {
 		panic(err)
 	}
 
-	StatTranslationsJSON = unzipTo(statTranslationsGz)
-	PassiveSkillStatTranslationsJSON = unzipTo(passiveSkillStatTranslationsGz)
-	PassiveSkillAuraStatTranslationsJSON = unzipTo(passiveSkillAuraStatTranslationsGz)
-
 	PossibleStatsJSON = unzipTo(possibleStatsGz)
+}
+
+func getLocale(locale string) string {
+	matches := regexp.MustCompile(`(?mi)en|zh`).FindStringSubmatch(locale)
+	if len(matches) > 0 {
+		return strings.ToLower(matches[0])
+	}
+
+	return "en"
+}
+
+func StatTranslationsJSON(locale string) string {
+	var gz, err = trs.ReadFile(fmt.Sprintf("trs/%s/stat_descriptions.json.gz", getLocale(locale)))
+	if err != nil {
+		panic(err)
+	}
+
+	return string(unzipTo(gz))
+}
+
+func PassiveSkillStatTranslationsJSON(locale string) string {
+	var gz, err = trs.ReadFile(fmt.Sprintf("trs/%s/passive_skill_stat_descriptions.json.gz", getLocale(locale)))
+	if err != nil {
+		panic(err)
+	}
+
+	return string(unzipTo(gz))
+}
+
+func PassiveSkillAuraStatTranslationsJSON(locale string) string {
+	var gz, err = trs.ReadFile(fmt.Sprintf("trs/%s/passive_skill_aura_stat_descriptions.json.gz", getLocale(locale)))
+	if err != nil {
+		panic(err)
+	}
+
+	return string(unzipTo(gz))
 }
 
 func unzipJSONTo[T any](data []byte) T {

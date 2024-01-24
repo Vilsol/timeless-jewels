@@ -1,4 +1,4 @@
-import type { Translation, Node, SkillTreeData, Group, Sprite, TranslationFile } from './skill_tree_types';
+import type { Group, Node, SkillTreeData, Sprite, Translation, TranslationFile } from './skill_tree_types';
 import { data } from './types';
 
 export let skillTree: SkillTreeData;
@@ -13,7 +13,7 @@ export const inverseTranslations: Record<string, Translation> = {};
 
 export const passiveToTree: Record<number, number> = {};
 
-export const loadSkillTree = () => {
+export const loadSkillTree = (locale: string) => {
   skillTree = JSON.parse(data.SkillTree);
   console.log('Loaded skill tree', skillTree);
 
@@ -94,7 +94,7 @@ export const loadSkillTree = () => {
   ];
 
   translationFiles.forEach((f) => {
-    const translations: TranslationFile = JSON.parse(f);
+    const translations: TranslationFile = JSON.parse(f(locale));
 
     translations.descriptors.forEach((t) => {
       t.ids.forEach((id) => {
