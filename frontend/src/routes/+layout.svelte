@@ -16,6 +16,7 @@
   const go = new Go();
 
   if (browser) {
+    const currentLocale = localStorage.getItem('locale') || navigator.language || 'en';
     fetch(assets + '/calculator.wasm')
       .then((data) => data.arrayBuffer())
       .then((data) => {
@@ -23,7 +24,8 @@
           go.run(result.instance);
           wasmLoading = false;
           initializeCrystalline();
-          loadSkillTree(navigator.language);
+
+          loadSkillTree(currentLocale);
         });
 
         syncWrap.boot(data);
@@ -31,7 +33,7 @@
 
     document.title = $_('app_name');
 
-    locale.set(localStorage.getItem('locale') || navigator.language);
+    locale.set(currentLocale);
   }
 </script>
 

@@ -55,6 +55,8 @@
     "Victario": "Victario",
     "Chitus": "Chitus",
     "Caspiro": "Caspiro",
+    "Trade": "Trade",
+    "Grouped": "Grouped",
     "app_name": "Timeless Calculator"
   },
   "zh": {
@@ -65,12 +67,12 @@
     "Rarity": "稀有度",
     "Value": "价值",
     "Select All": "全选",
-    "Skill Tree View": "技能树视图",
+    "Skill Tree View": "天赋树",
     "Conqueror": "征服者",
     "Enter Seed": "输入种子",
     "Select Stats": "选择词缀",
     "Seed": "种子",
-    "Config": "设置",
+    "Config": "配置",
     "Results": "结果",
     "Seed must be between": "种子必须在 {min} 和 {max} 之间。",
     "Sort Order": "排序",
@@ -78,8 +80,8 @@
     "Split": "分拆",
     "Search": "搜索",
     "Click on a jewel socket": "点击一个珠宝孔",
-    "Passive Skill": "被动技能",
-    "Alternate Passive Skill": "替代被动技能",
+    "Passive Skill": "词缀",
+    "Alternate Passive Skill": "额外词缀",
     "Additions": "附加",
     "Add Stat": "添加词缀",
     "Notables": "重要词缀",
@@ -113,6 +115,8 @@
     "Victario": "维多里奥",
     "Chitus": "切特斯",
     "Caspiro": "卡斯皮罗",
+    "Trade": "交易",
+    "Grouped": "分组",
     "app_name": "永恒珠宝计算器"
   }
 }

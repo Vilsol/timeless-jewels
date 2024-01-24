@@ -8,6 +8,7 @@
 
   import { _ } from 'svelte-i18n';
   import Select from 'svelte-select';
+  import Locale from '../lib/components/locale.svelte';
   import { calculator, data } from '../lib/types';
 
   const searchParams = $page.url.searchParams;
@@ -72,25 +73,17 @@
       goto($page.url.pathname + '?' + resultQuery);
     }
   };
-
-  const selectLocale = (newLocale: string) => {
-    localStorage.setItem('locale', newLocale);
-    location.reload();
-  };
 </script>
 
 <div class="py-10 flex flex-row justify-center w-screen h-screen">
-  <div class="flex flex-col justify-between w-1/3">
+  <div class="flex flex-col justify-between w-full mx-4 max-w-screen-sm">
     <div>
       <h1 class="text-white mb-5 text-center">{$_('app_name')}</h1>
 
-      <div class="mb-10 space-x-2 text-center">
-        <a href="#" class="hover:text-orange-400" on:click={() => selectLocale('en')}>English</a>
-        <a href="#" class="hover:text-orange-400" on:click={() => selectLocale('zh')}>中文</a>
-      </div>
+      <div class="mb-10"><Locale /></div>
 
       <a href="{base}/tree">
-        <h2 class="text-white mb-10 text-center underline text-orange-500">{$_('Skill Tree View')}</h2>
+        <h2 class="mb-10 text-center underline text-orange-500">{$_('Skill Tree View')}</h2>
       </a>
 
       <div class="themed">

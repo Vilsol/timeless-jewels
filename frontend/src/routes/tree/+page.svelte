@@ -7,6 +7,7 @@
   import Select from 'svelte-select';
   import SearchResults from '../../lib/components/SearchResults.svelte';
   import SkillTree from '../../lib/components/SkillTree.svelte';
+  import Locale from '../../lib/components/locale.svelte';
   import type { ReverseSearchConfig, StatConfig } from '../../lib/skill_tree';
   import { getAffectedNodes, openTrade, skillTree, translateStat } from '../../lib/skill_tree';
   import type { Node } from '../../lib/skill_tree_types';
@@ -451,6 +452,8 @@
             <h3 class="flex-grow">
               {results ? $_('Results') : $_('Timeless Jewel')}
             </h3>
+
+            <div class="ml-4"><Locale /></div>
           </div>
           {#if searchResults}
             <div class="flex flex-row">
@@ -459,14 +462,14 @@
                   class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
                   on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
                   disabled={!searchResults}>
-                  Trade
+                  {$_('Trade')}
                 </button>
                 <button
                   class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
                   class:grouped={groupResults}
                   on:click={() => (groupResults = !groupResults)}
                   disabled={!searchResults}>
-                  Grouped
+                  {$_('Grouped')}
                 </button>
               {/if}
               <button class="bg-neutral-100/20 px-4 p-1 rounded" on:click={() => (results = !results)}>
