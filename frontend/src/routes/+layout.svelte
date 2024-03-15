@@ -1,11 +1,14 @@
 <script lang="ts">
-  import '../app.scss';
-  import '../wasm_exec.js';
-  import { assets } from '$app/paths';
+  import '../i18n';
+
   import { browser } from '$app/environment';
+  import { assets } from '$app/paths';
+  import { _, locale } from 'svelte-i18n';
+  import '../app.scss';
   import { loadSkillTree } from '../lib/skill_tree';
-  import { syncWrap } from '../lib/worker';
   import { initializeCrystalline } from '../lib/types';
+  import { syncWrap } from '../lib/worker';
+  import '../wasm_exec.js';
 
   let wasmLoading = true;
 
@@ -13,6 +16,7 @@
   const go = new Go();
 
   if (browser) {
+    const currentLocale = localStorage.getItem('locale') || navigator.language || 'en';
     fetch(assets + '/calculator.wasm')
       .then((data) => data.arrayBuffer())
       .then((data) => {
@@ -20,11 +24,16 @@
           go.run(result.instance);
           wasmLoading = false;
           initializeCrystalline();
-          loadSkillTree();
+
+          loadSkillTree(currentLocale);
         });
 
         syncWrap.boot(data);
       });
+
+    document.title = $_('app_name');
+
+    locale.set(currentLocale);
   }
 </script>
 
@@ -33,9 +42,9 @@
     <div class="flex flex-col">
       <div class="py-10 flex flex-col justify-between">
         <div>
-          <h1 class="text-white mb-10 text-center">Timeless Calculator</h1>
+          <h1 class="text-white mb-10 text-center">{$_('app_name')}</h1>
 
-          <h2 class="text-center">Loading...</h2>
+          <h2 class="text-center">{$_('loading')}</h2>
         </div>
       </div>
     </div>
