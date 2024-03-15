@@ -459,10 +459,16 @@
             <div class="flex flex-row">
               {#if results}
                 <button
-                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
+                  class="p-1 px-3 bg-blue-500/40 bg-blue-500/70 rounded disabled:bg-blue-900/40 mr-2"
                   on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
                   disabled={!searchResults}>
                   {$_('Trade')}
+                </button>
+                <button
+                  class="p-1 px-3 bg-red-500/40 hover:bg-red-500/70 rounded disabled:bg-red-900/40 mr-2"
+                  on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw, 'tencent')}
+                  disabled={!searchResults}>
+                  {$_('Trade')} CN
                 </button>
                 <button
                   class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
