@@ -117,8 +117,9 @@
                 {#if result.AlternatePassiveSkill}
                   <div class="mt-4">
                     <h3>Alternate Passive Skill</h3>
-                    <span
-                      >{result.AlternatePassiveSkill.Name} ({result.AlternatePassiveSkill.ID}) ({result.AlternatePassiveSkill})</span>
+                    <span>
+                      {result.AlternatePassiveSkill.Name} ({result.AlternatePassiveSkill.ID})
+                    </span>
                   </div>
 
                   {#if result.StatRolls && Object.keys(result.StatRolls).length > 0}
