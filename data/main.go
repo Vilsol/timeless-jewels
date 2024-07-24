@@ -3,24 +3,29 @@ package data
 import (
 	"bytes"
 	"compress/gzip"
-	_ "embed"
 	"encoding/json"
 	"io"
+
+	_ "embed"
 )
 
 //go:embed alternate_passive_additions.json.gz
 var alternatePassiveAdditionsGz []byte
 var AlternatePassiveAdditions []*AlternatePassiveAddition
 
-var idToAlternatePassiveAddition = make(map[uint32]*AlternatePassiveAddition)
-var reverseAlternatePassiveAdditions = make(map[PassiveSkillType]map[uint32][]*AlternatePassiveAddition)
+var (
+	idToAlternatePassiveAddition     = make(map[uint32]*AlternatePassiveAddition)
+	reverseAlternatePassiveAdditions = make(map[PassiveSkillType]map[uint32][]*AlternatePassiveAddition)
+)
 
 //go:embed alternate_passive_skills.json.gz
 var alternatePassiveSkillsGz []byte
 var AlternatePassiveSkills []*AlternatePassiveSkill
 
-var idToAlternatePassiveSkill = make(map[uint32]*AlternatePassiveSkill)
-var reverseAlternatePassiveSkills = make(map[PassiveSkillType]map[uint32][]*AlternatePassiveSkill)
+var (
+	idToAlternatePassiveSkill     = make(map[uint32]*AlternatePassiveSkill)
+	reverseAlternatePassiveSkills = make(map[PassiveSkillType]map[uint32][]*AlternatePassiveSkill)
+)
 
 //go:embed alternate_tree_versions.json.gz
 var alternateTreeVersionsGz []byte
@@ -42,8 +47,11 @@ var idToStat = make(map[uint32]*Stat)
 
 //go:embed SkillTree.json.gz
 var skillTreeGz []byte
-var SkillTreeJSON []byte
-var SkillTreeData SkillTree
+
+var (
+	SkillTreeJSON []byte
+	SkillTreeData SkillTree
+)
 
 //go:embed stat_descriptions.json.gz
 var statTranslationsGz []byte
@@ -124,7 +132,7 @@ func init() {
 }
 
 func unzipJSONTo[T any](data []byte) T {
-	var out = new(T)
+	out := new(T)
 	if err := json.Unmarshal(unzipTo(data), &out); err != nil {
 		panic(err)
 	}

@@ -17,8 +17,6 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v6
         with:
-          skip-pkg-cache: true
-          skip-build-cache: true
           args: --timeout 5m
 
   lint-frontend:

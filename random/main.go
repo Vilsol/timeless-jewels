@@ -56,7 +56,7 @@ func (g *NumberGenerator) Initialize(seeds []uint32) {
 		index = (index + 1) % 4
 	}
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		roundState := ManipulateAlpha(
 			g.state[(index%4)] ^
 				g.state[((index+1)%4)] ^
@@ -72,7 +72,7 @@ func (g *NumberGenerator) Initialize(seeds []uint32) {
 		index = (index + 1) % 4
 	}
 
-	for i := 0; i < 4; i++ {
+	for range 4 {
 		roundState := ManipulateBravo(
 			g.state[(index%4)] +
 				g.state[((index+1)%4)] +
@@ -88,7 +88,7 @@ func (g *NumberGenerator) Initialize(seeds []uint32) {
 		index = (index + 1) % 4
 	}
 
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		g.GenerateNextState()
 	}
 }
