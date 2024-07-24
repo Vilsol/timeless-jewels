@@ -4,27 +4,18 @@ permissions: read-all
 
 on: [push, pull_request]
 
-env:
-  NODE_VERSION: "18"
-  PNPM_VERSION: "8.5.1"
-  GO_VERSION: "1.21.0"
-
 jobs:
   lint-backend:
     name: Lint Backend
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          stable: false
+          go-version-file: 'go.mod'
 
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Lint
-        uses: golangci/golangci-lint-action@v2
+      - uses: golangci/golangci-lint-action@v6
         with:
           skip-pkg-cache: true
           skip-build-cache: true
@@ -34,37 +25,30 @@ jobs:
     name: Lint Frontend
     runs-on: ubuntu-latest
     steps:
-      - name: Setup nodejs
-        uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: 'frontend/.nvmrc'
 
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.1
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: |
-            - cwd: frontend
+      - name: Enable corepack
+        run: corepack enable
 
       - name: Lint
         working-directory: ./frontend
-        run: pnpm run lint
+        run: |
+          pnpm install
+          pnpm run lint
 
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          stable: false
+          go-version-file: 'go.mod'
 
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Test
         run: go test -v ./...
@@ -75,14 +59,11 @@ jobs:
     needs:
       - lint-backend
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          stable: false
+          go-version-file: 'go.mod'
 
-      - name: Check out
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Build wasm
         run: go build -ldflags="-s -w" -v -o build.wasm ./wasm
@@ -96,20 +77,17 @@ jobs:
     needs:
       - lint-frontend
     steps:
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: 'frontend/.nvmrc'
 
-      - name: Check out
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.1
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: |
-            - cwd: frontend
+      - name: Enable corepack
+        run: corepack enable
 
       - name: Build frontend
         working-directory: frontend
-        run: pnpm run build
+        run: |
+          pnpm install
+          pnpm run build

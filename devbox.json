@@ -1,13 +1,9 @@
 {
-  "packages": ["go@1.19.13"],
-  "shell": {
-    "init_hook": [
-      "echo 'Welcome to devbox!' > /dev/null"
-    ],
-    "scripts": {
-      "test": [
-        "echo \"Error: no test specified\" && exit 1"
-      ]
-    }
+  "packages": [
+    "go@1.22.5",
+    "nodejs@22.3.0"
+  ],
+  "env": {
+    "DEVBOX_COREPACK_ENABLED": "true"
   }
 }
