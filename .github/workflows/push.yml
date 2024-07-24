@@ -9,11 +9,11 @@ jobs:
     name: Lint Backend
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-
-      - uses: actions/checkout@v4
 
       - uses: golangci/golangci-lint-action@v6
         with:
@@ -25,11 +25,11 @@ jobs:
     name: Lint Frontend
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'frontend/.nvmrc'
-
-      - uses: actions/checkout@v4
 
       - name: Enable corepack
         run: corepack enable
@@ -44,11 +44,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-
-      - uses: actions/checkout@v4
 
       - name: Test
         run: go test -v ./...
@@ -59,11 +59,11 @@ jobs:
     needs:
       - lint-backend
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-
-      - uses: actions/checkout@v4
 
       - name: Build wasm
         run: go build -ldflags="-s -w" -v -o build.wasm ./wasm
@@ -77,11 +77,11 @@ jobs:
     needs:
       - lint-frontend
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'frontend/.nvmrc'
-
-      - uses: actions/checkout@v4
 
       - name: Enable corepack
         run: corepack enable
