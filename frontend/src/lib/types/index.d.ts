@@ -15,7 +15,7 @@ export declare namespace data {
     Stat2Min: number;
     Stat2Max: number;
     PassiveType?: Array<number>;
-    GetStatMinMax(min: boolean, index: number): number;
+    GetStatMinMax(arg1: boolean, arg2: number): number;
   }
   interface AlternatePassiveAdditionInformation {
     AlternatePassiveAddition?: data.AlternatePassiveAddition;
@@ -41,7 +41,7 @@ export declare namespace data {
     RandomMin: number;
     RandomMax: number;
     ConquerorVersion: number;
-    GetStatMinMax(min: boolean, index: number): number;
+    GetStatMinMax(arg1: boolean, arg2: number): number;
   }
   interface AlternatePassiveSkillInformation {
     AlternatePassiveSkill?: data.AlternatePassiveSkill;

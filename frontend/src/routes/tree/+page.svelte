@@ -451,7 +451,6 @@
                 <span>Results</span>
               {:else}
                 <span>Timeless Jewel</span>
-                <span class="text-red-500"> - NOT FULLY UP TO DATE FOR 3.25</span>
               {/if}
             </h3>
           </div>
