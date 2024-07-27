@@ -1,5 +1,7 @@
 import type { Translation, Node, SkillTreeData, Group, Sprite, TranslationFile } from './skill_tree_types';
 import { data } from './types';
+import { type Filter, type Query, filterGroupsToQuery, filtersToFilterGroup } from './utils/trade_utils';
+import { chunkArray } from './utils/utils';
 
 export let skillTree: SkillTreeData;
 
@@ -384,91 +386,58 @@ const tradeStatNames: { [key: number]: { [key: string]: string } } = {
   }
 };
 
-export const constructQuery = (jewel: number, conqueror: string, result: SearchWithSeed[]) => {
+export const constructSingleResultQuery = (jewel: number, conqueror: string | null, result: SearchWithSeed): Query => {
+  const anyConqueror = conqueror === null;
+
+  const filters: Filter[] = Object.keys(tradeStatNames[jewel]).map((conq) => ({
+    id: tradeStatNames[jewel][conq],
+    value: {
+      min: result.seed,
+      max: result.seed
+    },
+    disabled: anyConqueror ? false : conq != conqueror
+  }));
+
+  const filterGroup = filtersToFilterGroup(filters, false);
+  const query: Query = filterGroupsToQuery([filterGroup]);
+  return query;
+};
+
+const constructSearchFilter = (jewel: number, conqueror: string | null, result: SearchWithSeed): Filter[] => {
+  // null conqueror indicates to search for any conqueror
+  const anyConqueror = conqueror === null;
+  const conquerors = anyConqueror ? Object.keys(tradeStatNames[jewel]) : [conqueror];
+
+  return conquerors.map((conq) => ({
+    id: tradeStatNames[jewel][conq],
+    value: {
+      min: result.seed,
+      max: result.seed
+    }
+  }));
+};
+
+export const constructQueries = (jewel: number, conqueror: string | null, results: SearchWithSeed[]) => {
   const max_filter_length = 50;
   const max_filters = 4;
   const max_query_length = max_filter_length * max_filters;
-  const final_query = [];
-  const stat = {
-    type: 'count',
-    value: { min: 1 },
-    filters: [],
-    disabled: false
-  };
 
-  // single seed case
-  if (result.length == 1) {
-    for (const conq of Object.keys(tradeStatNames[jewel])) {
-      stat.filters.push({
-        id: tradeStatNames[jewel][conq],
-        value: {
-          min: result[0].seed,
-          max: result[0].seed
-        },
-        disabled: conq != conqueror
-      });
-    }
+  // convert all results into filters
+  const allFilters = results.flatMap((result) => constructSearchFilter(jewel, conqueror, result));
 
-    final_query.push(stat);
-    // too many results case
-  } else if (result.length > max_query_length) {
-    for (let i = 0; i < max_filters; i++) {
-      final_query.push({
-        type: 'count',
-        value: { min: 1 },
-        filters: [],
-        disabled: i == 0 ? false : true
-      });
-    }
+  // group filters into groups of max_query_length, where each group is further grouped into chunks of max_filter_length
+  // this represents multiple trade links, where each trade link has multiple filter groups, and each filter group has multiple filters
+  const queryFilterGroups = chunkArray(allFilters, max_query_length).map((chunk) =>
+    chunkArray(chunk, max_filter_length)
+  );
 
-    for (const [i, r] of result.slice(0, max_query_length).entries()) {
-      const index = Math.floor(i / max_filter_length);
+  // map filters groups to queries
+  const tradeQueries = queryFilterGroups.map((queryFilterGroup) => {
+    // for each query, map the chunks within it to filter groups
+    const tradeFilterGroups = queryFilterGroup.map((filters, index) => filtersToFilterGroup(filters, index !== 0));
+    const tradeQuery: Query = filterGroupsToQuery(tradeFilterGroups);
+    return tradeQuery;
+  });
 
-      final_query[index].filters.push({
-        id: tradeStatNames[jewel][conqueror],
-        value: {
-          min: r.seed,
-          max: r.seed
-        }
-      });
-    }
-  } else {
-    for (const conq of Object.keys(tradeStatNames[jewel])) {
-      stat.disabled = conq != conqueror;
-
-      for (const r of result) {
-        stat.filters.push({
-          id: tradeStatNames[jewel][conq],
-          value: {
-            min: r.seed,
-            max: r.seed
-          }
-        });
-      }
-
-      if (stat.filters.length > max_filter_length) {
-        stat.filters = stat.filters.slice(0, max_filter_length);
-      }
-
-      final_query.push(stat);
-    }
-  }
-
-  return {
-    query: {
-      status: {
-        option: 'online'
-      },
-      stats: final_query
-    },
-    sort: {
-      price: 'asc'
-    }
-  };
-};
-
-export const openTrade = (jewel: number, conqueror: string, results: SearchWithSeed[]) => {
-  const url = new URL('https://www.pathofexile.com/trade/search/Necropolis');
-  url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
-  window.open(url, '_blank');
+  return tradeQueries;
 };

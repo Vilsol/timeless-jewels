@@ -4,13 +4,15 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import type { Node } from '../../lib/skill_tree_types';
-  import { getAffectedNodes, skillTree, translateStat, openTrade } from '../../lib/skill_tree';
+  import { getAffectedNodes, skillTree, translateStat, constructQueries } from '../../lib/skill_tree';
   import { syncWrap } from '../../lib/worker';
   import { proxy } from 'comlink';
-  import type { ReverseSearchConfig, StatConfig } from '../../lib/skill_tree';
+  import type { Query, ReverseSearchConfig, StatConfig } from '../../lib/skill_tree';
   import SearchResults from '../../lib/components/SearchResults.svelte';
   import { statValues } from '../../lib/values';
   import { data, calculator } from '../../lib/types';
+  import TradeButton from '$lib/components/TradeButton.svelte';
+  import TradeLinks from '$lib/components/TradeLinks.svelte';
 
   const searchParams = $page.url.searchParams;
 
@@ -28,12 +30,18 @@
       }))
     : [];
 
-  let selectedConqueror = searchParams.has('conqueror')
+  $: dropdownConqs = conquerors.concat([{ value: 'Any', label: 'Any' }]);
+
+  let dropdownConqueror = searchParams.has('conqueror')
     ? {
         value: searchParams.get('conqueror'),
         label: searchParams.get('conqueror')
       }
     : undefined;
+
+  $: anyConqueror = dropdownConqueror?.value === 'Any';
+
+  $: selectedConqueror = dropdownConqueror?.value === 'Any' ? conquerors[0] : dropdownConqueror;
 
   let seed: number = searchParams.has('seed') ? parseInt(searchParams.get('seed')) : 0;
 
@@ -80,7 +88,7 @@
   const updateUrl = () => {
     const url = new URL(window.location.origin + window.location.pathname);
     selectedJewel && url.searchParams.append('jewel', selectedJewel.value.toString());
-    selectedConqueror && url.searchParams.append('conqueror', selectedConqueror.value);
+    dropdownConqueror && url.searchParams.append('conqueror', dropdownConqueror.value);
     seed && url.searchParams.append('seed', seed.toString());
     circledNode && url.searchParams.append('location', circledNode.toString());
     mode && url.searchParams.append('mode', mode);
@@ -156,14 +164,14 @@
   let currentSeed = 0;
   let searchResults: SearchResults;
   let searchJewel = 1;
-  let searchConqueror = '';
+  let searchConqueror: string | null = null;
   const search = () => {
     if (!circledNode) {
       return;
     }
 
     searchJewel = selectedJewel.value;
-    searchConqueror = selectedConqueror.value;
+    searchConqueror = anyConqueror ? null : selectedConqueror.value;
     searching = true;
     searchResults = undefined;
 
@@ -421,6 +429,20 @@
   };
 
   let collapsed = false;
+
+  let showTradeLinks = false;
+
+  let queries: Query[];
+
+  // reconstruct queries if search results change
+  $: if (searchResults && results) {
+    queries = constructQueries(searchJewel, searchConqueror, searchResults.raw);
+
+    // reset showTradeLinks to hidden if new queries is only length of 1
+    if (queries.length === 1) {
+      showTradeLinks = false;
+    }
+  }
 </script>
 
 <svelte:window on:paste={onPaste} />
@@ -457,12 +479,7 @@
           {#if searchResults}
             <div class="flex flex-row">
               {#if results}
-                <button
-                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
-                  on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
-                  disabled={!searchResults}>
-                  Trade
-                </button>
+                <TradeButton {queries} bind:showTradeLinks />
                 <button
                   class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
                   class:grouped={groupResults}
@@ -484,7 +501,7 @@
           {#if selectedJewel}
             <div class="mt-4">
               <h3 class="mb-2">Conqueror</h3>
-              <Select items={conquerors} bind:value={selectedConqueror} on:change={updateUrl} />
+              <Select items={dropdownConqs} bind:value={dropdownConqueror} on:change={updateUrl} />
             </div>
 
             {#if selectedConqueror && Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) >= 0}
@@ -661,6 +678,9 @@
         {/if}
 
         {#if searchResults && results}
+          {#if showTradeLinks}
+            <TradeLinks {queries} />
+          {/if}
           <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} />
         {/if}
       </div>
@@ -698,7 +718,8 @@
   }
 
   .grouped {
-    @apply bg-pink-500/40 disabled:bg-pink-900/40;
+    @apply bg-pink-500/40;
+    disabled: bg-pink-900/40;
   }
 
   .rainbow {
