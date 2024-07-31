@@ -433,11 +433,19 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
       });
     }
   } else {
-    for (const conq of Object.keys(tradeStatNames[jewel])) {
-      stat.disabled = conq != conqueror;
+    for (let i = 0; i < max_filters; i++) {
+      final_query.push({
+        type: 'count',
+        value: { min: 1 },
+        filters: []
+      });
+    }
 
+    for (const [i, conq] of Object.keys(tradeStatNames[jewel]).entries()) {
       for (const r of result) {
-        stat.filters.push({
+        final_query[i].disabled = conq != conqueror;
+
+        final_query[i].filters.push({
           id: tradeStatNames[jewel][conq],
           value: {
             min: r.seed,
@@ -445,12 +453,6 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
           }
         });
       }
-
-      if (stat.filters.length > max_filter_length) {
-        stat.filters = stat.filters.slice(0, max_filter_length);
-      }
-
-      final_query.push(stat);
     }
   }
 
