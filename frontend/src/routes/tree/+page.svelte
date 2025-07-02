@@ -78,6 +78,8 @@
 
   let mode = searchParams.has('mode') ? searchParams.get('mode') : '';
 
+  let disabled = new Set<number>();
+
   const updateUrl = () => {
     const url = new URL(window.location.origin + window.location.pathname);
     selectedJewel && url.searchParams.append('jewel', selectedJewel.value.toString());
@@ -98,8 +100,6 @@
     mode = newMode;
     updateUrl();
   };
-
-  let disabled = new Set<number>();
 
   if (searchParams.has('disabled')) {
     searchParams.getAll('disabled').forEach((d) => {
@@ -432,7 +432,8 @@
 
   let collapsed = false;
 
-  const platforms = [{
+  const platforms = [
+  {
     value: 'PC',
     label: 'PC'
   }, {
@@ -441,7 +442,8 @@
   }, {
     value: 'Playstation',
     label: 'Playstation'
-  }];
+  }
+  ];
 
   let platform = platforms.find((p) => p.value === localStorage.getItem('platform')) || platforms[0];
   $: localStorage.setItem('platform', platform.value);
@@ -450,8 +452,8 @@
   let league: { value: string; label: string } | undefined;
   const getLeagues = async () => {
     const response = await fetch('https://api.poe.watch/leagues');
-    const data = await response.json();
-    leagues = data.map((l: { name: string }) => ({ value: l.name, label: l.name }));
+    const responseJson = await response.json();
+    leagues = responseJson.map((l: { name: string }) => ({ value: l.name, label: l.name }));
     league = leagues.find((l) => l.value === localStorage.getItem('league')) || leagues[0];
   };
 
