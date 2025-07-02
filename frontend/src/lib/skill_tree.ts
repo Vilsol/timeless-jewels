@@ -467,8 +467,8 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
   };
 };
 
-export const openTrade = (jewel: number, conqueror: string, results: SearchWithSeed[]) => {
-  const url = new URL('https://www.pathofexile.com/trade/search/Necropolis');
+export const openTrade = (jewel: number, conqueror: string, results: SearchWithSeed[], platform: string, league: string) => {
+  const url = new URL(`https://www.pathofexile.com/trade/search${platform === 'PC' ? '' : `/${platform.toLowerCase()}`}/${league}`);
   url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
   window.open(url, '_blank');
 };

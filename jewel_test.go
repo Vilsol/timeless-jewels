@@ -23,8 +23,8 @@ func TestGloriousVanity(t *testing.T) {
 			conqueror: data.Xibaqua,
 			passive:   2286, // Doomsday (hex_zone_keystone2800_)
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(13),
-				StatRolls:             map[uint32]uint32{0: 12},
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(12),
+				StatRolls:             map[uint32]uint32{0: 11},
 			},
 		},
 		{
@@ -33,7 +33,7 @@ func TestGloriousVanity(t *testing.T) {
 			passive:   411, // Instability (maximum_power_charges742)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(67),
-				StatRolls:             map[uint32]uint32{0: 5, 1: 22},
+				StatRolls:             map[uint32]uint32{0: 8, 1: 22},
 			},
 		},
 		{
@@ -82,8 +82,8 @@ func TestGloriousVanity(t *testing.T) {
 			conqueror: data.Zerphi,
 			passive:   2286, // Doomsday (hex_zone_keystone2800_)
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(13),
-				StatRolls:             map[uint32]uint32{0: 12},
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(12),
+				StatRolls:             map[uint32]uint32{0: 11},
 			},
 		},
 		{
@@ -91,8 +91,8 @@ func TestGloriousVanity(t *testing.T) {
 			conqueror: data.Ahuana,
 			passive:   2286, // Doomsday (hex_zone_keystone2800_)
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(13),
-				StatRolls:             map[uint32]uint32{0: 12},
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(12),
+				StatRolls:             map[uint32]uint32{0: 11},
 			},
 		},
 		{
@@ -100,8 +100,8 @@ func TestGloriousVanity(t *testing.T) {
 			conqueror: data.Doryani,
 			passive:   2286, // Doomsday (hex_zone_keystone2800_)
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(13),
-				StatRolls:             map[uint32]uint32{0: 12},
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(12),
+				StatRolls:             map[uint32]uint32{0: 11},
 			},
 		},
 	}
