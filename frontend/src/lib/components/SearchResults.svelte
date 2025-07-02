@@ -8,6 +8,8 @@
   export let groupResults = true;
   export let jewel: number;
   export let conqueror: string;
+  export let platform: string;
+  export let league: string;
 
   const computeSize = (r: SearchWithSeed) =>
     8 + 48 + r.skills.reduce((o, s) => o + 32 + Object.keys(s.stats).length * 24, 0);
@@ -55,7 +57,7 @@
       itemCount={searchResults.raw.length}
       itemSize={searchResults.raw.map(computeSize)}>
       <div slot="item" let:index let:style {style}>
-        <SearchResult set={searchResults.raw[index]} {highlight} {jewel} {conqueror} />
+        <SearchResult set={searchResults.raw[index]} {highlight} {jewel} {conqueror} {platform} {league} />
       </div>
     </VirtualList>
   </div>

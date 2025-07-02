@@ -705,7 +705,7 @@
         {/if}
 
         {#if searchResults && results}
-          <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} />
+          <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} platform={platform.value} league={league.value} />
         {/if}
       </div>
     </div>
