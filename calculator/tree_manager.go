@@ -155,10 +155,3 @@ func (a *AlternateTreeManager) RollAdditions(minimumAdditions uint32, maximumAdd
 
 	return alternatePassiveAdditionInformations
 }
-
-func min(a uint32, b uint32) uint32 {
-	if a < b {
-		return a
-	}
-	return b
-}
