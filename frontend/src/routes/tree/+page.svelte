@@ -446,7 +446,7 @@
   ];
 
   let platform = platforms.find((p) => p.value === localStorage.getItem('platform')) || platforms[0];
-  $: localStorage.setItem('platform', platform.value);
+  $: platform && localStorage.setItem('platform', platform.value);
 
   let leagues: { value: string; label: string }[] = [];
   let league: { value: string; label: string } | undefined;
