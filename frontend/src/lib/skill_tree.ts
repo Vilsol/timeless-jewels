@@ -486,5 +486,8 @@ export const openTrade = (
     `https://www.pathofexile.com/trade/search${platform === 'PC' ? '' : `/${platform.toLowerCase()}`}/${league}`
   );
   url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
+
+  console.log('opening trade', url);
+
   window.open(url, '_blank');
 };
