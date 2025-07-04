@@ -474,6 +474,14 @@ export const openTrade = (
   platform: string,
   league: string
 ) => {
+  if (!platform || typeof platform !== 'string') {
+    platform = 'PC';
+  }
+
+  if (!league || typeof league !== 'string') {
+    league = 'Standard';
+  }
+
   const url = new URL(
     `https://www.pathofexile.com/trade/search${platform === 'PC' ? '' : `/${platform.toLowerCase()}`}/${league}`
   );

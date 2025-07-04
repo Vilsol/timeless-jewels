@@ -458,7 +458,6 @@
   };
 
   $: league && localStorage.setItem('league', league.value);
-  $: console.log(league);
 
   onMount(() => {
     getLeagues();
