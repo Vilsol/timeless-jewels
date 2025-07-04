@@ -42,7 +42,7 @@
             itemCount={searchResults.grouped[k].length}
             itemSize={searchResults.grouped[k].map(computeSize)}>
             <div slot="item" let:index let:style {style}>
-              <SearchResult set={searchResults.grouped[k][index]} {highlight} {jewel} {conqueror} />
+              <SearchResult set={searchResults.grouped[k][index]} {highlight} {jewel} {conqueror} {platform} {league} />
             </div>
           </VirtualList>
         </div>
