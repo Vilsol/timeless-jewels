@@ -1,30 +1,87 @@
 linters-settings:
   wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+      - github.com/labstack/echo/v4.Context
+
     ignorePackageGlobs:
       - github.com/vilsol/timeless-jewels/*
+
+  govet:
+    disable:
+      - shadow
+
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+
+  gci:
+    custom-order: true
+    sections:
+      - standard
+      - default
+      - prefix(github.com/vilsol/timeless-jewels)
+      - blank
+      - dot
+
+  sloglint:
+    attr-only: true
+    context: scope
+    forbidden-keys:
+      - time
+      - level
+      - msg
+      - source
+
+  spancheck:
+    checks:
+      - end
+      - record-error
+      - set-status
+
+
+issues:
+  exclude-files:
+    - ./generated/generated.go
+    - ./generated/models_gen.go
+  exclude-dirs:
+    - ./generated/
+  exclude:
+    - should pass the context parameter
 
 linters:
   disable-all: true
   enable:
-    - deadcode
     - errcheck
     - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - bidichk
     - contextcheck
     - durationcheck
     - errorlint
-    - goconst
     - goimports
     - revive
-    - ifshort
     - misspell
     - prealloc
     - whitespace
     - wrapcheck
+    - gci
+    - gocritic
+    - gofumpt
+    - nonamedreturns
+    - inamedparam
+    - sloglint
+    - spancheck
+    - intrange
+    - copyloopvar
+    - fatcontext
+    - canonicalheader

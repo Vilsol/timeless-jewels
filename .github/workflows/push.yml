@@ -5,27 +5,21 @@ permissions: read-all
 on: [push, pull_request]
 
 env:
-  GO_VERSION: '1.21.0'
+  GO_VERSION: "1.21.0"
 
 jobs:
   lint-backend:
     name: Lint Backend
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          stable: false
+      - uses: actions/checkout@v4
 
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Lint
-        uses: golangci/golangci-lint-action@v2
+      - uses: actions/setup-go@v5
         with:
-          skip-pkg-cache: true
-          skip-build-cache: true
+          go-version-file: "go.mod"
+
+      - uses: golangci/golangci-lint-action@v6
+        with:
           args: --timeout 5m
 
   lint-frontend:
@@ -46,14 +40,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          stable: false
+      - uses: actions/checkout@v4
 
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
 
       - name: Test
         run: go test -v ./...
@@ -64,14 +55,11 @@ jobs:
     needs:
       - lint-backend
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          stable: false
+      - uses: actions/checkout@v4
 
-      - name: Check out
-        uses: actions/checkout@v2
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
 
       - name: Build wasm
         run: go build -ldflags="-s -w" -v -o build.wasm ./wasm
@@ -94,5 +82,5 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: |
-          bun install 
+          bun install
           bun run build

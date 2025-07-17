@@ -50,8 +50,8 @@ type AlternatePassiveSkill struct {
 	ConquerorVersion         uint32             `json:"Var24"`
 }
 
-func (a *AlternatePassiveSkill) GetStatMinMax(min bool, index uint32) uint32 {
-	switch min {
+func (a *AlternatePassiveSkill) GetStatMinMax(statMin bool, index uint32) uint32 {
+	switch statMin {
 	case true:
 		switch index {
 		case 0:
@@ -91,8 +91,8 @@ type AlternatePassiveAddition struct {
 	PassiveType              []PassiveSkillType `json:"PassiveType"`
 }
 
-func (a *AlternatePassiveAddition) GetStatMinMax(min bool, index uint32) uint32 {
-	switch min {
+func (a *AlternatePassiveAddition) GetStatMinMax(statMin bool, index uint32) uint32 {
+	switch statMin {
 	case true:
 		switch index {
 		case 0:

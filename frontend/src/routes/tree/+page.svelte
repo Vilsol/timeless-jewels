@@ -14,6 +14,7 @@
   import { calculator, data } from '../../lib/types';
   import { statValues } from '../../lib/values';
   import { syncWrap } from '../../lib/worker';
+  import { onMount } from 'svelte';
 
   const searchParams = $page.url.searchParams;
 
@@ -80,6 +81,8 @@
 
   let mode = searchParams.has('mode') ? searchParams.get('mode') : '';
 
+  let disabled = new Set<number>();
+
   const updateUrl = () => {
     const url = new URL(window.location.origin + window.location.pathname);
     selectedJewel && url.searchParams.append('jewel', selectedJewel.value.toString());
@@ -87,6 +90,7 @@
     seed && url.searchParams.append('seed', seed.toString());
     circledNode && url.searchParams.append('location', circledNode.toString());
     mode && url.searchParams.append('mode', mode);
+    disabled.forEach((d) => url.searchParams.append('disabled', d.toString()));
 
     Object.keys(selectedStats).forEach((s) => {
       url.searchParams.append('stat', s.toString());
@@ -100,7 +104,12 @@
     updateUrl();
   };
 
-  let disabled = new Set();
+  if (searchParams.has('disabled')) {
+    searchParams.getAll('disabled').forEach((d) => {
+      disabled.add(parseInt(d));
+    });
+  }
+
   const clickNode = (node: Node) => {
     if (node.isJewelSocket) {
       circledNode = node.skill;
@@ -113,6 +122,7 @@
       }
       // Re-assign to update svelte
       disabled = disabled;
+      updateUrl();
     }
   };
 
@@ -424,6 +434,39 @@
   };
 
   let collapsed = false;
+
+  const platforms = [
+    {
+      value: 'PC',
+      label: 'PC'
+    },
+    {
+      value: 'Xbox',
+      label: 'Xbox'
+    },
+    {
+      value: 'Playstation',
+      label: 'Playstation'
+    }
+  ];
+
+  let platform = platforms.find((p) => p.value === localStorage.getItem('platform')) || platforms[0];
+  $: localStorage.setItem('platform', platform.value);
+
+  let leagues: { value: string; label: string }[] = [];
+  let league: { value: string; label: string } | undefined;
+  const getLeagues = async () => {
+    const response = await fetch('https://api.poe.watch/leagues');
+    const responseJson = await response.json();
+    leagues = responseJson.map((l: { name: string }) => ({ value: l.name, label: l.name }));
+    league = leagues.find((l) => l.value === localStorage.getItem('league')) || leagues[0];
+  };
+
+  $: league && localStorage.setItem('league', league.value);
+
+  onMount(() => {
+    getLeagues();
+  });
 </script>
 
 <svelte:window on:paste={onPaste} />
@@ -439,7 +482,7 @@
   disabled={[...disabled]}>
   {#if !collapsed}
     <div
-      class="w-screen md:w-10/12 lg:w-2/3 xl:w-1/2 2xl:w-5/12 3xl:w-1/3 4xl:w-1/4 absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen">
+      class="w-screen md:w-10/12 lg:w-2/3 xl:w-1/2 2xl:w-5/12 3xl:w-1/3 4xl:w-1/4 min-w-[820px] absolute top-0 left-0 bg-black/80 backdrop-blur-sm themed rounded-br-lg max-h-screen">
       <div class="p-4 max-h-screen flex flex-col">
         <div class="flex flex-row justify-between mb-2">
           <div class="flex flex-row items-center">
@@ -450,14 +493,20 @@
             </button>
 
             <h3 class="flex-grow">
-              {results ? $_('Results') : $_('Timeless Jewel')}
+              {#if results}
+                <span>Results</span>
+              {:else}
+                <span>Timeless Jewel</span>
+              {/if}
             </h3>
 
             <div class="ml-4"><Locale /></div>
           </div>
           {#if searchResults}
-            <div class="flex flex-row">
+            <div class="flex flex-row gap-2">
               {#if results}
+                <Select items={leagues} bind:value={league} on:change={updateUrl} clearable={false} />
+                <Select items={platforms} bind:value={platform} on:change={updateUrl} clearable={false} />
                 <button
                   class="p-1 px-3 bg-blue-500/40 bg-blue-500/70 rounded disabled:bg-blue-900/40 mr-2"
                   on:click={() => openTrade(searchJewel, searchConqueror, searchResults.raw)}
@@ -471,7 +520,7 @@
                   {$_('Trade')} CN
                 </button>
                 <button
-                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40 mr-2"
+                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40"
                   class:grouped={groupResults}
                   on:click={() => (groupResults = !groupResults)}
                   disabled={!searchResults}>
@@ -672,7 +721,14 @@
         {/if}
 
         {#if searchResults && results}
-          <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} />
+          <SearchResults
+            {searchResults}
+            {groupResults}
+            {highlight}
+            jewel={searchJewel}
+            conqueror={searchConqueror}
+            platform={platform.value}
+            league={league.value} />
         {/if}
       </div>
     </div>
