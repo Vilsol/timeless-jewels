@@ -457,7 +457,7 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
   return {
     query: {
       status: {
-        option: 'online'
+        option: 'any'
       },
       stats: final_query
     },
