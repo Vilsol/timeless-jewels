@@ -68,7 +68,51 @@
       goto($page.url.pathname + '?' + resultQuery);
     }
   };
+
+  const onPaste = (event: ClipboardEvent) => {
+    if (event.type !== 'paste') {
+      return;
+    }
+
+    const paste = (event.clipboardData || window.clipboardData).getData('text');
+    const lines = paste.split('\n').map(line => line.trim());
+
+    if (lines.length < 14) {
+      return;
+    }
+
+    const jewel = jewels.find((j) => j.label === lines[2]);
+    if (!jewel) {
+      return;
+    }
+
+    let newSeed: number | undefined;
+    let conqueror: string | undefined;
+    for (let i = 10; i < lines.length; i++) {
+      conqueror = Object.keys(data.TimelessJewelConquerors[jewel.value]).find((k) => lines[i].indexOf(k) >= 0);
+      if (conqueror) {
+        const matches = /(\d+)/.exec(lines[i]);
+        if (matches.length === 0) {
+          continue;
+        }
+
+        newSeed = parseInt(matches[1]);
+        break;
+      }
+    }
+
+    if (!conqueror || !newSeed) {
+      return;
+    }
+
+    seed = newSeed;
+    selectedJewel = jewel;
+    selectedConqueror = { label: conqueror, value: conqueror };
+    updateUrl();
+  };
 </script>
+
+<svelte:window on:paste={onPaste} />
 
 <div class="py-10 flex flex-row justify-center w-screen h-screen">
   <div class="flex flex-col justify-between w-1/3">
