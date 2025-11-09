@@ -522,7 +522,7 @@
         </div>
 
         {#if !results}
-          <Select items={jewels} bind:value={selectedJewel} on:change={changeJewel} />
+          <Select items={jewels} bind:value={selectedJewel} on:change={changeJewel} placeholder="Please select or paste jewel" />
 
           {#if selectedJewel}
             <div class="mt-4">

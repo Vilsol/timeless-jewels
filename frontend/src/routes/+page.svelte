@@ -81,7 +81,7 @@
 
       <div class="themed">
         <h3 class="mb-2">Timeless Jewel</h3>
-        <Select items={jewels} bind:value={selectedJewel} on:select={updateUrl} />
+        <Select items={jewels} bind:value={selectedJewel} on:select={updateUrl} placeholder="Please select or paste jewel" />
 
         {#if selectedJewel}
           <div class="mt-4">
