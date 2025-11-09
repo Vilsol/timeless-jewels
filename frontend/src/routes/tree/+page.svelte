@@ -392,7 +392,7 @@
     }
 
     const paste = (event.clipboardData || window.clipboardData).getData('text');
-    const lines = paste.split('\n');
+    const lines = paste.split('\n').map(line => line.trim());
 
     if (lines.length < 14) {
       return;
