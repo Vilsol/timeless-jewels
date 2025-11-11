@@ -440,7 +440,7 @@
     value: 'Xbox',
     label: 'Xbox'
   }, {
-    value: 'Playstation',
+    value: 'sony',
     label: 'Playstation'
   }
   ];
