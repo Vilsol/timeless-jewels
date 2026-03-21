@@ -433,7 +433,7 @@ export const constructQuery = (jewel: number, conqueror: string, result: SearchW
       });
     }
   } else {
-    for (const conq of Object.keys(tradeStatNames[jewel])) {
+    for (const conq of Object.keys(tradeStatNames[jewel]).sort((a, b) => a === conqueror ? -1 : b === conqueror ? 1 : 0)) {
       stat.disabled = conq != conqueror;
 
       for (const r of result) {
