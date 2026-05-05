@@ -139,9 +139,9 @@ func TestLethalPride(t *testing.T) {
 			passive:   411, // Instability (maximum_power_charges742)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(42),
-					StatRolls:                data.StatRolls{20},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(42),
+						StatRolls:                data.StatRolls{20},
 					},
 				},
 			},
@@ -152,9 +152,9 @@ func TestLethalPride(t *testing.T) {
 			passive:   519, // Intelligence (intelligence879)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
-					StatRolls:                data.StatRolls{4},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
+						StatRolls:                data.StatRolls{4},
 					},
 				},
 			},
@@ -165,9 +165,9 @@ func TestLethalPride(t *testing.T) {
 			passive:   1190, // Elemental Damage (elemental_damage1906)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
-					StatRolls:                data.StatRolls{4},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
+						StatRolls:                data.StatRolls{4},
 					},
 				},
 			},
@@ -178,9 +178,9 @@ func TestLethalPride(t *testing.T) {
 			passive:   88, // Eagle Eye (eagle_eye199)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(57),
-					StatRolls:                data.StatRolls{12},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(57),
+						StatRolls:                data.StatRolls{12},
 					},
 				},
 			},
@@ -247,9 +247,9 @@ func TestBrutalRestraint(t *testing.T) {
 			passive:   411, // Instability (maximum_power_charges742)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(70),
-					StatRolls:                data.StatRolls{10},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(70),
+						StatRolls:                data.StatRolls{10},
 					},
 				},
 			},
@@ -260,9 +260,9 @@ func TestBrutalRestraint(t *testing.T) {
 			passive:   519, // Intelligence (intelligence879)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
-					StatRolls:                data.StatRolls{4},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
+						StatRolls:                data.StatRolls{4},
 					},
 				},
 			},
@@ -273,9 +273,9 @@ func TestBrutalRestraint(t *testing.T) {
 			passive:   1190, // Elemental Damage (elemental_damage1906)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
-					StatRolls:                data.StatRolls{4},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
+						StatRolls:                data.StatRolls{4},
 					},
 				},
 			},
@@ -286,9 +286,9 @@ func TestBrutalRestraint(t *testing.T) {
 			passive:   88, // Eagle Eye (eagle_eye199)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(76),
-					StatRolls:                data.StatRolls{20},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(76),
+						StatRolls:                data.StatRolls{20},
 					},
 				},
 			},
@@ -355,9 +355,9 @@ func TestMilitantFaith(t *testing.T) {
 			passive:   411, // Instability (maximum_power_charges742)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(93),
-					StatRolls:                data.StatRolls{5},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(93),
+						StatRolls:                data.StatRolls{5},
 					},
 				},
 			},
@@ -368,9 +368,9 @@ func TestMilitantFaith(t *testing.T) {
 			passive:   519, // Intelligence (intelligence879)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
-					StatRolls:                data.StatRolls{5},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
+						StatRolls:                data.StatRolls{5},
 					},
 				},
 			},
@@ -381,9 +381,9 @@ func TestMilitantFaith(t *testing.T) {
 			passive:   1190, // Elemental Damage (elemental_damage1906)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
-					StatRolls:                data.StatRolls{5},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
+						StatRolls:                data.StatRolls{5},
 					},
 				},
 			},
@@ -394,9 +394,9 @@ func TestMilitantFaith(t *testing.T) {
 			passive:   88, // Eagle Eye (eagle_eye199)
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
-				{
-					AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(93),
-					StatRolls:                data.StatRolls{5},
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(93),
+						StatRolls:                data.StatRolls{5},
 					},
 				},
 			},
