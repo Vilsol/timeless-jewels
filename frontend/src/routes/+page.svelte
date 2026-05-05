@@ -162,7 +162,7 @@
     <div class="flex justify-between">
       <div class="text-right text-orange-500">
         <a href="https://discord.gg/mfacademy" target="_blank" rel="noopener" class="flex flex-row align-middle">
-          <img src="{assets}/mf-academy-logo.png" width="24px" />
+          <img src="{assets}/mf-academy-logo.png" width="24px" alt="MF Academy logo" />
           <span class="ml-2">MF Academy</span>
         </a>
       </div>

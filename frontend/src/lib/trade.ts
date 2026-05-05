@@ -62,7 +62,18 @@ export const constructQuery = <T extends SeedRef>(jewel: number, conqueror: stri
     throw new Error(`constructQuery: unknown conqueror "${conqueror}" for jewel ${jewel}`);
   }
 
-  const final_query: any[] = [];
+  interface TradeFilter {
+    id: string;
+    value: { min: number; max: number };
+    disabled?: boolean;
+  }
+  interface TradeStatGroup {
+    type: 'count';
+    value: { min: number };
+    filters: TradeFilter[];
+    disabled: boolean;
+  }
+  const final_query: TradeStatGroup[] = [];
 
   if (result.length === 1) {
     final_query.push({
