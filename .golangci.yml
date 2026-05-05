@@ -1,87 +1,98 @@
-linters-settings:
-  wrapcheck:
-    ignoreSigs:
-      - .Errorf(
-      - errors.New(
-      - errors.Unwrap(
-      - .WithMessage(
-      - .WithMessagef(
-      - .WithStack(
-      - github.com/labstack/echo/v4.Context
-
-    ignorePackageGlobs:
-      - github.com/vilsol/timeless-jewels/*
-
-  govet:
-    disable:
-      - shadow
-
-  gocritic:
-    disabled-checks:
-      - ifElseChain
-
-  gci:
-    custom-order: true
-    sections:
-      - standard
-      - default
-      - prefix(github.com/vilsol/timeless-jewels)
-      - blank
-      - dot
-
-  sloglint:
-    attr-only: true
-    context: scope
-    forbidden-keys:
-      - time
-      - level
-      - msg
-      - source
-
-  spancheck:
-    checks:
-      - end
-      - record-error
-      - set-status
-
-
-issues:
-  exclude-files:
-    - ./generated/generated.go
-    - ./generated/models_gen.go
-  exclude-dirs:
-    - ./generated/
-  exclude:
-    - should pass the context parameter
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
     - bidichk
+    - canonicalheader
     - contextcheck
+    - copyloopvar
     - durationcheck
+    - errcheck
     - errorlint
-    - goimports
-    - revive
-    - misspell
-    - prealloc
-    - whitespace
-    - wrapcheck
-    - gci
+    - fatcontext
     - gocritic
-    - gofumpt
-    - nonamedreturns
+    - govet
     - inamedparam
+    - ineffassign
+    - intrange
+    - misspell
+    - nonamedreturns
+    - prealloc
+    - revive
     - sloglint
     - spancheck
-    - intrange
-    - copyloopvar
-    - fatcontext
-    - canonicalheader
+    - staticcheck
+    - unused
+    - whitespace
+    - wrapcheck
+  settings:
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+    govet:
+      disable:
+        - shadow
+    sloglint:
+      attr-only: true
+      context: scope
+      forbidden-keys:
+        - time
+        - level
+        - msg
+        - source
+    spancheck:
+      checks:
+        - end
+        - record-error
+        - set-status
+    wrapcheck:
+      ignore-sigs:
+        - .Errorf(
+        - errors.New(
+        - errors.Unwrap(
+        - .WithMessage(
+        - .WithMessagef(
+        - .WithStack(
+        - github.com/labstack/echo/v4.Context
+      ignore-package-globs:
+        - github.com/vilsol/timeless-jewels/*
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: (.+)\.go$
+        text: should pass the context parameter
+    paths:
+      - ./generated/generated.go
+      - ./generated/models_gen.go
+      - ./generated/
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/vilsol/timeless-jewels)
+        - blank
+        - dot
+      custom-order: true
+  exclusions:
+    generated: lax
+    paths:
+      - ./generated/generated.go
+      - ./generated/models_gen.go
+      - ./generated/
+      - third_party$
+      - builtin$
+      - examples$

@@ -59,9 +59,7 @@ export const constructQuery = <T extends SeedRef>(jewel: number, conqueror: stri
     throw new Error(`constructQuery: unknown jewel type ${jewel}`);
   }
   if (!conquerors.includes(conqueror)) {
-    throw new Error(
-      `constructQuery: unknown conqueror "${conqueror}" for jewel ${jewel}`
-    );
+    throw new Error(`constructQuery: unknown conqueror "${conqueror}" for jewel ${jewel}`);
   }
 
   const final_query: any[] = [];

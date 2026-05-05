@@ -46,9 +46,7 @@ describe('constructQuery — multi-seed (≤180 results)', () => {
     const q = constructQuery(5, 'Caspiro', seeds(12780, 13000, 13500));
     const enabled = q.query.stats.filter((g) => !g.disabled);
     expect(enabled).toHaveLength(1);
-    const enabledConqs = new Set(
-      enabled[0].filters.map((f: { id: string }) => stripPrefix(f.id))
-    );
+    const enabledConqs = new Set(enabled[0].filters.map((f: { id: string }) => stripPrefix(f.id)));
     expect(enabledConqs).toEqual(new Set(['caspiro']));
   });
 
@@ -60,6 +58,42 @@ describe('constructQuery — multi-seed (≤180 results)', () => {
       expect(enabled, `selected=${target}`).toHaveLength(1);
       const ids = new Set(enabled[0].filters.map((f: { id: string }) => stripPrefix(f.id)));
       expect(ids, `selected=${target}`).toEqual(new Set([target.toLowerCase()]));
+    }
+  });
+
+  // PR #55 (haggys22) tried to fix this by sorting the conqueror loop so the
+  // selected conqueror iterates first, rescuing its filters from the slice(0,45)
+  // truncation in the original buggy code. This test locks the stronger guarantee:
+  // selected-conqueror coverage is independent of iteration position, at any
+  // result-count regime, including the slice-relevant 50-seed and 200-seed cases
+  // where PR #55's workaround would have left the boxes disabled-by-default or
+  // truncated to 45.
+  it('selected-conqueror coverage is independent of iteration order (PR #55)', () => {
+    const jewelFiveOrder = Object.keys(tradeStatNames[5]); // Cadiro, Victario, Chitus, Caspiro
+    for (const target of jewelFiveOrder) {
+      for (const count of [3, 30, 50, 200]) {
+        const list = Array.from({ length: count }, (_, i) => ({ seed: i + 1 }));
+        const q = constructQuery(5, target, list);
+
+        // Whatever branch we land in, the selected conqueror must be the only
+        // conqueror enabled by default (or, in deep-dive mode, the only
+        // conqueror represented at all).
+        const enabled = q.query.stats.filter((g) => !g.disabled);
+        expect(enabled.length, `${target}@${count}: enabled groups`).toBeGreaterThanOrEqual(1);
+        const enabledIds = new Set(enabled.flatMap((g) => g.filters.map((f: { id: string }) => stripPrefix(f.id))));
+        expect(enabledIds, `${target}@${count}: enabled-conqueror ids`).toEqual(new Set([target.toLowerCase()]));
+
+        // And the selected conqueror's seeds are never silently truncated
+        // beyond PoE's hard cap (max_query_length = 180).
+        const seedSet = new Set(
+          q.query.stats.flatMap((g) =>
+            g.filters
+              .filter((f: { id: string }) => stripPrefix(f.id) === target.toLowerCase())
+              .map((f: { value: { min: number } }) => f.value.min)
+          )
+        );
+        expect(seedSet.size, `${target}@${count}: selected seeds in query`).toBe(Math.min(count, 180));
+      }
     }
   });
 
@@ -77,12 +111,9 @@ describe('constructQuery — multi-seed (≤180 results)', () => {
     expect(enabled).toHaveLength(1);
     expect(disabled).toHaveLength(3);
 
-    const conquerorOf = (g: { filters: { id: string }[] }) =>
-      stripPrefix(g.filters[0].id);
+    const conquerorOf = (g: { filters: { id: string }[] }) => stripPrefix(g.filters[0].id);
     expect(conquerorOf(enabled[0])).toBe('victario');
-    expect(new Set(disabled.map(conquerorOf))).toEqual(
-      new Set(['cadiro', 'chitus', 'caspiro'])
-    );
+    expect(new Set(disabled.map(conquerorOf))).toEqual(new Set(['cadiro', 'chitus', 'caspiro']));
 
     // Each disabled group must mirror the enabled one — same seed values,
     // same filter count, just a different stat ID. That's what makes them
@@ -121,14 +152,9 @@ describe('constructQuery — overflow (>180 results)', () => {
     for (let i = 1; i < 4; i++) {
       expect(q.query.stats[i].disabled).toBe(true);
     }
-    const total = q.query.stats.reduce(
-      (acc: number, g) => acc + g.filters.length,
-      0
-    );
+    const total = q.query.stats.reduce((acc: number, g) => acc + g.filters.length, 0);
     expect(total).toBe(180); // 45 * 4
-    const allIds = new Set(
-      q.query.stats.flatMap((g) => g.filters.map((f: { id: string }) => stripPrefix(f.id)))
-    );
+    const allIds = new Set(q.query.stats.flatMap((g) => g.filters.map((f: { id: string }) => stripPrefix(f.id))));
     expect(allIds).toEqual(new Set(['chitus']));
   });
 });
@@ -150,24 +176,18 @@ describe('tradeUrl — platform/realm mapping (issue #52)', () => {
   });
 
   it('Xbox maps to /xbox/', () => {
-    expect(tradeUrl('Xbox', 'Standard')).toBe(
-      'https://www.pathofexile.com/trade/search/xbox/Standard'
-    );
+    expect(tradeUrl('Xbox', 'Standard')).toBe('https://www.pathofexile.com/trade/search/xbox/Standard');
   });
 
   // Repros #52: GGG renamed playstation realm to "sony".
   it('Playstation maps to /sony/ (not /playstation/)', () => {
-    expect(tradeUrl('Playstation', 'Standard')).toBe(
-      'https://www.pathofexile.com/trade/search/sony/Standard'
-    );
+    expect(tradeUrl('Playstation', 'Standard')).toBe('https://www.pathofexile.com/trade/search/sony/Standard');
   });
 
   it('falls back to PC + Standard when platform/league are missing', () => {
     expect(tradeUrl('', '')).toBe('https://www.pathofexile.com/trade/search/Standard');
     // @ts-expect-error: testing runtime fallback behavior
-    expect(tradeUrl(undefined, undefined)).toBe(
-      'https://www.pathofexile.com/trade/search/Standard'
-    );
+    expect(tradeUrl(undefined, undefined)).toBe('https://www.pathofexile.com/trade/search/Standard');
   });
 });
 
@@ -210,18 +230,13 @@ describe('RED — selected-conqueror seed coverage (issues #7, #14)', () => {
     // Seeds may live in disabled groups (toggleable in PoE trade UI) but must
     // be *present* in the query — silent truncation is the bug.
     const seedSet = new Set(
-      q.query.stats.flatMap((g) =>
-        g.filters.map((f: { value: { min: number } }) => f.value.min)
-      )
+      q.query.stats.flatMap((g) => g.filters.map((f: { value: { min: number } }) => f.value.min))
     );
     expect(seedSet.size).toBe(100);
     // And every filter still targets the selected conqueror only.
-    const ids = new Set(
-      q.query.stats.flatMap((g) => g.filters.map((f: { id: string }) => stripPrefix(f.id)))
-    );
+    const ids = new Set(q.query.stats.flatMap((g) => g.filters.map((f: { id: string }) => stripPrefix(f.id))));
     expect(ids).toEqual(new Set(['caspiro']));
   });
-
 });
 
 describe('RED — tradeUrl encodes league names safely', () => {
