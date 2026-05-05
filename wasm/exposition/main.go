@@ -22,6 +22,7 @@ func Expose() *crystalline.Exposer {
 		data.BrutalRestraint: data.BrutalRestraint.String(),
 		data.MilitantFaith:   data.MilitantFaith.String(),
 		data.ElegantHubris:   data.ElegantHubris.String(),
+		data.HeroicTragedy:   data.HeroicTragedy.String(),
 	}, "data", "TimelessJewels")
 
 	e.ExposeOrPanic(data.TimelessJewelConquerors, "data", "TimelessJewelConquerors")

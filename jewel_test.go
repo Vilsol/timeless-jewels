@@ -531,6 +531,97 @@ func TestElegantHubris(t *testing.T) {
 	}
 }
 
+func TestHeroicTragedy(t *testing.T) {
+	const seed = 2000
+
+	tests := []struct {
+		jewel     data.JewelType
+		conqueror data.Conqueror
+		passive   uint32
+		result    data.AlternatePassiveSkillInformation
+	}{
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Vorana,
+			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(179),
+				StatRolls:             data.StatRolls{1},
+			},
+		},
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Vorana,
+			passive:   411, // Instability (maximum_power_charges742)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(172),
+				StatRolls:             data.StatRolls{12, 8},
+			},
+		},
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Vorana,
+			passive:   519, // Intelligence (intelligence879)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(94),
+						StatRolls:                data.StatRolls{2},
+					},
+				},
+			},
+		},
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Vorana,
+			passive:   1190, // Elemental Damage (elemental_damage1906)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
+					{
+						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(94),
+						StatRolls:                data.StatRolls{2},
+					},
+				},
+			},
+		},
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Vorana,
+			passive:   88, // Eagle Eye (eagle_eye199)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(175),
+				StatRolls:             data.StatRolls{20, 20},
+			},
+		},
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Uhtred,
+			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(180),
+				StatRolls:             data.StatRolls{1},
+			},
+		},
+		{
+			jewel:     data.HeroicTragedy,
+			conqueror: data.Medved,
+			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			result: data.AlternatePassiveSkillInformation{
+				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(181),
+				StatRolls:             data.StatRolls{1},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(string(test.conqueror), func(t *testing.T) {
+			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			})
+		})
+	}
+}
+
 func BenchmarkAll(b *testing.B) {
 	applicable := data.GetApplicablePassives()
 
