@@ -1,6 +1,6 @@
 module github.com/Vilsol/timeless-jewels
 
-go 1.22.5
+go 1.26.2
 
 require (
 	github.com/MarvinJWendt/testza v0.5.1
