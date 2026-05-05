@@ -29,13 +29,18 @@ const (
 	JewelSocket
 )
 
+// StatRolls holds up to 4 rolled stat values for a replaced passive
+// (or up to 2 for an addition). Indexed positionally by the corresponding
+// StatsKeys slot.
+type StatRolls [4]int32
+
 type AlternatePassiveSkillInformation struct {
 	AlternatePassiveSkill                *AlternatePassiveSkill
-	StatRolls                            map[uint32]uint32
+	StatRolls                            StatRolls
 	AlternatePassiveAdditionInformations []AlternatePassiveAdditionInformation
 }
 
 type AlternatePassiveAdditionInformation struct {
 	AlternatePassiveAddition *AlternatePassiveAddition
-	StatRolls                map[uint32]uint32
+	StatRolls                StatRolls
 }

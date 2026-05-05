@@ -121,11 +121,11 @@
                       >{result.AlternatePassiveSkill.Name} ({result.AlternatePassiveSkill.ID}) ({result.AlternatePassiveSkill})</span>
                   </div>
 
-                  {#if result.StatRolls && Object.keys(result.StatRolls).length > 0}
+                  {#if result.AlternatePassiveSkill.StatsKeys && result.AlternatePassiveSkill.StatsKeys.length > 0}
                     <ol class="mt-4 list-decimal pl-8">
-                      {#each Object.keys(result.StatRolls) as roll, i}
-                        {@const stat = data.GetStatByIndex(result.AlternatePassiveSkill.StatsKeys[i])}
-                        <li>{stat.Text || '<no name>'} ({stat.ID}) - {result.StatRolls[roll]}</li>
+                      {#each result.AlternatePassiveSkill.StatsKeys as statKey, i}
+                        {@const stat = data.GetStatByIndex(statKey)}
+                        <li>{stat.Text || '<no name>'} ({stat.ID}) - {result.StatRolls[i]}</li>
                       {/each}
                     </ol>
                   {/if}
@@ -139,11 +139,11 @@
                         <li class="mt-4">
                           <span>{info.AlternatePassiveAddition.ID} ({info.AlternatePassiveAddition.Index})</span>
 
-                          {#if info.StatRolls && Object.keys(info.StatRolls).length > 0}
+                          {#if info.AlternatePassiveAddition.StatsKeys && info.AlternatePassiveAddition.StatsKeys.length > 0}
                             <ol class="list-decimal pl-8">
-                              {#each Object.keys(info.StatRolls) as roll, i}
-                                {@const stat = data.GetStatByIndex(info.AlternatePassiveAddition.StatsKeys[i])}
-                                <li>{stat.Text || '<no name>'} ({stat.ID}) - {info.StatRolls[roll]}</li>
+                              {#each info.AlternatePassiveAddition.StatsKeys as statKey, i}
+                                {@const stat = data.GetStatByIndex(statKey)}
+                                <li>{stat.Text || '<no name>'} ({stat.ID}) - {info.StatRolls[i]}</li>
                               {/each}
                             </ol>
                           {/if}

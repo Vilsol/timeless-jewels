@@ -19,7 +19,7 @@ export declare namespace data {
   }
   interface AlternatePassiveAdditionInformation {
     AlternatePassiveAddition?: data.AlternatePassiveAddition;
-    StatRolls?: Record<number, number>;
+    StatRolls?: Array<number>;
   }
   interface AlternatePassiveSkill {
     Index: number;
@@ -45,7 +45,7 @@ export declare namespace data {
   }
   interface AlternatePassiveSkillInformation {
     AlternatePassiveSkill?: data.AlternatePassiveSkill;
-    StatRolls?: Record<number, number>;
+    StatRolls?: Array<number>;
     AlternatePassiveAdditionInformations?: Array<data.AlternatePassiveAdditionInformation>;
   }
   interface PassiveSkill {

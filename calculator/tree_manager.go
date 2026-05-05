@@ -69,11 +69,12 @@ func (a *AlternateTreeManager) RollAlternatePassiveAddition(rng *random.NumberGe
 func (a *AlternateTreeManager) ReplacePassiveSkill(rng *random.NumberGenerator) data.AlternatePassiveSkillInformation {
 	if a.PassiveSkill.IsKeystone {
 		alternatePassiveSkillKeyStone := data.GetAlternatePassiveSkillKeyStone(a.TimelessJewel)
+		if alternatePassiveSkillKeyStone == nil {
+			return data.AlternatePassiveSkillInformation{}
+		}
 		return data.AlternatePassiveSkillInformation{
 			AlternatePassiveSkill: alternatePassiveSkillKeyStone,
-			StatRolls: map[uint32]uint32{
-				0: alternatePassiveSkillKeyStone.Stat1Min,
-			},
+			StatRolls:             data.StatRolls{alternatePassiveSkillKeyStone.Stat1Min},
 		}
 	}
 
@@ -95,12 +96,12 @@ func (a *AlternateTreeManager) ReplacePassiveSkill(rng *random.NumberGenerator) 
 	}
 
 	elements := min(uint32(len(rolledAlternatePassiveSkill.StatsKeys)), 4)
-	alternatePassiveSkillStatRolls := make(map[uint32]uint32, elements)
+	var alternatePassiveSkillStatRolls data.StatRolls
 	for i := range elements {
 		alternatePassiveSkillStatRolls[i] = rolledAlternatePassiveSkill.GetStatMinMax(true, i)
 
 		if rolledAlternatePassiveSkill.GetStatMinMax(false, i) > rolledAlternatePassiveSkill.GetStatMinMax(true, i) {
-			alternatePassiveSkillStatRolls[i] = rng.Generate(rolledAlternatePassiveSkill.GetStatMinMax(true, i), rolledAlternatePassiveSkill.GetStatMinMax(false, i))
+			alternatePassiveSkillStatRolls[i] = rng.GenerateSigned(rolledAlternatePassiveSkill.GetStatMinMax(true, i), rolledAlternatePassiveSkill.GetStatMinMax(false, i))
 		}
 	}
 
@@ -128,7 +129,7 @@ func (a *AlternateTreeManager) RollAdditions(minimumAdditions uint32, maximumAdd
 		additionCountRoll = rng.Generate(minimumAdditions, maximumAdditions)
 	}
 
-	alternatePassiveAdditionInformations := make([]data.AlternatePassiveAdditionInformation, 0)
+	alternatePassiveAdditionInformations := make([]data.AlternatePassiveAdditionInformation, 0, additionCountRoll)
 
 	for range additionCountRoll {
 		var rolledAlternatePassiveAddition *data.AlternatePassiveAddition
@@ -138,12 +139,12 @@ func (a *AlternateTreeManager) RollAdditions(minimumAdditions uint32, maximumAdd
 		}
 
 		elements := min(uint32(len(rolledAlternatePassiveAddition.StatsKeys)), 2)
-		alternatePassiveAdditionStatRolls := make(map[uint32]uint32, elements)
+		var alternatePassiveAdditionStatRolls data.StatRolls
 		for j := range elements {
 			alternatePassiveAdditionStatRolls[j] = rolledAlternatePassiveAddition.GetStatMinMax(true, j)
 
 			if rolledAlternatePassiveAddition.GetStatMinMax(false, j) > rolledAlternatePassiveAddition.GetStatMinMax(true, j) {
-				alternatePassiveAdditionStatRolls[j] = rng.Generate(rolledAlternatePassiveAddition.GetStatMinMax(true, j), rolledAlternatePassiveAddition.GetStatMinMax(false, j))
+				alternatePassiveAdditionStatRolls[j] = rng.GenerateSigned(rolledAlternatePassiveAddition.GetStatMinMax(true, j), rolledAlternatePassiveAddition.GetStatMinMax(false, j))
 			}
 		}
 
