@@ -46,7 +46,7 @@ const platformRealms: { [key: string]: string } = {
   Playstation: 'sony'
 };
 
-export const constructQuery = <T extends SeedRef>(jewel: number, conqueror: string, result: T[]) => {
+export const constructQuery = <T extends SeedRef>(jewel: number, conqueror: string, result: T[], isLegacyTradersMode = false) => {
   const max_filter_length = 45;
   const max_filters = 4;
   const max_query_length = max_filter_length * max_filters;
@@ -125,7 +125,7 @@ export const constructQuery = <T extends SeedRef>(jewel: number, conqueror: stri
 
   return {
     query: {
-      status: { option: 'online' },
+      status: { option: isLegacyTradersMode ? 'online' : 'any' },
       stats: final_query
     },
     sort: { price: 'asc' }
@@ -150,10 +150,11 @@ export const openTrade = <T extends SeedRef>(
   conqueror: string,
   results: T[],
   platform: string,
-  league: string
+  league: string,
+  isLegacyTradersMode = false
 ) => {
   const url = new URL(tradeUrl(platform, league));
-  url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results)));
+  url.searchParams.set('q', JSON.stringify(constructQuery(jewel, conqueror, results, isLegacyTradersMode)));
 
   console.log('opening trade', url);
 

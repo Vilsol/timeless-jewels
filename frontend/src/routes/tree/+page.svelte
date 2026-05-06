@@ -448,6 +448,20 @@
   let platform = platforms.find((p) => p.value === localStorage.getItem('platform')) || platforms[0];
   $: localStorage.setItem('platform', platform.value);
 
+  const TradersModes = {
+    legacy: {
+      value: 'legacy',
+      label: 'Legacy Traders'
+    },
+    modern: {
+      value: 'modern',
+      label: 'All Traders'
+    }
+  };
+
+  let isLegacyTradersMode = localStorage.getItem('tradersMode') === TradersModes.legacy.value || false;
+  $: localStorage.setItem('tradersMode', isLegacyTradersMode ? TradersModes.legacy.value : TradersModes.modern.value);
+
   let leagues: { value: string; label: string }[] = [];
   let league: { value: string; label: string } | undefined;
   const getLeagues = async () => {
@@ -512,6 +526,12 @@
                   on:click={() => (groupResults = !groupResults)}
                   disabled={!searchResults}>
                   Grouped
+                </button>
+                <button
+                  class="p-1 px-3 bg-blue-500/40 rounded disabled:bg-blue-900/40"
+                  on:click={() => (isLegacyTradersMode = !isLegacyTradersMode)}
+                  disabled={!searchResults}>
+                  {isLegacyTradersMode ? TradersModes.legacy.label : TradersModes.modern.label}
                 </button>
               {/if}
               <button class="bg-neutral-100/20 px-4 p-1 rounded" on:click={() => (results = !results)}>
@@ -719,7 +739,7 @@
         {/if}
 
         {#if searchResults && results}
-          <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} platform={platform.value} league={league.value} />
+          <SearchResults {searchResults} {groupResults} {highlight} jewel={searchJewel} conqueror={searchConqueror} platform={platform.value} league={league.value} isLegacyTradersMode={isLegacyTradersMode} />
         {/if}
       </div>
     </div>
