@@ -10,6 +10,7 @@
   export let conqueror: string;
   export let platform: string;
   export let league: string;
+  export let isLegacyTradersMode = false;
 
   const computeSize = (r: SearchWithSeed) =>
     8 + 48 + r.skills.reduce((o, s) => o + 32 + Object.keys(s.stats).length * 24, 0);
@@ -42,7 +43,7 @@
             itemCount={searchResults.grouped[k].length}
             itemSize={searchResults.grouped[k].map(computeSize)}>
             <div slot="item" let:index let:style {style}>
-              <SearchResult set={searchResults.grouped[k][index]} {highlight} {jewel} {conqueror} {platform} {league} />
+              <SearchResult set={searchResults.grouped[k][index]} {highlight} {jewel} {conqueror} {platform} {league} {isLegacyTradersMode} />
             </div>
           </VirtualList>
         </div>
@@ -57,7 +58,7 @@
       itemCount={searchResults.raw.length}
       itemSize={searchResults.raw.map(computeSize)}>
       <div slot="item" let:index let:style {style}>
-        <SearchResult set={searchResults.raw[index]} {highlight} {jewel} {conqueror} {platform} {league} />
+        <SearchResult set={searchResults.raw[index]} {highlight} {jewel} {conqueror} {platform} {league} {isLegacyTradersMode} />
       </div>
     </VirtualList>
   </div>

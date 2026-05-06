@@ -8,6 +8,7 @@
   export let conqueror: string;
   export let platform: string;
   export let league: string;
+  export let isLegacyTradersMode = false;
 </script>
 
 <div
