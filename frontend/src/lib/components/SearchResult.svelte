@@ -35,7 +35,7 @@
     <div class="font-bold text-orange-500 text-center">
       Seed {set.seed} (weight {set.weight})
     </div>
-    <button class="px-3 bg-blue-500/40 rounded" on:click={() => openTrade(jewel, conqueror, [set], platform, league)}>Trade</button>
+    <button class="px-3 bg-blue-500/40 rounded" on:click={() => openTrade(jewel, conqueror, [set], platform, league, isLegacyTradersMode)}>Trade</button>
   </div>
   {#each set.skills as skill}
     <div class="mt-2">
