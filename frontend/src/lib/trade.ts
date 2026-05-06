@@ -46,7 +46,12 @@ const platformRealms: { [key: string]: string } = {
   Playstation: 'sony'
 };
 
-export const constructQuery = <T extends SeedRef>(jewel: number, conqueror: string, result: T[], isLegacyTradersMode = false) => {
+export const constructQuery = <T extends SeedRef>(
+  jewel: number,
+  conqueror: string,
+  result: T[],
+  isLegacyTradersMode = false
+) => {
   const max_filter_length = 45;
   const max_filters = 4;
   const max_query_length = max_filter_length * max_filters;
