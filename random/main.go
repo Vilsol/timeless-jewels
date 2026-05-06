@@ -112,12 +112,7 @@ func (g *NumberGenerator) GenerateNextState() {
 func (g *NumberGenerator) Temper() uint32 {
 	b := g.state[0] + (g.state[2] >> 8)
 	a := g.state[3] ^ b
-
-	if (b & 1) != 0 {
-		return a ^ 0x3793FDFF
-	}
-
-	return a
+	return a ^ (-(b & 1) & 0x3793FDFF)
 }
 
 func (g *NumberGenerator) GenerateUInt() uint32 {
@@ -129,17 +124,13 @@ func (g *NumberGenerator) GenerateSingle(exclusiveMaximumValue uint32) uint32 {
 	return g.GenerateUInt() % exclusiveMaximumValue
 }
 
+func (g *NumberGenerator) GenerateSigned(minValue int32, maxValue int32) int32 {
+	return int32(g.Generate(uint32(minValue), uint32(maxValue)))
+}
+
 func (g *NumberGenerator) Generate(minValue uint32, maxValue uint32) uint32 {
 	a := minValue + 0x80000000
 	b := maxValue + 0x80000000
-
-	if minValue >= 0x80000000 {
-		a = minValue + 0x80000000
-	}
-
-	if maxValue >= 0x80000000 {
-		b = maxValue + 0x80000000
-	}
 
 	roll := g.GenerateSingle((b - a) + 1)
 

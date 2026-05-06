@@ -71,6 +71,9 @@ func IsSmallAttribute(stat uint32) bool {
 }
 
 func IsPassiveSkillValidForAlteration(passiveSkill *PassiveSkill) bool {
+	if passiveSkill == nil {
+		return false
+	}
 	passiveSkillType := GetPassiveSkillType(passiveSkill)
 	return (passiveSkillType != None) && (passiveSkillType != JewelSocket)
 }

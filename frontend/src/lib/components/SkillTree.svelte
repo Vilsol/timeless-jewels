@@ -520,19 +520,19 @@
   };
 
   const onScroll = (event: WheelEvent) => {
-    if (event.deltaY > 0) {
-      if (scaling < 30) {
-        offsetX += event.offsetX;
-        offsetY += event.offsetY;
-      }
-    } else {
-      if (scaling > 3) {
-        offsetX -= event.offsetX;
-        offsetY -= event.offsetY;
-      }
+    // Keep the world point under the cursor invariant during zoom. From
+    // toCanvasCoords: canvasX = (worldX + |min_x| + offsetX) / scaling, so
+    // for a fixed canvas point P the offset must change by P * Δscale
+    // when scaling changes. Using the actual clamped delta (not assuming ±1)
+    // makes zoom track the mouse correctly for trackpads, hi-res wheels, and
+    // at the scale clamps.
+    const newScaling = Math.min(30, Math.max(3, scaling + event.deltaY / 100));
+    const dScale = newScaling - scaling;
+    if (dScale !== 0) {
+      offsetX += event.offsetX * dScale;
+      offsetY += event.offsetY * dScale;
+      scaling = newScaling;
     }
-
-    scaling = Math.min(30, Math.max(3, scaling + event.deltaY / 100));
 
     event.preventDefault();
     event.stopPropagation();

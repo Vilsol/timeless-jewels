@@ -8,15 +8,27 @@
   export let conqueror: string;
   export let platform: string;
   export let league: string;
+  export let isLegacyTradersMode = false;
 </script>
 
 <div
   class="my-2 border-white/50 border p-2 flex flex-col cursor-pointer"
+  role="button"
+  tabindex="0"
   on:click={() =>
     highlight(
       set.seed,
       set.skills.map((s) => s.passive)
-    )}>
+    )}
+  on:keydown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      highlight(
+        set.seed,
+        set.skills.map((s) => s.passive)
+      );
+    }
+  }}>
   <div class="flex flex-row justify-between">
     <!-- Padding -->
     <button class="px-3 invisible">Trade</button>
