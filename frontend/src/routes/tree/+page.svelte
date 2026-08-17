@@ -409,7 +409,7 @@
     }
 
     const paste = (event.clipboardData || window.clipboardData).getData('text');
-    const lines = paste.split('\n');
+    const lines = paste.split('\n').map(line => line.trim());
 
     if (lines.length < 14) {
       return;
@@ -584,7 +584,7 @@
         </div>
 
         {#if !results}
-          <Select items={jewels} bind:value={selectedJewel} on:change={changeJewel} />
+          <Select items={jewels} bind:value={selectedJewel} on:change={changeJewel} placeholder="Please select or paste jewel" />
 
           {#if selectedJewel}
             <div class="mt-4">
