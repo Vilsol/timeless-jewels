@@ -19,42 +19,104 @@ const obj = {
   },
   async search(args: ReverseSearchConfig, callback: (seed: number) => Promise<void>): Promise<SearchResults> {
     const searchResult = await calculator.ReverseSearch(
-      args.nodes,
+      [...args.nodes, ...args.anointNodes],
       args.stats.map((s) => s.id),
       args.jewel,
       args.conqueror,
       callback
     );
 
+    const anointSet = new Set(args.anointNodes);
+
     const searchGrouped: { [key: number]: SearchWithSeed[] } = {};
     Object.keys(searchResult).forEach((seedStr) => {
       const seed = parseInt(seedStr);
 
-      let weight = 0;
-
       const statCounts: Record<number, number> = {};
-      const skills = Object.keys(searchResult[seed]).map((skillIDStr) => {
-        const skillID = parseInt(skillIDStr);
-        Object.keys(searchResult[seed][skillID]).forEach((st) => {
-          const n = parseInt(st);
-          statCounts[n] = (statCounts[n] || 0) + 1;
-          weight += args.stats.find((s) => s.id == n)?.weight || 0;
+      const anointCandidates: { score: number; skillID: number }[] = [];
+
+      const skills = Object.keys(searchResult[seed])
+        .filter((skillIDStr) => !anointSet.has(parseInt(skillIDStr)))
+        .map((skillIDStr) => {
+          const skillID = parseInt(skillIDStr);
+          Object.keys(searchResult[seed][skillID]).forEach((st) => {
+            const n = parseInt(st);
+            statCounts[n] = (statCounts[n] || 0) + 1;
+          });
+
+          return {
+            passive: passiveToTree[skillID],
+            stats: searchResult[seed][skillID]
+          };
         });
 
-        return {
-          passive: passiveToTree[skillID],
-          stats: searchResult[seed][skillID]
-        };
-      });
+      const runningCounts = { ...statCounts };
 
-      const len = Object.keys(searchResult[seed]).length;
+      if (args.anoints > 0) {
+        const seedResult = (searchResult ?? {})[seed] ?? {};
+        const anointSkillIDs = Object.keys(seedResult)
+          .filter((skillIDStr) => anointSet.has(parseInt(skillIDStr)))
+          .map((skillIDStr) => parseInt(skillIDStr));
+
+        // Marginal weight of taking this node next, given what is already counted.
+        const scoreCandidate = (skillID: number) => {
+          let nodeScore = 0;
+          const nodeStats = seedResult[skillID] ?? {};
+          for (const stat of args.stats) {
+            const count = nodeStats[stat.id] !== undefined ? 1 : 0;
+            const remainingCap = stat.max > 0 ? Math.max(0, stat.max - (runningCounts[stat.id] || 0)) : count;
+            const effectiveCount = stat.max > 0 ? Math.min(count, remainingCap) : count;
+            nodeScore += effectiveCount * stat.weight;
+          }
+          return nodeScore;
+        };
+
+        const remaining = new Set(anointSkillIDs);
+        for (let i = 0; i < args.anoints && remaining.size > 0; i++) {
+          let bestID = -1;
+          let bestScore = -1;
+          for (const skillID of remaining) {
+            const score = scoreCandidate(skillID);
+            if (score > bestScore) {
+              bestScore = score;
+              bestID = skillID;
+            }
+          }
+          if (bestID === -1) {
+            break;
+          }
+
+          remaining.delete(bestID);
+          anointCandidates.push({ score: bestScore, skillID: bestID });
+          Object.keys(seedResult[bestID] ?? {}).forEach((st) => {
+            const n = parseInt(st);
+            runningCounts[n] = (runningCounts[n] || 0) + 1;
+          });
+          skills.push({
+            passive: passiveToTree[bestID],
+            stats: (seedResult[bestID] ?? {}) as { [key: string]: number }
+          });
+        }
+      }
+
+      let weight = 0;
+      for (const stat of args.stats) {
+        const count = statCounts[stat.id] || 0;
+        const effectiveCount = stat.max > 0 ? Math.min(count, stat.max) : count;
+        weight += effectiveCount * stat.weight;
+      }
+      for (let i = 0; i < Math.min(args.anoints, anointCandidates.length); i++) {
+        weight += anointCandidates[i].score;
+      }
+
+      const len = skills.length;
       searchGrouped[len] = [
         ...(searchGrouped[len] || []),
         {
           skills: skills,
           seed,
           weight,
-          statCounts
+          statCounts: runningCounts
         }
       ];
     });

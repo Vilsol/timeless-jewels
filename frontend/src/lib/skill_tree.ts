@@ -274,9 +274,14 @@ export const formatStats = (translation: Translation, stat: number): string | un
     }
   }
 
-  return datum.string
-    .replace(/\{0(?::(.*?)d(.*?))\}/, '$1' + finalStat.toString() + '$2')
-    .replace(`{0}`, parseFloat(finalStat.toFixed(2)).toString());
+  return (
+    datum.string
+      .replace(/\{0(?::(.*?)d(.*?))\}/, '$1' + finalStat.toString() + '$2')
+      .replace(`{0}`, parseFloat(finalStat.toFixed(2)).toString())
+      // The game data ships literal backslash-n in multi-line stat text
+      // (e.g. Supreme Ostentation), so unescape it into a real newline.
+      .replace(/\\n/g, '\n')
+  );
 };
 
 export const baseJewelRadius = 1800;
@@ -309,6 +314,7 @@ export const getStat = (id: number | string): Stat => {
 
 export interface StatConfig {
   min: number;
+  max: number;
   id: number;
   weight: number;
 }
@@ -317,6 +323,8 @@ export interface ReverseSearchConfig {
   jewel: number;
   conqueror: string;
   nodes: number[];
+  anointNodes: number[];
+  anoints: number;
   stats: StatConfig[];
   minTotalWeight: number;
 }

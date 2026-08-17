@@ -79,6 +79,7 @@
       selectedStats[nStat] = {
         weight: 1,
         min: 0,
+        max: 0,
         id: nStat
       };
     });
@@ -155,6 +156,7 @@
     selectedStats[stat.detail.value] = {
       weight: 1,
       min: 0,
+      max: 0,
       id: stat.detail.value
     };
     selectedStats = selectedStats;
@@ -176,6 +178,7 @@
 
   let results = false;
   let minTotalWeight = 0;
+  let anoints = 0;
   let searching = false;
   let currentSeed = 0;
   let searchResults: SearchResults;
@@ -202,6 +205,14 @@
         .map((n) => data.TreeToPassive[n.skill])
         .filter((n) => !!n)
         .map((n) => n.Index),
+      // Deselected notables are the anoint pool: not on the tree, but reachable
+      // via anointment, so the search may pick the best `anoints` of them.
+      anointNodes: affectedNodes
+        .filter((n) => n.isNotable && disabled.has(n.skill))
+        .map((n) => data.TreeToPassive[n.skill])
+        .filter((n) => !!n)
+        .map((n) => n.Index),
+      anoints,
       stats: Object.keys(selectedStats).map((stat) => selectedStats[stat]),
       minTotalWeight
     };
@@ -519,7 +530,8 @@
   {clickNode}
   {circledNode}
   selectedJewel={selectedJewel?.value}
-  selectedConqueror={isAnyConqueror ? undefined : selectedConqueror?.value}
+  selectedConqueror={isAnyConqueror ? conquerors[0]?.value : selectedConqueror?.value}
+  anyConqueror={isAnyConqueror}
   {highlighted}
   {seed}
   highlightJewels={!circledNode}
@@ -726,6 +738,10 @@
                             <div class="mr-2">Min:</div>
                             <input type="number" min="0" bind:value={selectedStats[s].min} />
                           </div>
+                          <div class="mr-4 flex flex-row items-center">
+                            <div class="mr-2">Max:</div>
+                            <input type="number" min="0" bind:value={selectedStats[s].max} />
+                          </div>
                           <div class="flex flex-row items-center">
                             <div class="mr-2">Weight:</div>
                             <input type="number" min="0" bind:value={selectedStats[s].weight} />
@@ -734,10 +750,14 @@
                       </div>
                     {/each}
                   </div>
-                  <div class="flex flex-col mt-2">
+                  <div class="flex flex-row items-center mt-2 gap-4">
                     <div class="flex flex-row items-center">
                       <div class="mr-2 min-w-fit">Min Total Weight:</div>
                       <input type="number" min="0" bind:value={minTotalWeight} />
+                    </div>
+                    <div class="flex flex-row items-center">
+                      <div class="mr-2 min-w-fit">Anoints:</div>
+                      <input type="number" min="0" bind:value={anoints} />
                     </div>
                   </div>
                   <div class="flex flex-col mt-4">
@@ -763,7 +783,7 @@
                       <button
                         class="p-2 px-2 bg-yellow-500/40 rounded disabled:bg-yellow-900/40 flex-grow"
                         on:click={deselectAll}
-                        disabled={searching || disabled.size >= affectedNodes.length}>
+                        disabled={searching}>
                         Deselect
                       </button>
                     </div>

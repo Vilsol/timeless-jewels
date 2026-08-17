@@ -8,6 +8,7 @@
     drawnGroups,
     drawnNodes,
     formatStats,
+    getAffectedNodes,
     inverseSprites,
     inverseSpritesActive,
     inverseTranslations,
@@ -24,6 +25,9 @@
 
   export let selectedJewel: number;
   export let selectedConqueror: string;
+  // Under "Any" the conqueror above is an arbitrary stand-in. That is exact for
+  // every node except keystones, which are the only conqueror-dependent ones.
+  export let anyConqueror = false;
   export let seed: number;
   export let highlighted: number[] = [];
   export let disabled: number[] = [];
@@ -150,6 +154,13 @@
   let cursor = 'unset';
 
   let hoveredNode: Node | undefined;
+
+  // Every node in the socket's radius, whether or not it is currently selected.
+  // Deselected nodes are still transformed by the jewel, so the tooltip should
+  // show what they would become.
+  $: affectedSkills = circledNode
+    ? new Set(getAffectedNodes(skillTree.nodes[circledNode]).map((n) => n.skill))
+    : new Set<number>();
   $: render = (({ context, width, height }) => {
     const start = window.performance.now();
 
@@ -242,7 +253,6 @@
       context.strokeStyle = '#ad2b2b';
     }
 
-    let hoveredNodeActive = false;
     let newHoverNode: Node | undefined;
     Object.keys(drawnNodes).forEach((nodeId) => {
       const node = drawnNodes[nodeId];
@@ -313,7 +323,6 @@
 
       if (distance(rotatedPos, mousePos) < touchDistance / scaling) {
         newHoverNode = node;
-        hoveredNodeActive = active;
       }
     });
 
@@ -328,56 +337,64 @@
     }
 
     if (hoveredNode) {
-      let nodeName = hoveredNode.name;
-      let nodeStats: { text: string; special: boolean }[] = (hoveredNode.stats || []).map((s) => ({
+      const nodeName = hoveredNode.name;
+      const nodeStats: { text: string; special: boolean }[] = (hoveredNode.stats || []).map((s) => ({
         text: s,
         special: false
       }));
 
-      if (!hoveredNode.isJewelSocket && hoveredNodeActive) {
-        if (hoveredNode.skill && seed && selectedJewel && selectedConqueror) {
-          const result = calculator.Calculate(
-            data.TreeToPassive[hoveredNode.skill].Index,
-            seed,
-            selectedJewel,
-            selectedConqueror
-          );
+      if (
+        !hoveredNode.isJewelSocket &&
+        hoveredNode.skill &&
+        seed &&
+        selectedJewel &&
+        selectedConqueror &&
+        !(anyConqueror && hoveredNode.isKeystone) &&
+        affectedSkills.has(hoveredNode.skill)
+      ) {
+        const result = calculator.Calculate(
+          data.TreeToPassive[hoveredNode.skill].Index,
+          seed,
+          selectedJewel,
+          selectedConqueror
+        );
 
-          if (result) {
-            if ('AlternatePassiveSkill' in result && result.AlternatePassiveSkill) {
-              nodeStats = [];
-              nodeName = result.AlternatePassiveSkill.Name;
+        if (result) {
+          // Keep the original stats above and append the transformed ones, so
+          // the tooltip reads as before/after rather than replacing the node.
+          if ('AlternatePassiveSkill' in result && result.AlternatePassiveSkill) {
+            nodeStats.push({ text: '', special: false });
+            nodeStats.push({ text: `Replaced By: ${result.AlternatePassiveSkill.Name}`, special: true });
 
-              if ('StatsKeys' in result.AlternatePassiveSkill) {
-                result.AlternatePassiveSkill.StatsKeys.forEach((statId, i) => {
+            if ('StatsKeys' in result.AlternatePassiveSkill) {
+              result.AlternatePassiveSkill.StatsKeys.forEach((statId, i) => {
+                const stat = data.GetStatByIndex(statId);
+                const translation = inverseTranslations[stat.ID] || '';
+                if (translation) {
+                  nodeStats.push({
+                    text: formatStats(translation, result.StatRolls[i]) || stat.ID,
+                    special: true
+                  });
+                }
+              });
+            }
+          }
+
+          if (result.AlternatePassiveAdditionInformations) {
+            result.AlternatePassiveAdditionInformations.forEach((info) => {
+              if ('StatsKeys' in info.AlternatePassiveAddition) {
+                info.AlternatePassiveAddition.StatsKeys.forEach((statId, i) => {
                   const stat = data.GetStatByIndex(statId);
                   const translation = inverseTranslations[stat.ID] || '';
                   if (translation) {
                     nodeStats.push({
-                      text: formatStats(translation, result.StatRolls[i]) || stat.ID,
+                      text: formatStats(translation, info.StatRolls[i]) || stat.ID,
                       special: true
                     });
                   }
                 });
               }
-            }
-
-            if (result.AlternatePassiveAdditionInformations) {
-              result.AlternatePassiveAdditionInformations.forEach((info) => {
-                if ('StatsKeys' in info.AlternatePassiveAddition) {
-                  info.AlternatePassiveAddition.StatsKeys.forEach((statId, i) => {
-                    const stat = data.GetStatByIndex(statId);
-                    const translation = inverseTranslations[stat.ID] || '';
-                    if (translation) {
-                      nodeStats.push({
-                        text: formatStats(translation, info.StatRolls[i]) || stat.ID,
-                        special: true
-                      });
-                    }
-                  });
-                }
-              });
-            }
+            });
           }
         }
       }
@@ -402,12 +419,12 @@
       if (nodeStats && nodeStats.length > 0) {
         nodeStats.forEach((stat) => {
           if (allLines.length > 0) {
-            offset += 5;
+            offset += 3;
           }
 
           stat.text.split('\n').forEach((line) => {
             if (allLines.length > 0) {
-              offset += 10;
+              offset += 5;
             }
 
             const lines = wrapText(line, context, maxWidth - padding);
@@ -417,7 +434,7 @@
                 offset,
                 special: stat.special
               });
-              offset += 20;
+              offset += 16;
             });
           });
         });
@@ -465,7 +482,7 @@
 
     context.fillStyle = '#ffffff';
     context.textAlign = 'right';
-    context.font = '12px Roboto Mono';
+    context.font = '12px Roboto';
 
     const end = window.performance.now();
 
