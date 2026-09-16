@@ -16,6 +16,13 @@ type PassiveSkill struct {
 	IsKeystone          bool     `json:"IsKeystone"`
 	IsNotable           bool     `json:"IsNotable"`
 	IsJewelSocket       bool     `json:"IsJewelSocket"`
+	AscendancyKey       *uint32  `json:"AscendancyKey"`
+	DescendancyKey      *uint32  `json:"DescendancyKey"`
+}
+
+// IsAscendancy covers bloodline (descendancy) nodes too; Zorath conquers both.
+func (p *PassiveSkill) IsAscendancy() bool {
+	return p.AscendancyKey != nil || p.DescendancyKey != nil
 }
 
 type AlternateTreeVersion struct {

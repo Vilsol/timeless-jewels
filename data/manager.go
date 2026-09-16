@@ -62,6 +62,11 @@ func GetApplicableAlternatePassiveSkills(passiveSkill *PassiveSkill, timelessJew
 	return reverseAlternatePassiveSkills[GetPassiveSkillType(passiveSkill)][timelessJewel.AlternateTreeVersion.Index]
 }
 
+// GetAlternatePassiveSkillsOfType is GetApplicableAlternatePassiveSkills for an explicit passive type.
+func GetAlternatePassiveSkillsOfType(passiveSkillType PassiveSkillType, timelessJewel TimelessJewel) []*AlternatePassiveSkill {
+	return reverseAlternatePassiveSkills[passiveSkillType][timelessJewel.AlternateTreeVersion.Index]
+}
+
 func IsSmallAttribute(stat uint32) bool {
 	bitPosition := (stat + 1) - 574
 	if bitPosition <= 6 && (0x49&(1<<(bitPosition))) != 0 {

@@ -15,6 +15,10 @@ func (a *AlternateTreeManager) IsPassiveSkillReplaced(rng *random.NumberGenerato
 		return true
 	}
 
+	if a.ascendancyAlternatePassiveSkills() != nil {
+		return true
+	}
+
 	if a.PassiveSkill.IsNotable {
 		if a.TimelessJewel.AlternateTreeVersion.NotableReplacementSpawnWeight >= 100 {
 			return true
@@ -33,6 +37,17 @@ func (a *AlternateTreeManager) IsPassiveSkillReplaced(rng *random.NumberGenerato
 	}
 
 	return a.TimelessJewel.AlternateTreeVersion.AreSmallNormalPassiveSkillsReplaced
+}
+
+// ascendancyAlternatePassiveSkills returns the candidates for an ascendancy notable, or nil when
+// the tree version has none. The game tags Zorath's special ascendancy notables with PassiveType
+// JewelSocket (5); no legion version carries that type, so legion ascendancy nodes are untouched.
+// Graded against Path of Building's Zorath LUT: these roll with no notable pre-roll.
+func (a *AlternateTreeManager) ascendancyAlternatePassiveSkills() []*data.AlternatePassiveSkill {
+	if !a.PassiveSkill.IsNotable || !a.PassiveSkill.IsAscendancy() {
+		return nil
+	}
+	return data.GetAlternatePassiveSkillsOfType(data.JewelSocket, a.TimelessJewel)
 }
 
 func (a *AlternateTreeManager) AugmentPassiveSkill(rng *random.NumberGenerator) []data.AlternatePassiveAdditionInformation {
@@ -93,11 +108,16 @@ func (a *AlternateTreeManager) ReplacePassiveSkill(rng *random.NumberGenerator) 
 	}
 
 	applicableAlternatePassiveSkills := data.GetApplicableAlternatePassiveSkills(a.PassiveSkill, a.TimelessJewel)
+	notablePreRoll := data.GetPassiveSkillType(a.PassiveSkill) == data.Notable
+	if ascendancy := a.ascendancyAlternatePassiveSkills(); ascendancy != nil {
+		applicableAlternatePassiveSkills = ascendancy
+		notablePreRoll = false
+	}
 
 	var rolledAlternatePassiveSkill *data.AlternatePassiveSkill
 	rng.Reset(a.PassiveSkill, a.TimelessJewel)
 
-	if data.GetPassiveSkillType(a.PassiveSkill) == data.Notable {
+	if notablePreRoll {
 		rng.Generate(0, 100)
 	}
 
