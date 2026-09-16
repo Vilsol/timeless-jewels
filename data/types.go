@@ -25,7 +25,14 @@ type AlternateTreeVersion struct {
 	AreSmallNormalPassiveSkillsReplaced    bool   `json:"Var2"`
 	MinimumAdditions                       uint32 `json:"Var5"`
 	MaximumAdditions                       uint32 `json:"Var6"`
-	NotableReplacementSpawnWeight          uint32 `json:"Var9"`
+	// Addition counts are per passive type: Var3/4 small attribute, Var5/6 small normal, Var7/8
+	// notable. Templar and Kalguuran carry unequal pairs, but only in arms those jewels never
+	// reach; Abyss (Var5/6 = 0, Var7/8 = 1) is the first where the split changes output.
+	MinimumAdditionsSmallAttribute uint32 `json:"Var3"`
+	MaximumAdditionsSmallAttribute uint32 `json:"Var4"`
+	MinimumAdditionsNotable        uint32 `json:"Var7"`
+	MaximumAdditionsNotable        uint32 `json:"Var8"`
+	NotableReplacementSpawnWeight  uint32 `json:"Var9"`
 }
 
 type AlternatePassiveSkill struct {

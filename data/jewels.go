@@ -9,6 +9,11 @@ const (
 	MilitantFaith
 	ElegantHubris
 	HeroicTragedy
+	AbyssTecrod
+	AbyssUlaman
+	AbyssKurgal
+	AbyssAmanamu
+	AbyssZorath
 )
 
 func (t JewelType) String() string {
@@ -25,6 +30,16 @@ func (t JewelType) String() string {
 		return "Elegant Hubris"
 	case HeroicTragedy:
 		return "Heroic Tragedy"
+	case AbyssTecrod:
+		return "Abyss Tecrod"
+	case AbyssUlaman:
+		return "Abyss Ulaman"
+	case AbyssKurgal:
+		return "Abyss Kurgal"
+	case AbyssAmanamu:
+		return "Abyss Amanamu"
+	case AbyssZorath:
+		return "Abyss Zorath"
 	default:
 		return "N/A"
 	}
@@ -57,6 +72,8 @@ const (
 	Victario = Conqueror("Victario")
 	Chitus   = Conqueror("Chitus")
 	Caspiro  = Conqueror("Caspiro")
+
+	Abyss = Conqueror("Abyss")
 
 	Vorana = Conqueror("Vorana")
 	Uhtred = Conqueror("Uhtred")
@@ -154,6 +171,11 @@ var TimelessJewelConquerors = map[JewelType]map[Conqueror]*TimelessJewelConquero
 			Version: 1,
 		},
 	},
+	AbyssTecrod:  {Abyss: &TimelessJewelConqueror{Index: 0, Version: 0}},
+	AbyssUlaman:  {Abyss: &TimelessJewelConqueror{Index: 0, Version: 0}},
+	AbyssKurgal:  {Abyss: &TimelessJewelConqueror{Index: 0, Version: 0}},
+	AbyssAmanamu: {Abyss: &TimelessJewelConqueror{Index: 0, Version: 0}},
+	AbyssZorath:  {Abyss: &TimelessJewelConqueror{Index: 0, Version: 0}},
 	HeroicTragedy: {
 		Vorana: &TimelessJewelConqueror{
 			Index:   1,
@@ -202,4 +224,9 @@ var TimelessJewelSeedRanges = map[JewelType]Range{
 		Min: 100,
 		Max: 8000,
 	},
+	AbyssTecrod:  {Min: 100, Max: 8000},
+	AbyssUlaman:  {Min: 100, Max: 8000},
+	AbyssKurgal:  {Min: 100, Max: 8000},
+	AbyssAmanamu: {Min: 100, Max: 8000},
+	AbyssZorath:  {Min: 100, Max: 8000},
 }

@@ -42,7 +42,21 @@ func (a *AlternateTreeManager) AugmentPassiveSkill(rng *random.NumberGenerator) 
 		rng.Generate(0, 100)
 	}
 
-	return a.RollAdditions(a.TimelessJewel.AlternateTreeVersion.MinimumAdditions, a.TimelessJewel.AlternateTreeVersion.MaximumAdditions, rng)
+	minAdd, maxAdd := a.additionRange()
+	return a.RollAdditions(minAdd, maxAdd, rng)
+}
+
+// additionRange picks the addition count for this passive's type; see AlternateTreeVersion.
+func (a *AlternateTreeManager) additionRange() (uint32, uint32) {
+	v := a.TimelessJewel.AlternateTreeVersion
+	switch data.GetPassiveSkillType(a.PassiveSkill) {
+	case data.SmallAttribute:
+		return v.MinimumAdditionsSmallAttribute, v.MaximumAdditionsSmallAttribute
+	case data.Notable:
+		return v.MinimumAdditionsNotable, v.MaximumAdditionsNotable
+	default:
+		return v.MinimumAdditions, v.MaximumAdditions
+	}
 }
 
 func (a *AlternateTreeManager) RollAlternatePassiveAddition(rng *random.NumberGenerator) *data.AlternatePassiveAddition {
@@ -112,8 +126,9 @@ func (a *AlternateTreeManager) ReplacePassiveSkill(rng *random.NumberGenerator) 
 		}
 	}
 
-	minAdditions := a.TimelessJewel.AlternateTreeVersion.MinimumAdditions + rolledAlternatePassiveSkill.RandomMin
-	maxAdditions := a.TimelessJewel.AlternateTreeVersion.MaximumAdditions + rolledAlternatePassiveSkill.RandomMax
+	baseMin, baseMax := a.additionRange()
+	minAdditions := baseMin + rolledAlternatePassiveSkill.RandomMin
+	maxAdditions := baseMax + rolledAlternatePassiveSkill.RandomMax
 
 	return data.AlternatePassiveSkillInformation{
 		AlternatePassiveSkill:                rolledAlternatePassiveSkill,
