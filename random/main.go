@@ -28,6 +28,10 @@ type NumberGenerator struct {
 	seededKey   [2]uint32
 	seededState [4]uint32
 	seeded      bool
+
+	// Abyss jewels draw bounded values like MSVC's _Rng_from_urng (rejecting the biased tail);
+	// legion jewels keep plain modulo, which is what PoB's legion LUTs were generated with.
+	msvcDraw bool
 }
 
 func NewRNG() *NumberGenerator {
@@ -36,6 +40,9 @@ func NewRNG() *NumberGenerator {
 
 func (g *NumberGenerator) Reset(passiveSkill *data.PassiveSkill, timelessJewel data.TimelessJewel) {
 	key := [2]uint32{passiveSkill.PassiveSkillGraphID, timelessJewel.GetSeed()}
+
+	// Before the memo check: the key omits the jewel type, so a hit may come from the other mode.
+	g.msvcDraw = data.JewelType(timelessJewel.AlternateTreeVersion.Index) >= data.AbyssTecrod
 
 	if g.seeded && g.seededKey == key {
 		g.state = g.seededState
@@ -138,7 +145,25 @@ func (g *NumberGenerator) GenerateUInt() uint32 {
 }
 
 func (g *NumberGenerator) GenerateSingle(exclusiveMaximumValue uint32) uint32 {
+	if g.msvcDraw {
+		return g.generateSingleMSVC(exclusiveMaximumValue)
+	}
 	return g.GenerateUInt() % exclusiveMaximumValue
+}
+
+// generateSingleMSVC is MSVC STL's _Rng_from_urng::operator() for a 32-bit engine
+// (stl/inc/xutility): no draw at all for n <= 1, otherwise redraw while v lands in the
+// tail past the last whole multiple of n.
+func (g *NumberGenerator) generateSingleMSVC(n uint32) uint32 {
+	if n <= 1 {
+		return 0
+	}
+	for {
+		v := g.GenerateUInt()
+		if v/n < 0xFFFFFFFF/n || 0xFFFFFFFF%n == n-1 {
+			return v % n
+		}
+	}
 }
 
 func (g *NumberGenerator) GenerateSigned(minValue int32, maxValue int32) int32 {
