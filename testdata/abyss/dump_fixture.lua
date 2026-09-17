@@ -4,9 +4,15 @@
 --   Z <seed> <node> -              every tree keystone, which has no ABYN block
 --   S <jt> <seed> <node> <comps>   ABYS (7-10), union over sockets; asserts sockets agree
 -- comps: type:id:roll,roll;...  type 1 replaces (id = alternate skill + 337), type 2 adds
+--
+-- key mode, for abyss_tail_draws.txt.gz: luajit dump_fixture.lua <out> --keys <keyfile>
+--   keyfile lines are "<jt> <seed> <node>"; writes only those records, same line formats
 local outPath = arg[1]
+local keysPath = arg[2] == "--keys" and arg[3]
 local seeds = {}
-for s in arg[2]:gmatch("%d+") do seeds[#seeds+1] = tonumber(s) end
+if not keysPath then
+	for s in arg[2]:gmatch("%d+") do seeds[#seeds+1] = tonumber(s) end
+end
 
 dofile("HeadlessWrapper.lua")
 
@@ -24,6 +30,49 @@ local function sortedKeys(tbl)
 end
 
 local out = io.open(outPath, "w")
+
+if keysPath then
+	local keys = {}
+	for line in io.lines(keysPath) do
+		local jt, seed, node = line:match("^(%d+) (%d+) (%d+)")
+		keys[#keys+1] = { tonumber(jt), tonumber(seed), tonumber(node) }
+	end
+	table.sort(keys, function(a, b)
+		for i = 1, 3 do
+			if a[i] ~= b[i] then return a[i] < b[i] end
+		end
+		return false
+	end)
+	local union = {}
+	for _, k in ipairs(keys) do
+		local jt, seed, n = k[1], k[2], k[3]
+		if jt == 11 then
+			data.readAbyssJewelLUT(seed, 0, 11, {})
+			assert(data.timelessJewelLUTs[11].blockOffsets[n], "no Zorath block for key")
+			local res = data.readAbyssJewelLUT(seed, n, 11, { [n] = true }, "__none__")
+			out:write(string.format("Z %d %d %s\n", seed, n, enc(res[n] or {})))
+		else
+			local ukey = jt .. " " .. seed
+			if not union[ukey] then
+				data.readAbyssJewelLUT(seed, 0, jt, nil)
+				local seen = {}
+				for s in pairs(data.timelessJewelLUTs[jt].blockOffsets) do
+					for node, m in pairs(data.readAbyssJewelLUT(seed, s, jt, nil)) do
+						local e = enc(m)
+						assert(not seen[node] or seen[node] == e, "socket conflict")
+						seen[node] = e
+					end
+				end
+				union[ukey] = seen
+			end
+			assert(union[ukey][n], "no record for key")
+			out:write(string.format("S %d %d %d %s\n", jt, seed, n, union[ukey][n]))
+		end
+	end
+	out:close()
+	return
+end
+
 for _, seed in ipairs(seeds) do
 	data.readAbyssJewelLUT(seed, 0, 11, {})
 	local lut = data.timelessJewelLUTs[11]

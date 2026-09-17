@@ -30,6 +30,35 @@ type abyssComponent struct {
 // Rolls are compared signed. PoB's getAbyssJewelComponentRoll flips a negative roll only for
 // display, where the stat's minimum is non-negative; the stored roll is what the RNG produced.
 func TestAbyssMatchesPathOfBuilding(t *testing.T) {
+	rows := gradeAbyssFixture(t, "testdata/abyss/abyss_lut.txt.gz")
+	if len(rows) != 15 {
+		t.Fatalf("expected 5 jewel types x 3 seeds in the fixture, got %d groups", len(rows))
+	}
+}
+
+// TestAbyssTailDrawsMatchPathOfBuilding grades every record in PoB's full Abyss LUTs where a
+// plain modulo draw disagrees with PoB: each one lands a bounded draw in the biased tail, so
+// only a rejection-sampled draw reproduces them. Keys from grading all 52,852,691 records,
+// expected values from dump_fixture.lua --keys.
+func TestAbyssTailDrawsMatchPathOfBuilding(t *testing.T) {
+	rows := gradeAbyssFixture(t, "testdata/abyss/abyss_tail_draws.txt.gz")
+	total := 0
+	for _, n := range rows {
+		total += n
+	}
+	if total != 1153 {
+		t.Fatalf("expected 1153 tail records, got %d", total)
+	}
+}
+
+type abyssGroup struct {
+	jewel data.JewelType
+	seed  uint32
+}
+
+func gradeAbyssFixture(t *testing.T, path string) map[abyssGroup]int {
+	t.Helper()
+
 	byGraphID := make(map[uint32]*data.PassiveSkill, len(data.PassiveSkills))
 	for _, p := range data.PassiveSkills {
 		if _, ok := byGraphID[p.PassiveSkillGraphID]; !ok {
@@ -37,7 +66,7 @@ func TestAbyssMatchesPathOfBuilding(t *testing.T) {
 		}
 	}
 
-	f, err := os.Open("testdata/abyss/abyss_lut.txt.gz")
+	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,12 +76,8 @@ func TestAbyssMatchesPathOfBuilding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	type group struct {
-		jewel data.JewelType
-		seed  uint32
-	}
-	rows := make(map[group]int)
-	failures := make(map[group]int)
+	rows := make(map[abyssGroup]int)
+	failures := make(map[abyssGroup]int)
 
 	sc := bufio.NewScanner(zr)
 	for sc.Scan() {
@@ -65,7 +90,7 @@ func TestAbyssMatchesPathOfBuilding(t *testing.T) {
 		node, _ := strconv.Atoi(fields[3])
 		want := parseAbyssComponents(t, fields[4])
 
-		g := group{data.JewelType(jewel), uint32(seed)}
+		g := abyssGroup{data.JewelType(jewel), uint32(seed)}
 		rows[g]++
 
 		passive := byGraphID[uint32(node)]
@@ -84,14 +109,17 @@ func TestAbyssMatchesPathOfBuilding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(rows) != 15 {
-		t.Fatalf("expected 5 jewel types x 3 seeds in the fixture, got %d groups", len(rows))
-	}
+	total := 0
 	for g, n := range rows {
 		if failures[g] > 0 {
+			total += failures[g]
 			t.Errorf("%s seed %d: %d of %d nodes differ from PoB", g.jewel, g.seed, failures[g], n)
 		}
 	}
+	if total > 0 {
+		t.Errorf("%s: %d records differ from PoB", path, total)
+	}
+	return rows
 }
 
 func parseAbyssComponents(t *testing.T, s string) []abyssComponent {
