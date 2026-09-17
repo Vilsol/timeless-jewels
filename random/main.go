@@ -61,6 +61,22 @@ func (g *NumberGenerator) Reset(passiveSkill *data.PassiveSkill, timelessJewel d
 	g.seeded = true
 }
 
+// ResetSingle seeds from the jewel seed alone with the reference tinymt32_init (no period
+// certification), as Zorath's ascendancy pick does; bounded draws take the Abyss MSVC mode.
+func (g *NumberGenerator) ResetSingle(seed uint32) {
+	g.msvcDraw = true
+
+	g.state = [4]uint32{seed, 0x8F7011EE, 0xFC78FF1F, 0x3793FDFF}
+	for i := uint32(1); i < 8; i++ {
+		prev := g.state[(i-1)&3]
+		g.state[i&3] ^= i + 1812433253*(prev^(prev>>30))
+	}
+
+	for range 8 {
+		g.GenerateNextState()
+	}
+}
+
 func (g *NumberGenerator) Initialize(seeds []uint32) {
 	index := uint32(1)
 
