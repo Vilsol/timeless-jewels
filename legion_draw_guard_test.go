@@ -75,7 +75,7 @@ func TestLegionDrawsMatchPathOfBuilding(t *testing.T) {
 			t.Fatalf("node %d is not a passive skill", node)
 		}
 		// The LUT does not depend on the conqueror; any fixed one will do.
-		conquerors := make([]string, 0)
+		conquerors := make([]string, 0, len(data.TimelessJewelConquerors[jewel]))
 		for c := range data.TimelessJewelConquerors[jewel] {
 			conquerors = append(conquerors, string(c))
 		}
@@ -112,7 +112,7 @@ func parseLegionLUT(s string) ([]int, error) {
 	for _, v := range strings.Split(s, ",") {
 		n, err := strconv.Atoi(v)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parsing %q: %w", v, err)
 		}
 		out = append(out, n)
 	}
