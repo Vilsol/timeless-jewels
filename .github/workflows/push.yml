@@ -51,6 +51,31 @@ jobs:
       - name: Test
         run: go test -v ./...
 
+  generated:
+    name: Generated Bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      # A stale generated file and a generator bug fail identically from the
+      # outside, so the committed output has to be reproducible.
+      - name: Regenerate bindings
+        run: >
+          go tool crystalline -app timeless-jewels
+          -js-out ./frontend/src/lib/types/index.js
+          -ts-out ./frontend/src/lib/types/index.d.ts
+          -banner "/* eslint-disable */" ./...
+
+      # intent-to-add so a newly generated file that nobody committed also fails.
+      - name: Check the committed output is current
+        run: |
+          git add -N frontend/src/lib/types wasm/exposition/crystalline_gen.go
+          git diff --exit-code -- frontend/src/lib/types wasm/exposition/crystalline_gen.go
+
   build-backend:
     name: Build Backend
     runs-on: ubuntu-latest
