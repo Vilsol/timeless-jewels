@@ -69,7 +69,7 @@ func GetAlternatePassiveSkillsOfType(passiveSkillType PassiveSkillType, timeless
 
 func IsSmallAttribute(stat uint32) bool {
 	bitPosition := (stat + 1) - 574
-	if bitPosition <= 6 && (0x49&(1<<(bitPosition))) != 0 {
+	if bitPosition <= 6 && (0x49&(1<<bitPosition)) != 0 {
 		return true
 	}
 	return false
