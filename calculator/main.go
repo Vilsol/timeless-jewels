@@ -1,6 +1,8 @@
 package calculator
 
 import (
+	"time"
+
 	"github.com/Vilsol/timeless-jewels/data"
 	"github.com/Vilsol/timeless-jewels/random"
 )
@@ -14,6 +16,10 @@ type UpdateFunc func(seed uint32)
 var calculationCache = make(map[data.Conqueror]map[data.JewelType]map[uint32]map[uint32]data.AlternatePassiveSkillInformation)
 
 func Calculate(passiveID uint32, seed uint32, timelessJewelType data.JewelType, conqueror data.Conqueror) data.AlternatePassiveSkillInformation {
+	if calculateStatsEnabled {
+		defer recordCalculate(time.Now())
+	}
+
 	passiveSkill := data.GetPassiveSkillByIndex(passiveID)
 
 	if !data.IsPassiveSkillValidForAlteration(passiveSkill) {

@@ -6,6 +6,7 @@
   import { loadSkillTree } from '../lib/skill_tree';
   import { syncWrap } from '../lib/worker';
   import { initializeCrystalline } from '../lib/types';
+  import '../lib/perf';
 
   let wasmLoading = true;
 

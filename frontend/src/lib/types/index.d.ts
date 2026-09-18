@@ -1,77 +1,139 @@
 /* eslint-disable */
+
+/// <reference lib="es2018" />
+/// <reference lib="dom" />
+/// <reference lib="esnext.disposable" />
 export declare namespace calculator {
-  function Calculate(passiveID: number, seed: number, timelessJewelType: number, conqueror: string): data.AlternatePassiveSkillInformation;
-  function ReverseSearch(passiveIDs?: Array<number>, statIDs?: Array<number>, timelessJewelType: number, conqueror: string, updates: (arg1: number) => Promise<void>): Promise<(Record<number, Record<number, Record<number, number> | undefined> | undefined> | undefined)>;
+  interface CalculateStats {
+    readonly Calls: number;
+    readonly TotalNanos: number;
+    readonly MaxNanos: number;
+  }
+  function Calculate(passiveID: number, seed: number, timelessJewelType: data.JewelType, conqueror: data.Conqueror): data.AlternatePassiveSkillInformation;
+  function GetCalculateStats(): calculator.CalculateStats;
+  function ResetCalculateStats(): void;
+  function ReverseSearch(passiveIDs: Array<number> | undefined, statIDs: Array<number> | undefined, timelessJewelType: data.JewelType, conqueror: data.Conqueror, updates: (seed: number) => void): Promise<(Record<number, Record<number, Record<number, number> | undefined> | undefined> | undefined)>;
+  function SetCalculateTracking(enabled: boolean): void;
 }
 export declare namespace data {
   interface AlternatePassiveAddition {
-    Index: number;
-    ID: string;
-    AlternateTreeVersionsKey: number;
-    SpawnWeight: number;
-    StatsKeys?: Array<number>;
-    Stat1Min: number;
-    Stat1Max: number;
-    Stat2Min: number;
-    Stat2Max: number;
-    PassiveType?: Array<number>;
-    GetStatMinMax(arg1: boolean, arg2: number): number;
+    readonly Index: number;
+    readonly ID: string;
+    readonly AlternateTreeVersionsKey: number;
+    readonly SpawnWeight: number;
+    readonly StatsKeys?: Array<number>;
+    readonly Stat1Min: number;
+    readonly Stat1Max: number;
+    readonly Stat2Min: number;
+    readonly Stat2Max: number;
+    readonly PassiveType?: Array<data.PassiveSkillType>;
   }
   interface AlternatePassiveAdditionInformation {
-    AlternatePassiveAddition?: data.AlternatePassiveAddition;
-    StatRolls?: Array<number>;
+    readonly AlternatePassiveAddition?: data.AlternatePassiveAddition;
+    readonly StatRolls?: Array<number>;
   }
   interface AlternatePassiveSkill {
-    Index: number;
-    ID: string;
-    AlternateTreeVersionsKey: number;
-    Name: string;
-    PassiveType?: Array<number>;
-    StatsKeys?: Array<number>;
-    Stat1Min: number;
-    Stat1Max: number;
-    Stat2Min: number;
-    Stat2Max: number;
-    Stat3Min: number;
-    Stat3Max: number;
-    Stat4Min: number;
-    Stat4Max: number;
-    SpawnWeight: number;
-    ConquerorIndex: number;
-    RandomMin: number;
-    RandomMax: number;
-    ConquerorVersion: number;
-    GetStatMinMax(arg1: boolean, arg2: number): number;
+    readonly Index: number;
+    readonly ID: string;
+    readonly AlternateTreeVersionsKey: number;
+    readonly Name: string;
+    readonly PassiveType?: Array<data.PassiveSkillType>;
+    readonly StatsKeys?: Array<number>;
+    readonly Stat1Min: number;
+    readonly Stat1Max: number;
+    readonly Stat2Min: number;
+    readonly Stat2Max: number;
+    readonly Stat3Min: number;
+    readonly Stat3Max: number;
+    readonly Stat4Min: number;
+    readonly Stat4Max: number;
+    readonly SpawnWeight: number;
+    readonly ConquerorIndex: number;
+    readonly RandomMin: number;
+    readonly RandomMax: number;
+    readonly ConquerorVersion: number;
   }
   interface AlternatePassiveSkillInformation {
-    AlternatePassiveSkill?: data.AlternatePassiveSkill;
-    StatRolls?: Array<number>;
-    AlternatePassiveAdditionInformations?: Array<data.AlternatePassiveAdditionInformation>;
+    readonly AlternatePassiveSkill?: data.AlternatePassiveSkill;
+    readonly StatRolls?: Array<number>;
+    readonly AlternatePassiveAdditionInformations?: Array<data.AlternatePassiveAdditionInformation>;
   }
+  type Conqueror = "Xibaqua" | "Zerphi" | "Ahuana" | "Doryani" | "Kaom" | "Rakiata" | "Kiloava" | "Akoya" | "Deshret" | "Balbala" | "Asenath" | "Nasima" | "Venarius" | "Maxarius" | "Dominus" | "Avarius" | "Cadiro" | "Victario" | "Chitus" | "Caspiro" | "Abyss" | "Vorana" | "Uhtred" | "Medved";
+  const Conqueror: {
+    readonly Xibaqua: "Xibaqua";
+    readonly Zerphi: "Zerphi";
+    readonly Ahuana: "Ahuana";
+    readonly Doryani: "Doryani";
+    readonly Kaom: "Kaom";
+    readonly Rakiata: "Rakiata";
+    readonly Kiloava: "Kiloava";
+    readonly Akoya: "Akoya";
+    readonly Deshret: "Deshret";
+    readonly Balbala: "Balbala";
+    readonly Asenath: "Asenath";
+    readonly Nasima: "Nasima";
+    readonly Venarius: "Venarius";
+    readonly Maxarius: "Maxarius";
+    readonly Dominus: "Dominus";
+    readonly Avarius: "Avarius";
+    readonly Cadiro: "Cadiro";
+    readonly Victario: "Victario";
+    readonly Chitus: "Chitus";
+    readonly Caspiro: "Caspiro";
+    readonly Abyss: "Abyss";
+    readonly Vorana: "Vorana";
+    readonly Uhtred: "Uhtred";
+    readonly Medved: "Medved";
+  };
+  type JewelType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+  const JewelType: {
+    readonly GloriousVanity: 1;
+    readonly LethalPride: 2;
+    readonly BrutalRestraint: 3;
+    readonly MilitantFaith: 4;
+    readonly ElegantHubris: 5;
+    readonly HeroicTragedy: 6;
+    readonly AbyssTecrod: 7;
+    readonly AbyssUlaman: 8;
+    readonly AbyssKurgal: 9;
+    readonly AbyssAmanamu: 10;
+    readonly AbyssZorath: 11;
+  };
   interface PassiveSkill {
-    Index: number;
-    ID: string;
-    StatIndices?: Array<number>;
-    PassiveSkillGraphID: number;
-    Name: string;
-    IsKeystone: boolean;
-    IsNotable: boolean;
-    IsJewelSocket: boolean;
+    readonly Index: number;
+    readonly ID: string;
+    readonly StatIndices?: Array<number>;
+    readonly PassiveSkillGraphID: number;
+    readonly Name: string;
+    readonly IsKeystone: boolean;
+    readonly IsNotable: boolean;
+    readonly IsJewelSocket: boolean;
+    readonly AscendancyKey?: number;
+    readonly DescendancyKey?: number;
   }
+  type PassiveSkillType = 0 | 1 | 2 | 3 | 4 | 5;
+  const PassiveSkillType: {
+    readonly None: 0;
+    readonly SmallAttribute: 1;
+    readonly SmallNormal: 2;
+    readonly Notable: 3;
+    readonly KeyStone: 4;
+    readonly JewelSocket: 5;
+  };
   interface Range {
-    Min: number;
-    Max: number;
-    Special: boolean;
+    readonly Min: number;
+    readonly Max: number;
+    readonly Special: boolean;
   }
   interface Stat {
-    Index: number;
-    ID: string;
-    Text: string;
-    Category?: number;
+    readonly Index: number;
+    readonly ID: string;
+    readonly Text: string;
+    readonly Category?: number;
   }
   interface TimelessJewelConqueror {
-    Index: number;
-    Version: number;
+    readonly Index: number;
+    readonly Version: number;
   }
   function GetAlternatePassiveAdditionByIndex(index: number): (data.AlternatePassiveAddition | undefined);
   function GetAlternatePassiveSkillByIndex(index: number): (data.AlternatePassiveSkill | undefined);
@@ -83,9 +145,10 @@ export declare namespace data {
   const PossibleStats: string;
   const SkillTree: string;
   const StatTranslationsJSON: string;
-  const TimelessJewelConquerors: Record<number, Record<string, data.TimelessJewelConqueror | undefined> | undefined> | undefined;
-  const TimelessJewelSeedRanges: Record<number, data.Range> | undefined;
-  const TimelessJewels: Record<number, string> | undefined;
+  const TimelessJewelConquerors: Record<data.JewelType, Record<data.Conqueror, data.TimelessJewelConqueror | undefined> | undefined> | undefined;
+  const TimelessJewelSeedRanges: Record<data.JewelType, data.Range> | undefined;
+  const TimelessJewels: Record<data.JewelType, string> | undefined;
   const TreeToPassive: Record<number, data.PassiveSkill | undefined> | undefined;
 }
+export function boot(wasm: string | URL | BufferSource): Promise<{ calculator: typeof calculator; data: typeof data }>;
 export const initializeCrystalline: () => void;

@@ -5,6 +5,7 @@
   import { goto } from '$app/navigation';
   import type { Node } from '../../lib/skill_tree_types';
   import { getAffectedNodes, skillTree, translateStat, constructQueries, openQuery, seedsPerQuery } from '../../lib/skill_tree';
+  import * as perf from '../../lib/perf';
   import { syncWrap } from '../../lib/worker';
   import { proxy } from 'comlink';
   import type { ReverseSearchConfig, StatConfig, TradeQuery } from '../../lib/skill_tree';
@@ -54,23 +55,52 @@
     ? getAffectedNodes(skillTree.nodes[circledNode]).filter((n) => !n.isJewelSocket && !n.isMastery)
     : [];
 
+  const onSeedInput = () => {
+    perf.count('input: seed keystroke');
+    perf.sinceInput('input: seed keystroke to paint');
+  };
+
+  // The skill's own stats and its additions' stats are treated alike downstream,
+  // so they are gathered into one list here.
+  const statKeysOf = (result: data.AlternatePassiveSkillInformation): number[] => {
+    const keys: number[] = [];
+
+    if (result.AlternatePassiveSkill?.StatsKeys) {
+      keys.push(...result.AlternatePassiveSkill.StatsKeys);
+    }
+
+    result.AlternatePassiveAdditionInformations?.forEach((info) => {
+      if (info.AlternatePassiveAddition?.StatsKeys) {
+        keys.push(...info.AlternatePassiveAddition.StatsKeys);
+      }
+    });
+
+    return keys;
+  };
+
   $: seedResults =
     !seed ||
     !selectedJewel ||
     !selectedConqueror ||
     Object.keys(data.TimelessJewelConquerors[selectedJewel.value]).indexOf(selectedConqueror.value) < 0
       ? []
-      : affectedNodes
-          .filter((n) => !!data.TreeToPassive[n.skill])
-          .map((n) => ({
-            node: n.skill,
-            result: calculator.Calculate(
-              data.TreeToPassive[n.skill].Index,
-              seed,
-              selectedJewel.value,
-              selectedConqueror.value
-            )
-          }));
+      : perf.time('page: seedResults', () =>
+          affectedNodes
+            .filter((n) => !!data.TreeToPassive[n.skill])
+            .map((n) => ({
+              node: n.skill,
+              statKeys: perf.time('wasm: Calculate', () =>
+                statKeysOf(
+                  calculator.Calculate(
+                    data.TreeToPassive[n.skill].Index,
+                    seed,
+                    selectedJewel.value,
+                    selectedConqueror.value
+                  )
+                )
+              )
+            }))
+        );
 
   let selectedStats: Record<number, StatConfig> = {};
   if (searchParams.has('stat')) {
@@ -281,25 +311,27 @@
     critical: '#b2a7d6'
   };
 
-  const colorMessage = (message: string): string => {
-    Object.keys(colorKeys).forEach((key) => {
-      const value = colorKeys[key];
-      message = message.replace(
-        new RegExp(`(${key}(?:$|\\s))|((?:^|\\s)${key})`, 'gi'),
-        `<span style='color: ${value}; font-weight: bold'>$1$2</span>`
-      );
+  const colorMessage = (message: string): string =>
+    perf.time('page: colorMessage', () => {
+      Object.keys(colorKeys).forEach((key) => {
+        const value = colorKeys[key];
+        message = message.replace(
+          new RegExp(`(${key}(?:$|\\s))|((?:^|\\s)${key})`, 'gi'),
+          `<span style='color: ${value}; font-weight: bold'>$1$2</span>`
+        );
+      });
+
+      return message;
     });
 
-    return message;
-  };
-
   const combineResults = (
-    rawResults: { result: data.AlternatePassiveSkillInformation; node: number }[],
+    rawResults: { statKeys: number[]; node: number }[],
     withColors: boolean,
     only: 'notables' | 'passives' | 'all'
-  ): CombinedResult[] => {
-    const mappedStats: { [key: number]: number[] } = {};
-    rawResults.forEach((r) => {
+  ): CombinedResult[] =>
+    perf.time('page: combineResults', () => {
+      const mappedStats: { [key: number]: number[] } = {};
+      rawResults.forEach((r) => {
       if (skillTree.nodes[r.node].isKeystone) {
         return;
       }
@@ -314,39 +346,28 @@
         }
       }
 
-      if (r.result.AlternatePassiveSkill && r.result.AlternatePassiveSkill.StatsKeys) {
-        r.result.AlternatePassiveSkill.StatsKeys.forEach((key) => {
-          mappedStats[key] = [...(mappedStats[key] || []), r.node];
-        });
-      }
-
-      if (r.result.AlternatePassiveAdditionInformations) {
-        r.result.AlternatePassiveAdditionInformations.forEach((info) => {
-          if (info.AlternatePassiveAddition.StatsKeys) {
-            info.AlternatePassiveAddition.StatsKeys.forEach((key) => {
-              mappedStats[key] = [...(mappedStats[key] || []), r.node];
-            });
-          }
-        });
-      }
+      r.statKeys.forEach((key) => {
+        mappedStats[key] = [...(mappedStats[key] || []), r.node];
+      });
     });
 
-    return Object.keys(mappedStats).map((statID) => {
-      const translated = translateStat(parseInt(statID));
-      return {
-        stat: withColors ? colorMessage(translated) : translated,
-        rawStat: translated,
-        id: statID,
-        passives: mappedStats[statID]
-      };
+      return Object.keys(mappedStats).map((statID) => {
+        const translated = perf.time('page: translateStat', () => translateStat(parseInt(statID)));
+        return {
+          stat: withColors ? colorMessage(translated) : translated,
+          rawStat: translated,
+          id: statID,
+          passives: mappedStats[statID]
+        };
+      });
     });
-  };
 
   const sortCombined = (
     combinedResults: CombinedResult[],
     order: 'count' | 'alphabet' | 'rarity' | 'value'
-  ): CombinedResult[] => {
-    switch (order) {
+  ): CombinedResult[] =>
+    perf.time('page: sortCombined', () => {
+      switch (order) {
       case 'alphabet':
         return combinedResults.sort((a, b) =>
           a.rawStat
@@ -370,10 +391,10 @@
           }
           return allPossibleStats[selectedJewel.value][a.id] - allPossibleStats[selectedJewel.value][b.id];
         });
-    }
+      }
 
-    return combinedResults;
-  };
+      return combinedResults;
+    });
 
   const sortResults = [
     {
@@ -618,6 +639,7 @@
                   <input
                     type="number"
                     bind:value={seed}
+                    on:input={onSeedInput}
                     on:blur={updateUrl}
                     min={data.TimelessJewelSeedRanges[selectedJewel.value].Min}
                     max={data.TimelessJewelSeedRanges[selectedJewel.value].Max} />

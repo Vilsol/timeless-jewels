@@ -1,7 +1,7 @@
 package exposition
 
 import (
-	"github.com/Vilsol/crystalline"
+	"github.com/Vilsol/crystalline/bind"
 	"github.com/Vilsol/timeless-jewels/calculator"
 	"github.com/Vilsol/timeless-jewels/data"
 
@@ -11,40 +11,51 @@ import (
 	_ "github.com/Vilsol/timeless-jewels/data/embedded"
 )
 
-func Expose() *crystalline.Exposer {
-	e := crystalline.NewExposer("timeless-jewels")
+//crystalline:exports
+func Exports(r bind.Registry) {
+	// Nothing on the JS side writes to these or calls their methods; they are
+	// read once per seed and thrown away, so a live wrapper is all cost.
+	r.Type(data.AlternatePassiveSkillInformation{}, bind.Plain())
+	r.Type(data.AlternatePassiveSkill{}, bind.Plain())
+	r.Type(data.AlternatePassiveAddition{}, bind.Plain())
+	r.Type(data.PassiveSkill{}, bind.Plain())
+	r.Type(data.Stat{}, bind.Plain())
+	r.Type(data.Range{}, bind.Plain())
+	r.Type(data.TimelessJewelConqueror{}, bind.Plain())
+	r.Type(calculator.CalculateStats{}, bind.Plain())
 
-	e.ExposeFuncOrPanic(calculator.Calculate)
-	e.ExposeFuncOrPanic(calculator.ReverseSearch)
-	e.ExposeFuncOrPanic(data.GetStatByIndex)
-	e.ExposeFuncOrPanic(data.GetAlternatePassiveSkillByIndex)
-	e.ExposeFuncOrPanic(data.GetAlternatePassiveAdditionByIndex)
-	e.ExposeFuncOrPanic(data.GetPassiveSkillByIndex)
+	r.Func(calculator.Calculate)
+	r.Func(calculator.ReverseSearch)
+	r.Func(calculator.SetCalculateTracking)
+	r.Func(calculator.GetCalculateStats)
+	r.Func(calculator.ResetCalculateStats)
+	r.Func(data.GetStatByIndex)
+	r.Func(data.GetAlternatePassiveSkillByIndex)
+	r.Func(data.GetAlternatePassiveAdditionByIndex)
+	r.Func(data.GetPassiveSkillByIndex)
 
-	e.ExposeOrPanic(map[data.JewelType]string{
+	r.Value("TimelessJewels", map[data.JewelType]string{
 		data.GloriousVanity:  data.GloriousVanity.String(),
 		data.LethalPride:     data.LethalPride.String(),
 		data.BrutalRestraint: data.BrutalRestraint.String(),
 		data.MilitantFaith:   data.MilitantFaith.String(),
 		data.ElegantHubris:   data.ElegantHubris.String(),
 		data.HeroicTragedy:   data.HeroicTragedy.String(),
-	}, "data", "TimelessJewels")
+	})
 
-	e.ExposeOrPanic(data.TimelessJewelConquerors, "data", "TimelessJewelConquerors")
-	e.ExposeOrPanic(data.TimelessJewelSeedRanges, "data", "TimelessJewelSeedRanges")
-	e.ExposeOrPanic(data.GetApplicablePassives(), "data", "PassiveSkills")
-	e.ExposeOrPanic(string(data.SkillTreeJSON), "data", "SkillTree")
+	r.Value("TimelessJewelConquerors", data.TimelessJewelConquerors)
+	r.Value("TimelessJewelSeedRanges", data.TimelessJewelSeedRanges)
+	r.Value("PassiveSkills", data.GetApplicablePassives())
+	r.Value("SkillTree", string(data.SkillTreeJSON), bind.InNamespace("data"))
 
 	treeToPassive := make(map[uint32]*data.PassiveSkill)
 	for _, skill := range data.PassiveSkills {
 		treeToPassive[skill.PassiveSkillGraphID] = skill
 	}
 
-	e.ExposeOrPanic(treeToPassive, "data", "TreeToPassive")
-	e.ExposeOrPanic(string(data.StatTranslationsJSON), "data", "StatTranslationsJSON")
-	e.ExposeOrPanic(string(data.PassiveSkillStatTranslationsJSON), "data", "PassiveSkillStatTranslationsJSON")
-	e.ExposeOrPanic(string(data.PassiveSkillAuraStatTranslationsJSON), "data", "PassiveSkillAuraStatTranslationsJSON")
-	e.ExposeOrPanic(string(data.PossibleStatsJSON), "data", "PossibleStats")
-
-	return e
+	r.Value("TreeToPassive", treeToPassive)
+	r.Value("StatTranslationsJSON", string(data.StatTranslationsJSON), bind.InNamespace("data"))
+	r.Value("PassiveSkillStatTranslationsJSON", string(data.PassiveSkillStatTranslationsJSON), bind.InNamespace("data"))
+	r.Value("PassiveSkillAuraStatTranslationsJSON", string(data.PassiveSkillAuraStatTranslationsJSON), bind.InNamespace("data"))
+	r.Value("PossibleStats", string(data.PossibleStatsJSON), bind.InNamespace("data"))
 }

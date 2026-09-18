@@ -9,7 +9,6 @@ import (
 
 	"github.com/Vilsol/timeless-jewels/calculator"
 	"github.com/Vilsol/timeless-jewels/data"
-	"github.com/Vilsol/timeless-jewels/wasm/exposition"
 
 	// findAll sweeps the shipped tables, so this tool needs them installed.
 	_ "github.com/Vilsol/timeless-jewels/data/embedded"
@@ -18,18 +17,15 @@ import (
 // Uses separate steps so finder step has the new data loaded by data package
 
 //go:generate go run tools.go find
-//go:generate go run tools.go types
+//go:generate go tool crystalline -app timeless-jewels -js-out ./frontend/src/lib/types/index.js -ts-out ./frontend/src/lib/types/index.d.ts -banner "/* eslint-disable */" ./...
 
 func main() {
 	if len(os.Args) < 2 {
 		return
 	}
 
-	switch os.Args[1] {
-	case "find":
+	if os.Args[1] == "find" {
 		findAll()
-	case "types":
-		generateTypes()
 	}
 }
 
@@ -111,29 +107,4 @@ func findAll() {
 	}
 
 	writeZipped("./data/possible_stats.json.gz", foundStats)
-}
-
-func generateTypes() {
-	e := exposition.Expose()
-	tsFile, jsFile, err := e.Build()
-	if err != nil {
-		panic(err)
-	}
-
-	tsFile = "/* eslint-disable */\n" + tsFile
-	jsFile = "/* eslint-disable */\n" + jsFile
-
-	if err := os.MkdirAll("./frontend/src/lib/types", 0777); err != nil {
-		if !os.IsExist(err) {
-			panic(err)
-		}
-	}
-
-	if err := os.WriteFile("./frontend/src/lib/types/index.js", []byte(jsFile), 0777); err != nil {
-		panic(err)
-	}
-
-	if err := os.WriteFile("./frontend/src/lib/types/index.d.ts", []byte(tsFile), 0777); err != nil {
-		panic(err)
-	}
 }

@@ -18,6 +18,7 @@
   import type { Point } from '../skill_tree';
   import { derived } from 'svelte/store';
   import { calculator, data } from '../types';
+  import * as perf from '../perf';
 
   export let clickNode: (node: Node) => void;
   export let circledNode: number | undefined;
@@ -336,11 +337,8 @@
 
       if (!hoveredNode.isJewelSocket && hoveredNodeActive) {
         if (hoveredNode.skill && seed && selectedJewel && selectedConqueror) {
-          const result = calculator.Calculate(
-            data.TreeToPassive[hoveredNode.skill].Index,
-            seed,
-            selectedJewel,
-            selectedConqueror
+          const result = perf.time('canvas: hover Calculate', () =>
+            calculator.Calculate(data.TreeToPassive[hoveredNode.skill].Index, seed, selectedJewel, selectedConqueror)
           );
 
           if (result) {
@@ -468,6 +466,7 @@
     context.font = '12px Roboto Mono';
 
     const end = window.performance.now();
+    perf.record('canvas: full render', end - start);
 
     context.fillText(`${(end - start).toFixed(1)}ms`, width - 5, 17);
   }) as RenderFunc;
