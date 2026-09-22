@@ -1,5 +1,6 @@
-calculator/abyss_ascendancy.go ports the ascendancy walk, and abyss_ascendancy_test.go carries the
-in-game observations, of https://github.com/Parazeya/abyss-jewels, used under the MIT License:
+calculator/abyss_ascendancy.go ports the ascendancy walk, calculator/abyss_region.go ports the
+region walk, and abyss_ascendancy_test.go carries the in-game observations, of
+https://github.com/Parazeya/abyss-jewels, used under the MIT License:
 
 MIT License
 

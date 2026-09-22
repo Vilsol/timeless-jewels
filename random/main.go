@@ -61,6 +61,19 @@ func (g *NumberGenerator) Reset(passiveSkill *data.PassiveSkill, timelessJewel d
 	g.seeded = true
 }
 
+// ResetAbyss seeds from a graph id and jewel seed like Reset, in the Abyss MSVC draw mode, for the
+// walk that picks which passives a socket-keyed Abyss jewel conquers. It leaves Reset's memo alone.
+func (g *NumberGenerator) ResetAbyss(graphID uint32, seed uint32) {
+	g.msvcDraw = true
+
+	g.state[0] = InitialStateConstant0
+	g.state[1] = InitialStateConstant1
+	g.state[2] = InitialStateConstant2
+	g.state[3] = InitialStateConstant3
+
+	g.Initialize([]uint32{graphID, seed})
+}
+
 // ResetSingle seeds from the jewel seed alone with the reference tinymt32_init (no period
 // certification), as Zorath's ascendancy pick does; bounded draws take the Abyss MSVC mode.
 func (g *NumberGenerator) ResetSingle(seed uint32) {
