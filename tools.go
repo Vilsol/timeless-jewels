@@ -4,8 +4,11 @@ package main
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"os"
+
+	"github.com/Vilsol/go-pob-data/loader"
 
 	"github.com/Vilsol/timeless-jewels/calculator"
 	"github.com/Vilsol/timeless-jewels/data"
@@ -26,6 +29,34 @@ func main() {
 
 	if os.Args[1] == "find" {
 		findAll()
+	}
+
+	if os.Args[1] == "translations" {
+		downloadTranslations(os.Args[2])
+	}
+}
+
+type noCache struct{}
+
+func (noCache) Get(string) ([]byte, error) { return nil, nil }
+func (noCache) Set(string, []byte) error   { return nil }
+func (noCache) Exists(string) bool         { return false }
+
+// go-pob-data only publishes stat descriptions as msgpack bundles, re-encoded here to the JSON the frontend reads.
+func downloadTranslations(version string) {
+	files := map[string]string{
+		"stat_descriptions":                    "./data/embedded/stat_descriptions.json.gz",
+		"passive_skill_stat_descriptions":      "./data/embedded/passive_skill_stat_descriptions.json.gz",
+		"passive_skill_aura_stat_descriptions": "./data/embedded/passive_skill_aura_stat_descriptions.json.gz",
+	}
+
+	for name, path := range files {
+		file, err := loader.LoadBundledTranslation(context.Background(), version, "en", name, noCache{})
+		if err != nil {
+			panic(err)
+		}
+
+		writeZipped(path, file)
 	}
 }
 
@@ -106,5 +137,5 @@ func findAll() {
 		}
 	}
 
-	writeZipped("./data/possible_stats.json.gz", foundStats)
+	writeZipped("./data/embedded/possible_stats.json.gz", foundStats)
 }
