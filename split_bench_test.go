@@ -46,6 +46,7 @@ var benchPairs = []struct {
 // ANY change to the indexes, including one that broke them. This REFUSES rather than passing
 // vacuously if the corpus stops producing real work.
 func TestBenchCorpusIsNonDegenerate(t *testing.T) {
+	passiveIDs := passiveIndices(t, reversePassives)
 	for _, p := range benchPairs {
 		replaced, augmented := 0, 0
 		for _, id := range passiveIDs {
@@ -67,8 +68,9 @@ func TestBenchCorpusIsNonDegenerate(t *testing.T) {
 }
 
 // BenchmarkCalculate is the hot path go-pob will call once per in-radius node per build.
-// passiveIDs comes from reverse_test.go — 61 ids already proven valid for alteration.
+// reversePassives comes from reverse_test.go — 61 ids already proven valid for alteration.
 func BenchmarkCalculate(b *testing.B) {
+	passiveIDs := passiveIndices(b, reversePassives)
 	b.ReportAllocs()
 
 	for _, p := range benchPairs {
@@ -86,6 +88,7 @@ func BenchmarkCalculate(b *testing.B) {
 // were to leave an index stale or swap a map for a scan, this moves before BenchmarkCalculate
 // does — Calculate spends most of its time in the RNG, which would mask a lookup regression.
 func BenchmarkLookups(b *testing.B) {
+	passiveIDs := passiveIndices(b, reversePassives)
 	b.ReportAllocs()
 
 	b.Run("PassiveSkillByIndex", func(b *testing.B) {

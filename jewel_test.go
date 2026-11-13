@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strconv"
 	"testing"
 
 	"github.com/MarvinJWendt/testza"
@@ -15,63 +14,63 @@ func TestGloriousVanity(t *testing.T) {
 	tests := []struct {
 		jewel     data.JewelType
 		conqueror data.Conqueror
-		passive   uint32
+		passive   string
 		result    data.AlternatePassiveSkillInformation
 	}{
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Xibaqua,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(0),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_keystone_1"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Xibaqua,
-			passive:   411, // Instability (maximum_power_charges742)
+			passive:   "maximum_power_charges742", // Instability
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(67),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_notable_block_2"),
 				StatRolls:             data.StatRolls{8, 22},
 			},
 		},
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Xibaqua,
-			passive:   519, // Intelligence (intelligence879)
+			passive:   "intelligence879", // Intelligence
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(38),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_small_fire_resistance"),
 				StatRolls:             data.StatRolls{12},
 			},
 		},
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Xibaqua,
-			passive:   1190, // Elemental Damage (elemental_damage1906)
+			passive:   "elemental_damage1906", // Elemental Damage
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(21),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_small_movement_speed"),
 				StatRolls:             data.StatRolls{3},
 			},
 		},
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Xibaqua,
-			passive:   88, // Eagle Eye (eagle_eye199)
+			passive:   "eagle_eye199", // Eagle Eye
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(77),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_notable_random_defence"),
 				StatRolls:             data.StatRolls{},
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(14),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "vaal_small_critical_strike_multiplier"),
 						StatRolls:                data.StatRolls{6},
 					},
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(23),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "vaal_small_mana"),
 						StatRolls:                data.StatRolls{5},
 					},
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(36),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "vaal_small_lightning_resistance"),
 						StatRolls:                data.StatRolls{11},
 					},
 				},
@@ -80,27 +79,27 @@ func TestGloriousVanity(t *testing.T) {
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Zerphi,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(1),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_keystone_2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Ahuana,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(2),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_keystone_2_v2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.GloriousVanity,
 			conqueror: data.Doryani,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(3),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "vaal_keystone_3"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
@@ -108,8 +107,8 @@ func TestGloriousVanity(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
-			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			t.Run(test.passive, func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(passiveIndex(t, test.passive), seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -121,26 +120,26 @@ func TestLethalPride(t *testing.T) {
 	tests := []struct {
 		jewel     data.JewelType
 		conqueror data.Conqueror
-		passive   uint32
+		passive   string
 		result    data.AlternatePassiveSkillInformation
 	}{
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Kaom,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(78),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "karui_keystone_1"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Kaom,
-			passive:   411, // Instability (maximum_power_charges742)
+			passive:   "maximum_power_charges742", // Instability
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(42),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "karui_notable_add_armour"),
 						StatRolls:                data.StatRolls{20},
 					},
 				},
@@ -149,11 +148,11 @@ func TestLethalPride(t *testing.T) {
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Kaom,
-			passive:   519, // Intelligence (intelligence879)
+			passive:   "intelligence879", // Intelligence
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "karui_small_strength"),
 						StatRolls:                data.StatRolls{4},
 					},
 				},
@@ -162,11 +161,11 @@ func TestLethalPride(t *testing.T) {
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Kaom,
-			passive:   1190, // Elemental Damage (elemental_damage1906)
+			passive:   "elemental_damage1906", // Elemental Damage
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(39),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "karui_small_strength"),
 						StatRolls:                data.StatRolls{4},
 					},
 				},
@@ -175,11 +174,11 @@ func TestLethalPride(t *testing.T) {
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Kaom,
-			passive:   88, // Eagle Eye (eagle_eye199)
+			passive:   "eagle_eye199", // Eagle Eye
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(57),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "karui_notable_add_totem_placement_speed"),
 						StatRolls:                data.StatRolls{12},
 					},
 				},
@@ -188,27 +187,27 @@ func TestLethalPride(t *testing.T) {
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Rakiata,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(79),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "karui_keystone_2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Kiloava,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(80),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "karui_keystone_3"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.LethalPride,
 			conqueror: data.Akoya,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(81),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "karui_keystone_3_v2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
@@ -216,8 +215,8 @@ func TestLethalPride(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
-			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			t.Run(test.passive, func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(passiveIndex(t, test.passive), seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -229,26 +228,26 @@ func TestBrutalRestraint(t *testing.T) {
 	tests := []struct {
 		jewel     data.JewelType
 		conqueror data.Conqueror
-		passive   uint32
+		passive   string
 		result    data.AlternatePassiveSkillInformation
 	}{
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Deshret,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(82),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "maraketh_keystone_1"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Deshret,
-			passive:   411, // Instability (maximum_power_charges742)
+			passive:   "maximum_power_charges742", // Instability
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(70),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "maraketh_notable_add_flask_charges"),
 						StatRolls:                data.StatRolls{10},
 					},
 				},
@@ -257,11 +256,11 @@ func TestBrutalRestraint(t *testing.T) {
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Deshret,
-			passive:   519, // Intelligence (intelligence879)
+			passive:   "intelligence879", // Intelligence
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "maraketh_small_dex"),
 						StatRolls:                data.StatRolls{4},
 					},
 				},
@@ -270,11 +269,11 @@ func TestBrutalRestraint(t *testing.T) {
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Deshret,
-			passive:   1190, // Elemental Damage (elemental_damage1906)
+			passive:   "elemental_damage1906", // Elemental Damage
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(66),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "maraketh_small_dex"),
 						StatRolls:                data.StatRolls{4},
 					},
 				},
@@ -283,11 +282,11 @@ func TestBrutalRestraint(t *testing.T) {
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Deshret,
-			passive:   88, // Eagle Eye (eagle_eye199)
+			passive:   "eagle_eye199", // Eagle Eye
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(76),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "maraketh_notable_add_projectile_damage"),
 						StatRolls:                data.StatRolls{20},
 					},
 				},
@@ -296,27 +295,27 @@ func TestBrutalRestraint(t *testing.T) {
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Balbala,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(83),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "maraketh_keystone_1_v2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Asenath,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(84),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "maraketh_keystone_2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.BrutalRestraint,
 			conqueror: data.Nasima,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(85),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "maraketh_keystone_3"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
@@ -324,8 +323,8 @@ func TestBrutalRestraint(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
-			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			t.Run(test.passive, func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(passiveIndex(t, test.passive), seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -337,26 +336,26 @@ func TestMilitantFaith(t *testing.T) {
 	tests := []struct {
 		jewel     data.JewelType
 		conqueror data.Conqueror
-		passive   uint32
+		passive   string
 		result    data.AlternatePassiveSkillInformation
 	}{
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Venarius,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(86),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "templar_keystone_1"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Venarius,
-			passive:   411, // Instability (maximum_power_charges742)
+			passive:   "maximum_power_charges742", // Instability
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(93),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "templar_notable_devotion"),
 						StatRolls:                data.StatRolls{5},
 					},
 				},
@@ -365,11 +364,11 @@ func TestMilitantFaith(t *testing.T) {
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Venarius,
-			passive:   519, // Intelligence (intelligence879)
+			passive:   "intelligence879", // Intelligence
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "templar_small_devotion"),
 						StatRolls:                data.StatRolls{5},
 					},
 				},
@@ -378,11 +377,11 @@ func TestMilitantFaith(t *testing.T) {
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Venarius,
-			passive:   1190, // Elemental Damage (elemental_damage1906)
+			passive:   "elemental_damage1906", // Elemental Damage
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(92),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "templar_small_devotion"),
 						StatRolls:                data.StatRolls{5},
 					},
 				},
@@ -391,11 +390,11 @@ func TestMilitantFaith(t *testing.T) {
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Venarius,
-			passive:   88, // Eagle Eye (eagle_eye199)
+			passive:   "eagle_eye199", // Eagle Eye
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(93),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "templar_notable_devotion"),
 						StatRolls:                data.StatRolls{5},
 					},
 				},
@@ -404,27 +403,27 @@ func TestMilitantFaith(t *testing.T) {
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Maxarius,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(87),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "templar_keystone_1_v2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Dominus,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(88),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "templar_keystone_2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.MilitantFaith,
 			conqueror: data.Avarius,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(89),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "templar_keystone_3"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
@@ -432,8 +431,8 @@ func TestMilitantFaith(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
-			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			t.Run(test.passive, func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(passiveIndex(t, test.passive), seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -445,78 +444,78 @@ func TestElegantHubris(t *testing.T) {
 	tests := []struct {
 		jewel     data.JewelType
 		conqueror data.Conqueror
-		passive   uint32
+		passive   string
 		result    data.AlternatePassiveSkillInformation
 	}{
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Cadiro,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(105),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_keystone_1"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Cadiro,
-			passive:   411, // Instability (maximum_power_charges742)
+			passive:   "maximum_power_charges742", // Instability
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(123),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_notable_shock_1"),
 				StatRolls:             data.StatRolls{30},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Cadiro,
-			passive:   519, // Intelligence (intelligence879)
+			passive:   "intelligence879", // Intelligence
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(109),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_small_blank"),
 				StatRolls:             data.StatRolls{},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Cadiro,
-			passive:   1190, // Elemental Damage (elemental_damage1906)
+			passive:   "elemental_damage1906", // Elemental Damage
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(109),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_small_blank"),
 				StatRolls:             data.StatRolls{},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Cadiro,
-			passive:   88, // Eagle Eye (eagle_eye199)
+			passive:   "eagle_eye199", // Eagle Eye
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(137),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_notable_physical_damage_1"),
 				StatRolls:             data.StatRolls{80},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Victario,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(106),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_keystone_2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Chitus,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(107),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_keystone_3"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.ElegantHubris,
 			conqueror: data.Caspiro,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(108),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "eternal_keystone_3_v2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
@@ -524,8 +523,8 @@ func TestElegantHubris(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
-			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			t.Run(test.passive, func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(passiveIndex(t, test.passive), seed, test.jewel, test.conqueror))
 			})
 		})
 	}
@@ -537,35 +536,35 @@ func TestHeroicTragedy(t *testing.T) {
 	tests := []struct {
 		jewel     data.JewelType
 		conqueror data.Conqueror
-		passive   uint32
+		passive   string
 		result    data.AlternatePassiveSkillInformation
 	}{
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Vorana,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(179),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "kalguur_keystone_1"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Vorana,
-			passive:   411, // Instability (maximum_power_charges742)
+			passive:   "maximum_power_charges742", // Instability
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(172),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "kalguur_notable_19"),
 				StatRolls:             data.StatRolls{12, 8},
 			},
 		},
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Vorana,
-			passive:   519, // Intelligence (intelligence879)
+			passive:   "intelligence879", // Intelligence
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(94),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "kalguuran_small_ward"),
 						StatRolls:                data.StatRolls{2},
 					},
 				},
@@ -574,11 +573,11 @@ func TestHeroicTragedy(t *testing.T) {
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Vorana,
-			passive:   1190, // Elemental Damage (elemental_damage1906)
+			passive:   "elemental_damage1906", // Elemental Damage
 			result: data.AlternatePassiveSkillInformation{
 				AlternatePassiveAdditionInformations: []data.AlternatePassiveAdditionInformation{
 					{
-						AlternatePassiveAddition: data.GetAlternatePassiveAdditionByIndex(94),
+						AlternatePassiveAddition: alternatePassiveAddition(t, "kalguuran_small_ward"),
 						StatRolls:                data.StatRolls{2},
 					},
 				},
@@ -587,27 +586,27 @@ func TestHeroicTragedy(t *testing.T) {
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Vorana,
-			passive:   88, // Eagle Eye (eagle_eye199)
+			passive:   "eagle_eye199", // Eagle Eye
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(175),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "kalguur_notable_22"),
 				StatRolls:             data.StatRolls{20, 20},
 			},
 		},
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Uhtred,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(180),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "kalguur_keystone_2"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
 		{
 			jewel:     data.HeroicTragedy,
 			conqueror: data.Medved,
-			passive:   2286, // Supreme Ego (supreme_ego_keystone2696)
+			passive:   "supreme_ego_keystone2696", // Supreme Ego
 			result: data.AlternatePassiveSkillInformation{
-				AlternatePassiveSkill: data.GetAlternatePassiveSkillByIndex(181),
+				AlternatePassiveSkill: alternatePassiveSkill(t, "kalguur_keystone_3"),
 				StatRolls:             data.StatRolls{1},
 			},
 		},
@@ -615,8 +614,8 @@ func TestHeroicTragedy(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(string(test.conqueror), func(t *testing.T) {
-			t.Run(strconv.Itoa(int(test.passive)), func(t *testing.T) {
-				testza.AssertEqual(t, test.result, calculator.Calculate(test.passive, seed, test.jewel, test.conqueror))
+			t.Run(test.passive, func(t *testing.T) {
+				testza.AssertEqual(t, test.result, calculator.Calculate(passiveIndex(t, test.passive), seed, test.jewel, test.conqueror))
 			})
 		})
 	}

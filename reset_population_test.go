@@ -15,6 +15,7 @@ import (
 // or >=100 the function returns before it ever seeds. So the memo's ceiling is the share of
 // (passive, jewel) pairs that are notables under a tree version in that band.
 func TestDoubleResetPopulation(t *testing.T) {
+	passiveIDs := passiveIndices(t, reversePassives)
 	bands := map[string][]string{}
 	for _, v := range data.AlternateTreeVersions {
 		band := "0 (never seeds)"
