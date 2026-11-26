@@ -69,6 +69,15 @@ func TestAbyssAscendancyMatchesObservations(t *testing.T) {
 	}
 }
 
+func TestAbyssAscendancyCanSelectFourPointNotable(t *testing.T) {
+	// PoE 3.30 in-game report: https://github.com/PathOfBuildingCommunity/PathOfBuilding/issues/10584
+	const seed, ascendancy = 6696, "Assassin"
+	want := ascendancyNotableID(t, ascendancy, "Opportunistic")
+	if got, ok := calculator.AbyssAscendancyNotable(seed, ascendancy); !ok || got != want {
+		t.Fatalf("seed %d %s: got %d (%v), want Opportunistic (%d)", seed, ascendancy, got, ok, want)
+	}
+}
+
 // Every Ascendant notable costs five points, so no seed conquers one; Reliquarian has no
 // ordinary start and is never entered.
 func TestAbyssAscendancyAscendantLosesNothing(t *testing.T) {

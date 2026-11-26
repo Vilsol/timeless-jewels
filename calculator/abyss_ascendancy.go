@@ -33,9 +33,9 @@ import (
 	"github.com/Vilsol/timeless-jewels/random"
 )
 
-// Notables costing this many ascendancy points or more are walked through, never taken, which
-// is why Ascendant (every notable costs five) loses nothing.
-const abyssAscendancyMaxCost = 4
+// Four-point notables such as Opportunistic are eligible in 3.30. The walk
+// still passes through the five-point Ascendant notables.
+const abyssAscendancyMaxCost = 5
 
 type abyssAscendancyNode struct {
 	ascendancy  string // "" for a class start
