@@ -33,10 +33,6 @@ import (
 	"github.com/Vilsol/timeless-jewels/random"
 )
 
-// Four-point notables such as Opportunistic are eligible in 3.30. The walk
-// still passes through the five-point Ascendant notables.
-const abyssAscendancyMaxCost = 5
-
 type abyssAscendancyNode struct {
 	ascendancy  string // "" for a class start
 	links       []uint32
@@ -161,33 +157,15 @@ func buildAbyssAscendancyGraph(treeNodes map[string]data.Node) *abyssAscendancyG
 		}
 	}
 
-	// Ascendancy points to allocate a node, counted from its own start.
-	cost := make(map[uint32]int)
-	for _, start := range ordinaryStarts {
-		name := *bySkill[start].AscendancyName
-		cost[start] = 0
-		queue := []uint32{start}
-		for head := 0; head < len(queue); head++ {
-			for _, o := range links(bySkill[queue[head]]) {
-				t, ok := bySkill[o]
-				if _, seen := cost[o]; seen || !ok || t.AscendancyName == nil || *t.AscendancyName != name {
-					continue
-				}
-				cost[o] = cost[queue[head]] + 1
-				queue = append(queue, o)
-			}
-		}
-	}
-
 	for id := range keep {
 		n := bySkill[id]
 		node := &abyssAscendancyNode{links: links(n)}
 		if n.AscendancyName != nil {
 			node.ascendancy = *n.AscendancyName
 		}
-		c, costed := cost[id]
+		grantsPassivePoints := n.GrantedPassivePoints != nil && *n.GrantedPassivePoints != 0
 		node.collectable = isTrue(n.IsNotable) && !isTrue(n.IsMultipleChoice) && !isTrue(n.IsMultipleChoiceOption) &&
-			!isTrue(n.IsAscendancyStart) && costed && c < abyssAscendancyMaxCost
+			!isTrue(n.IsAscendancyStart) && !grantsPassivePoints
 		graph.nodes[id] = node
 	}
 	return graph

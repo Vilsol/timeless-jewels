@@ -78,8 +78,8 @@ func TestAbyssAscendancyCanSelectFourPointNotable(t *testing.T) {
 	}
 }
 
-// Every Ascendant notable costs five points, so no seed conquers one; Reliquarian has no
-// ordinary start and is never entered.
+// Ascendant notables grant passive points or are multiple-choice nodes. Reliquarian has
+// no ordinary start and is never entered.
 func TestAbyssAscendancyAscendantLosesNothing(t *testing.T) {
 	seeds := data.TimelessJewelSeedRanges[data.AbyssZorath]
 	for _, ascendancy := range []string{"Ascendant", "Reliquarian"} {

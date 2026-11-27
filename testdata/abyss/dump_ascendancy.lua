@@ -2,7 +2,7 @@
 -- abyss_ascendancy.txt.gz.
 -- usage: cd <PathOfBuilding>/src && luajit dump_ascendancy.lua <out> [step] [full,...] && gzip -9n <out>
 --   the committed fixture: luajit dump_ascendancy.lua <out> 97 Ascendant,Deadeye,Guardian
---   data revision: PoB #10600, commit 49bd6e080f07a78e1c3169d6dd37d9f15a9724fb
+--   data revision: LocalIdentity/TimelessJewelData@7ea49e4eee8730cbda319aa71a705b24ab35d18e (PoB #10600)
 --   <ascendancy> <seed> <node,node,...>   "-" when the seed selects nothing
 -- Every step-th seed (default 1) plus the last, and every seed for the ascendancies listed in full.
 local outPath = arg[1]
